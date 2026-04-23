@@ -79,17 +79,6 @@ export default function Courses() {
                 <Link href="/courses/calc1" className="btn btn-sm" style={{background:'var(--teal)',borderColor:'var(--teal)',color:'var(--bg)'}}>View Course →</Link>
               </div>
             </div>
-
-            <div style={{borderTop:'1px solid var(--border)',marginTop:'20px',paddingTop:'16px'}}>
-              <div style={{fontFamily:'var(--fm)',fontSize:'.7rem',color:'var(--text3)',letterSpacing:'.15em',textTransform:'uppercase',marginBottom:'10px'}}>Chapter 5 — Integration (Live Lectures)</div>
-              <Link href="/courses/calc1" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',background:'rgba(56,201,176,0.06)',border:'1px solid rgba(56,201,176,.2)',borderRadius:'8px',transition:'all .2s',color:'inherit'}}>
-                <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
-                  <span style={{fontFamily:'var(--fm)',fontSize:'.72rem',color:'var(--text3)'}}>L09</span>
-                  <span style={{fontSize:'.95rem',color:'var(--text)'}}>§ 5.1 — Indefinite Integration &amp; Differential Equations</span>
-                </div>
-                <span style={{fontFamily:'var(--fm)',fontSize:'.68rem',background:'var(--teal-lt)',color:'var(--teal)',border:'1px solid rgba(56,201,176,.3)',padding:'3px 10px',borderRadius:'20px'}}>✦ Live</span>
-              </Link>
-            </div>
           </div>
 
           {/* LINEAR ALGEBRA */}
