@@ -1,0 +1,275 @@
+import Link from 'next/link';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+
+export const metadata = {
+  title: 'Calculus I · Shoaib-K · LUMS',
+  description:
+    'MATH-101 Calculus I at LUMS — limits, derivatives, integration, and differential equations taught in two parallel tracks.',
+};
+
+export default function Calc1() {
+  return (
+    <>
+      <Navbar activePage="courses" />
+
+      {/* STICKY SUB-HEADER */}
+      <div style={{ position: 'sticky', top: 'calc(var(--nav-h) + 3px)', zIndex: 500, background: 'var(--bg2)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ padding: '8px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', borderBottom: '1px solid var(--border)' }}>
+          <Link href="/" style={{ color: 'var(--amber)' }}>Home</Link><span>›</span>
+          <Link href="/courses" style={{ color: 'var(--amber)' }}>Courses</Link><span>›</span>
+          <span style={{ color: 'var(--text2)', fontWeight: 500 }}>Calculus I</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px', overflowX: 'auto' }}>
+          {[
+            { href: '/courses/precalc', label: 'Pre-Calculus', active: false },
+            { href: '/courses/calc1', label: 'Calculus I', active: true },
+            { href: '/courses/linalg', label: 'Linear Algebra I', active: false },
+          ].map(({ href, label, active }) => (
+            <Link key={href} href={href} style={{
+              fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.06em',
+              textTransform: 'uppercase', color: active ? 'var(--amber)' : 'var(--text3)',
+              padding: '9px 18px', borderBottom: active ? '2px solid var(--amber)' : '2px solid transparent',
+              whiteSpace: 'nowrap', textDecoration: 'none',
+            }}>{label}</Link>
+          ))}
+        </div>
+      </div>
+
+      {/* TWO-COLUMN LAYOUT */}
+      <div style={{ display: 'flex', paddingTop: 'calc(var(--nav-h) + 3px + 37px + 40px)', minHeight: '100vh' }}>
+
+        {/* SIDEBAR */}
+        <aside style={{ width: '256px', flexShrink: 0, position: 'sticky', top: 'calc(var(--nav-h) + 3px + 37px + 40px)', height: 'calc(100vh - var(--nav-h) - 80px)', overflowY: 'auto', background: 'var(--bg2)', borderRight: '1px solid var(--border)' }}>
+          <div style={{ padding: '18px 16px 12px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '4px' }}>MATH-101 · Calculus I</div>
+            <div style={{ fontFamily: 'var(--fh)', fontSize: '.95rem', color: 'var(--text)', lineHeight: 1.3 }}>Course Contents</div>
+            <Link href="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', marginTop: '8px', textDecoration: 'none' }}>← All Courses</Link>
+          </div>
+
+          <nav style={{ padding: '8px 0 24px' }}>
+
+            {/* Course Overview — active */}
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Course Overview</span>
+            <Link href="/courses/calc1" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--amber)', borderLeft: '2px solid var(--amber)', background: 'rgba(232,160,32,.08)', textDecoration: 'none', lineHeight: 1.35 }}>
+              <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--amber)', flexShrink: 0, display: 'inline-block' }}></span>
+              Course Overview
+            </Link>
+
+            {/* Ch 1–4 coming soon */}
+            {[
+              { ch: 'Ch 1 — Functions, Graphs & Limits', items: ['1.1 · Functions', '1.2 · The Graph of a Function', '1.3 · Lines and Linear Functions', '1.4 · Functional Models', '1.5 · Limits', '1.6 · One-Sided Limits and Continuity'] },
+              { ch: 'Ch 2 — Differentiation: Basic Concepts', items: ['2.1 · The Derivative', '2.2 · Techniques of Differentiation', '2.3 · Product and Quotient Rules', '2.4 · The Chain Rule', '2.5 · Marginal Analysis', '2.6 · Implicit Differentiation'] },
+              { ch: 'Ch 3 — Applications of the Derivative', items: ['3.1 · Increasing & Decreasing Functions', '3.2 · Concavity & Inflection Points', '3.3 · Curve Sketching', '3.4 · Optimization; Elasticity', '3.5 · Additional Optimization'] },
+              { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: ['4.1 · Exponential Functions', '4.2 · Logarithmic Functions', '4.3 · Differentiation of Exp & Log', '4.4 · Exponential Models'] },
+            ].map(({ ch, items }) => (
+              <div key={ch}>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>{ch}</span>
+                {items.map(item => (
+                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
+                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Ch 5 — mix of live + coming soon */}
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Ch 5 — Integration</span>
+            {[
+              { href: '/courses/calc1/s51', label: '5.1 · Indefinite Integration' },
+              { href: '/courses/calc1/s52', label: '5.2 · Integration by Substitution' },
+              { href: '/courses/calc1/s53', label: '5.3 · The Definite Integral & FTC' },
+            ].map(({ href, label }) => (
+              <Link key={href} href={href} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', textDecoration: 'none', lineHeight: 1.35, borderLeft: '2px solid transparent' }}>
+                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
+                {label}
+                <span style={{ marginLeft: 'auto', fontSize: '.58rem', color: 'var(--teal)' }}>✦</span>
+              </Link>
+            ))}
+            {['5.4 · Applying Definite Integration', '5.5 · Applications to Business'].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
+                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
+                {item}
+              </div>
+            ))}
+
+            {/* Ch 6 — coming soon */}
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Ch 6 — Additional Integration Topics</span>
+            {['6.1 · Integration by Parts', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Continuous Probability'].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
+                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
+                {item}
+              </div>
+            ))}
+
+          </nav>
+        </aside>
+
+        {/* MAIN CONTENT */}
+        <main style={{ flex: 1, minWidth: 0, background: 'var(--bg)' }}>
+
+          {/* HERO */}
+          <div style={{ padding: '44px 52px 36px', background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)', borderBottom: '1px solid var(--border)' }}>
+            <span className="eyebrow">MATH-101 · Undergraduate I · LUMS</span>
+            <h1 style={{ fontSize: 'clamp(2rem,4vw,3rem)', marginBottom: '12px' }}>Calculus I</h1>
+            <p style={{ maxWidth: '560px', color: 'var(--text2)', fontSize: '1.02rem' }}>
+              The language in which physics, economics, and engineering are written. Taught in two parallel tracks — rigorously from first principles, and through the lens of business and economic application.
+            </p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', margin: '16px 0' }}>
+              <span className="tag tag-teal">Limits</span>
+              <span className="tag tag-teal">Derivatives</span>
+              <span className="tag tag-teal">Integration</span>
+              <span className="tag">Differential Equations</span>
+            </div>
+            <div style={{ display: 'flex', gap: '40px', marginTop: '28px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Level</div>
+                <div style={{ fontSize: '.95rem', color: 'var(--text)', marginTop: '4px' }}>Undergraduate I</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Textbooks</div>
+                <div style={{ fontSize: '.95rem', color: 'var(--text)', marginTop: '4px' }}>James Stewart · Hoffmann &amp; Bradley</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Status</div>
+                <div style={{ fontSize: '.95rem', color: 'var(--teal)', marginTop: '4px' }}>Ch 5 Live ✦</div>
+              </div>
+            </div>
+          </div>
+
+          {/* BODY */}
+          <div style={{ padding: '44px 52px' }}>
+
+            {/* Track cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '14px', marginBottom: '28px' }}>
+              {[
+                { color: 'var(--amber)', label: 'Track A', title: 'Rigorous Track', desc: "Epsilon-delta definitions, formal proofs, classical analysis. Based on Stewart's Calculus." },
+                { color: 'var(--teal)', label: 'Track B', title: 'Applied Track', desc: "Business, economics & social science applications. Based on Hoffmann's Calculus." },
+              ].map(({ color, label, title, desc }) => (
+                <div key={title} className="card" style={{ padding: '20px 24px', borderLeft: `3px solid ${color}` }}>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: '6px' }}>{label}</div>
+                  <h4 style={{ color: 'var(--text)', marginBottom: '6px' }}>{title}</h4>
+                  <p style={{ fontSize: '.9rem', marginBottom: 0 }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Topics */}
+            <h3 style={{ fontFamily: 'var(--fh)', fontSize: '1.3rem', color: 'var(--text)', marginBottom: '16px' }}>Topics Covered</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '14px', marginBottom: '32px' }}>
+              {[
+                { title: 'Limits & Continuity', desc: 'What it means for a function to approach a value. Formal definitions, limit laws, continuity.' },
+                { title: 'Differentiation', desc: 'Rates of change, tangent lines, all differentiation rules, and applications to optimisation.' },
+                { title: 'Integration', desc: 'Antiderivatives, Riemann sums, the Fundamental Theorem, and techniques of integration.' },
+                { title: 'Differential Equations', desc: 'Separable DEs, initial value problems, and continuous compounding.' },
+              ].map(({ title, desc }) => (
+                <div key={title} className="card" style={{ padding: '20px 24px' }}>
+                  <h4 style={{ color: 'var(--text)', marginBottom: '6px' }}>{title}</h4>
+                  <p style={{ fontSize: '.9rem', marginBottom: 0 }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--border2), transparent)', margin: '32px 0' }} />
+
+            {/* Quiz CTA */}
+            <div style={{ marginBottom: '32px' }}>
+              <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '16px' }}>
+                Chapter 5 Assessment
+              </div>
+              <Link href="/courses/calc1/ch5-quiz" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '20px 24px',
+                background: 'linear-gradient(135deg,rgba(26,107,107,.12),rgba(26,107,107,.06))',
+                border: '1.5px solid rgba(26,107,107,.35)', borderRadius: '12px',
+                textDecoration: 'none', color: 'inherit',
+              }}>
+                <div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: '6px' }}>⚡ Live Quiz · Auto-Graded</div>
+                  <div style={{ fontFamily: 'var(--fh)', fontSize: '1.1rem', color: 'var(--text)', marginBottom: '4px' }}>Chapter 5 Integration Quiz</div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>5 randomised questions · instant feedback · downloadable result card</div>
+                </div>
+                <div style={{ flexShrink: 0, marginLeft: '20px', background: 'var(--teal)', color: '#fff', fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '10px 18px', borderRadius: '8px' }}>
+                  Take Quiz →
+                </div>
+              </Link>
+            </div>
+
+            {/* Lecture notes */}
+            <h3 style={{ fontFamily: 'var(--fh)', fontSize: '1.3rem', color: 'var(--text)', marginBottom: '6px' }}>Course Lecture Notes</h3>
+            <p style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', marginBottom: '20px' }}>✦ = Live &nbsp;&nbsp;|&nbsp;&nbsp; Greyed out = Coming soon</p>
+
+            {/* Ch 1–4 all coming soon */}
+            {[
+              { ch: 'Chapter 1 — Functions, Graphs, and Limits', items: ['1.1 · Functions', '1.2 · The Graph of a Function', '1.3 · Lines and Linear Functions', '1.4 · Functional Models', '1.5 · Limits', '1.6 · One-Sided Limits and Continuity'] },
+              { ch: 'Chapter 2 — Differentiation: Basic Concepts', items: ['2.1 · The Derivative', '2.2 · Techniques of Differentiation', '2.3 · Product and Quotient Rules; Higher-Order Derivatives', '2.4 · The Chain Rule', '2.5 · Marginal Analysis and Approximations Using Increments', '2.6 · Implicit Differentiation and Related Rates'] },
+              { ch: 'Chapter 3 — Additional Applications of the Derivative', items: ['3.1 · Increasing and Decreasing Functions; Relative Extrema', '3.2 · Concavity and Points of Inflection', '3.3 · Curve Sketching', '3.4 · Optimization; Elasticity of Demand', '3.5 · Additional Applied Optimization'] },
+              { ch: 'Chapter 4 — Exponential and Logarithmic Functions', items: ['4.1 · Exponential Functions; Continuous Compounding', '4.2 · Logarithmic Functions', '4.3 · Differentiation of Exponential and Logarithmic Functions', '4.4 · Additional Applications; Exponential Models'] },
+            ].map(({ ch, items }) => (
+              <div key={ch}>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>{ch}</div>
+                {items.map(item => (
+                  <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
+                    <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {/* Ch 5 — live rows + coming soon */}
+            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>Chapter 5 — Integration</div>
+            {[
+              { href: '/courses/calc1/s51', title: '5.1 · Indefinite Integration and Differential Equations', sub: 'Antiderivatives · Rules · IVPs · Continuous Compounding' },
+              { href: '/courses/calc1/s52', title: '5.2 · Integration by Substitution', sub: 'Substitution Types · Word Problems · U-Choice Quiz' },
+              { href: '/courses/calc1/s53', title: '5.3 · The Definite Integral and the Fundamental Theorem of Calculus', sub: 'Definite Integrals · Fundamental Theorem of Calculus' },
+            ].map(({ href, title, sub }) => (
+              <Link key={href} href={href} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
+                <div>
+                  <div style={{ fontSize: '.9rem', color: 'var(--text)' }}>{title}</div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', color: 'var(--text3)', marginTop: '2px' }}>{sub}</div>
+                </div>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.65rem', color: 'var(--teal)', flexShrink: 0, marginLeft: '16px' }}>✦ Live</span>
+              </Link>
+            ))}
+            {['5.4 · Applying Definite Integration: Distribution of Wealth and Average Value', '5.5 · Additional Applications of Integration to Business and Economics'].map(item => (
+              <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
+              </div>
+            ))}
+
+            {/* Ch 6 */}
+            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>Chapter 6 — Additional Topics in Integration</div>
+            {['6.1 · Integration by Parts; Integral Tables', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Introduction to Continuous Probability'].map(item => (
+              <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
+              </div>
+            ))}
+
+          </div>
+
+          {/* FOOTER NAV */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 52px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
+            <Link href="/courses/precalc" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.74rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text3)', padding: '8px 18px', border: '1px solid var(--border)', borderRadius: '8px', textDecoration: 'none' }}>← Pre-Calculus</Link>
+            <Link href="/courses/linalg" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.74rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--amber)', padding: '8px 18px', border: '1px solid rgba(232,160,32,.4)', borderRadius: '8px', background: 'rgba(232,160,32,.07)', textDecoration: 'none' }}>Next: Linear Algebra I →</Link>
+          </div>
+
+        </main>
+      </div>
+
+      <Footer />
+
+      <script dangerouslySetInnerHTML={{ __html: `
+        window.addEventListener('scroll', () => {
+          const bar = document.getElementById('sk-progress-bar');
+          const el = document.documentElement;
+          if (bar) bar.style.width = (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+        }, { passive: true });
+      `}} />
+    </>
+  );
+}
