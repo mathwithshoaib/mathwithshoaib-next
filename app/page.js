@@ -1,14 +1,29 @@
+'use client';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-export const metadata = {
-  title: 'Muhammad Shoaib Khan · Mathematician · LUMS',
-  description: 'Welcome to the academic home of Muhammad Shoaib Khan — Teaching Fellow at LUMS, researcher in mathematical epidemiology, and passionate mathematics educator.',
-};
-
 export default function Home() {
+  useEffect(() => {
+    // Progress bar
+    const handleScroll = () => {
+      const el = document.documentElement;
+      const bar = document.getElementById('sk-progress-bar');
+      if (bar) bar.style.width = (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Reveal animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <>
       <Navbar activePage="home" />
@@ -120,20 +135,6 @@ export default function Home() {
       </section>
 
       <Footer />
-
-      <script dangerouslySetInnerHTML={{ __html: `
-        // Progress bar
-        window.addEventListener('scroll', () => {
-          const el = document.documentElement;
-          const bar = document.getElementById('sk-progress-bar');
-          if (bar) bar.style.width = (el.scrollTop / (el.scrollHeight - el.clientHeight) * 100) + '%';
-        }, { passive: true });
-        // Reveal animations
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-        }, { threshold: 0.1 });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-      `}} />
     </>
   );
 }

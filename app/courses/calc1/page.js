@@ -1,14 +1,52 @@
+'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
-export const metadata = {
-  title: 'Calculus I · Shoaib-K · LUMS',
-  description:
-    'MATH-101 Calculus I at LUMS — limits, derivatives, integration, and differential equations taught in two parallel tracks.',
-};
+const chapters = [
+  {
+    ch: 'Ch 1 — Functions, Graphs & Limits',
+    items: ['1.1 · Functions', '1.2 · The Graph of a Function', '1.3 · Lines and Linear Functions', '1.4 · Functional Models', '1.5 · Limits', '1.6 · One-Sided Limits and Continuity'],
+    live: [],
+  },
+  {
+    ch: 'Ch 2 — Differentiation: Basic Concepts',
+    items: ['2.1 · The Derivative', '2.2 · Techniques of Differentiation', '2.3 · Product and Quotient Rules', '2.4 · The Chain Rule', '2.5 · Marginal Analysis', '2.6 · Implicit Differentiation'],
+    live: [],
+  },
+  {
+    ch: 'Ch 3 — Applications of the Derivative',
+    items: ['3.1 · Increasing & Decreasing Functions', '3.2 · Concavity & Inflection Points', '3.3 · Curve Sketching', '3.4 · Optimization; Elasticity', '3.5 · Additional Optimization'],
+    live: [],
+  },
+  {
+    ch: 'Ch 4 — Exponential & Logarithmic Functions',
+    items: ['4.1 · Exponential Functions', '4.2 · Logarithmic Functions', '4.3 · Differentiation of Exp & Log', '4.4 · Exponential Models'],
+    live: [],
+  },
+  {
+    ch: 'Ch 5 — Integration',
+    items: ['5.1 · Indefinite Integration', '5.2 · Integration by Substitution', '5.3 · The Definite Integral & FTC', '5.4 · Applying Definite Integration', '5.5 · Applications to Business'],
+    live: [
+      { label: '5.1 · Indefinite Integration', href: '/courses/calc1/s51' },
+      { label: '5.2 · Integration by Substitution', href: '/courses/calc1/s52' },
+      { label: '5.3 · The Definite Integral & FTC', href: '/courses/calc1/s53' },
+    ],
+    defaultOpen: true,
+  },
+  {
+    ch: 'Ch 6 — Additional Integration Topics',
+    items: ['6.1 · Integration by Parts', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Continuous Probability'],
+    live: [],
+  },
+];
 
 export default function Calc1() {
+  const [open, setOpen] = useState({ 4: true }); // Ch5 open by default (index 4)
+
+  const toggle = (i) => setOpen(prev => ({ ...prev, [i]: !prev[i] }));
+
   return (
     <>
       <Navbar activePage="courses" />
@@ -37,72 +75,69 @@ export default function Calc1() {
       </div>
 
       {/* TWO-COLUMN LAYOUT */}
-      <div style={{ display: 'flex', paddingTop: 'calc(var(--nav-h) + 3px + 37px + 40px)', minHeight: '100vh' }}>
+      <div style={{ display: 'flex', paddingTop: 'calc(var(--nav-h) + 3px)', minHeight: '100vh' }}>
 
         {/* SIDEBAR */}
-        <aside style={{ width: '256px', flexShrink: 0, position: 'sticky', top: 'calc(var(--nav-h) + 3px + 37px + 40px)', height: 'calc(100vh - var(--nav-h) - 80px)', overflowY: 'auto', background: 'var(--bg2)', borderRight: '1px solid var(--border)' }}>
+        <aside style={{ width: '256px', flexShrink: 0, position: 'sticky', top: 'calc(var(--nav-h) + 3px)', height: 'calc(100vh - var(--nav-h) - 80px)', overflowY: 'auto', background: 'var(--bg2)', borderRight: '1px solid var(--border)' }}>
           <div style={{ padding: '18px 16px 12px', borderBottom: '1px solid var(--border)' }}>
             <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '4px' }}>MATH-101 · Calculus I</div>
             <div style={{ fontFamily: 'var(--fh)', fontSize: '.95rem', color: 'var(--text)', lineHeight: 1.3 }}>Course Contents</div>
             <Link href="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', marginTop: '8px', textDecoration: 'none' }}>← All Courses</Link>
           </div>
 
-          <nav style={{ padding: '8px 0 24px' }}>
-
-            {/* Course Overview — active */}
-            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Course Overview</span>
-            <Link href="/courses/calc1" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--amber)', borderLeft: '2px solid var(--amber)', background: 'rgba(232,160,32,.08)', textDecoration: 'none', lineHeight: 1.35 }}>
+          {/* Course Overview link */}
+          <div style={{ padding: '8px 0 4px' }}>
+            <Link href="/courses/calc1" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--amber)', borderLeft: '2px solid var(--amber)', background: 'rgba(232,160,32,.08)', textDecoration: 'none' }}>
               <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--amber)', flexShrink: 0, display: 'inline-block' }}></span>
               Course Overview
             </Link>
+          </div>
 
-            {/* Ch 1–4 coming soon */}
-            {[
-              { ch: 'Ch 1 — Functions, Graphs & Limits', items: ['1.1 · Functions', '1.2 · The Graph of a Function', '1.3 · Lines and Linear Functions', '1.4 · Functional Models', '1.5 · Limits', '1.6 · One-Sided Limits and Continuity'] },
-              { ch: 'Ch 2 — Differentiation: Basic Concepts', items: ['2.1 · The Derivative', '2.2 · Techniques of Differentiation', '2.3 · Product and Quotient Rules', '2.4 · The Chain Rule', '2.5 · Marginal Analysis', '2.6 · Implicit Differentiation'] },
-              { ch: 'Ch 3 — Applications of the Derivative', items: ['3.1 · Increasing & Decreasing Functions', '3.2 · Concavity & Inflection Points', '3.3 · Curve Sketching', '3.4 · Optimization; Elasticity', '3.5 · Additional Optimization'] },
-              { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: ['4.1 · Exponential Functions', '4.2 · Logarithmic Functions', '4.3 · Differentiation of Exp & Log', '4.4 · Exponential Models'] },
-            ].map(({ ch, items }) => (
-              <div key={ch}>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>{ch}</span>
-                {items.map(item => (
-                  <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
-                    <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            ))}
+          {/* Accordion chapters */}
+          <nav style={{ padding: '4px 0 24px' }}>
+            {chapters.map(({ ch, items, live = [] }, i) => {
+              const isOpen = !!open[i];
+              const liveMap = Object.fromEntries(live.map(l => [l.label, l.href]));
+              const hasLive = live.length > 0;
 
-            {/* Ch 5 — mix of live + coming soon */}
-            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Ch 5 — Integration</span>
-            {[
-              { href: '/courses/calc1/s51', label: '5.1 · Indefinite Integration' },
-              { href: '/courses/calc1/s52', label: '5.2 · Integration by Substitution' },
-              { href: '/courses/calc1/s53', label: '5.3 · The Definite Integral & FTC' },
-            ].map(({ href, label }) => (
-              <Link key={href} href={href} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', textDecoration: 'none', lineHeight: 1.35, borderLeft: '2px solid transparent' }}>
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
-                {label}
-                <span style={{ marginLeft: 'auto', fontSize: '.58rem', color: 'var(--teal)' }}>✦</span>
-              </Link>
-            ))}
-            {['5.4 · Applying Definite Integration', '5.5 · Applications to Business'].map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
-                {item}
-              </div>
-            ))}
+              return (
+                <div key={ch} style={{ borderBottom: '1px solid var(--border)' }}>
+                  {/* Chapter header — clickable */}
+                  <button
+                    onClick={() => toggle(i)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer',
+                      fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em',
+                      textTransform: 'uppercase', color: hasLive ? 'var(--teal)' : 'var(--text3)',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span>{ch}</span>
+                    <span style={{ fontSize: '.6rem', transition: 'transform .2s', display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+                  </button>
 
-            {/* Ch 6 — coming soon */}
-            <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '10px 16px 3px', display: 'block' }}>Ch 6 — Additional Integration Topics</span>
-            {['6.1 · Integration by Parts', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Continuous Probability'].map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 16px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
-                <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
-                {item}
-              </div>
-            ))}
-
+                  {/* Subsections — shown when open */}
+                  {isOpen && (
+                    <div style={{ paddingBottom: '6px' }}>
+                      {items.map(item => {
+                        const href = liveMap[item];
+                        return href ? (
+                          <Link key={item} href={href} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 16px 5px 24px', fontFamily: 'var(--fm)', fontSize: '.71rem', color: 'var(--teal)', textDecoration: 'none', lineHeight: 1.35 }}>
+                            <span style={{ fontSize: '.55rem' }}>✦</span>{item}
+                          </Link>
+                        ) : (
+                          <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 16px 5px 24px', fontFamily: 'var(--fm)', fontSize: '.71rem', color: 'var(--text3)', opacity: .38, lineHeight: 1.35 }}>
+                            <span style={{ width: '3px', height: '3px', borderRadius: '50%', background: 'var(--border2)', flexShrink: 0, display: 'inline-block' }}></span>
+                            {item}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </aside>
 
@@ -123,10 +158,6 @@ export default function Calc1() {
               <span className="tag">Differential Equations</span>
             </div>
             <div style={{ display: 'flex', gap: '40px', marginTop: '28px', flexWrap: 'wrap' }}>
-              <div>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Level</div>
-                <div style={{ fontSize: '.95rem', color: 'var(--text)', marginTop: '4px' }}>Undergraduate I</div>
-              </div>
               <div>
                 <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>Textbooks</div>
                 <div style={{ fontSize: '.95rem', color: 'var(--text)', marginTop: '4px' }}>James Stewart · Hoffmann &amp; Bradley</div>
@@ -171,84 +202,44 @@ export default function Calc1() {
               ))}
             </div>
 
-            {/* Divider */}
             <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--border2), transparent)', margin: '32px 0' }} />
 
-            {/* Quiz CTA */}
-            <div style={{ marginBottom: '32px' }}>
-              <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '16px' }}>
-                Chapter 5 Assessment
-              </div>
-              <Link href="/courses/calc1/ch5-quiz" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '20px 24px',
-                background: 'linear-gradient(135deg,rgba(26,107,107,.12),rgba(26,107,107,.06))',
-                border: '1.5px solid rgba(26,107,107,.35)', borderRadius: '12px',
-                textDecoration: 'none', color: 'inherit',
-              }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: '6px' }}>⚡ Live Quiz · Auto-Graded</div>
-                  <div style={{ fontFamily: 'var(--fh)', fontSize: '1.1rem', color: 'var(--text)', marginBottom: '4px' }}>Chapter 5 Integration Quiz</div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>5 randomised questions · instant feedback · downloadable result card</div>
-                </div>
-                <div style={{ flexShrink: 0, marginLeft: '20px', background: 'var(--teal)', color: '#fff', fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', padding: '10px 18px', borderRadius: '8px' }}>
-                  Take Quiz →
-                </div>
-              </Link>
-            </div>
+            
 
-            {/* Lecture notes */}
+            {/* Lecture notes TOC */}
             <h3 style={{ fontFamily: 'var(--fh)', fontSize: '1.3rem', color: 'var(--text)', marginBottom: '6px' }}>Course Lecture Notes</h3>
             <p style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', marginBottom: '20px' }}>✦ = Live &nbsp;&nbsp;|&nbsp;&nbsp; Greyed out = Coming soon</p>
 
-            {/* Ch 1–4 all coming soon */}
-            {[
-              { ch: 'Chapter 1 — Functions, Graphs, and Limits', items: ['1.1 · Functions', '1.2 · The Graph of a Function', '1.3 · Lines and Linear Functions', '1.4 · Functional Models', '1.5 · Limits', '1.6 · One-Sided Limits and Continuity'] },
-              { ch: 'Chapter 2 — Differentiation: Basic Concepts', items: ['2.1 · The Derivative', '2.2 · Techniques of Differentiation', '2.3 · Product and Quotient Rules; Higher-Order Derivatives', '2.4 · The Chain Rule', '2.5 · Marginal Analysis and Approximations Using Increments', '2.6 · Implicit Differentiation and Related Rates'] },
-              { ch: 'Chapter 3 — Additional Applications of the Derivative', items: ['3.1 · Increasing and Decreasing Functions; Relative Extrema', '3.2 · Concavity and Points of Inflection', '3.3 · Curve Sketching', '3.4 · Optimization; Elasticity of Demand', '3.5 · Additional Applied Optimization'] },
-              { ch: 'Chapter 4 — Exponential and Logarithmic Functions', items: ['4.1 · Exponential Functions; Continuous Compounding', '4.2 · Logarithmic Functions', '4.3 · Differentiation of Exponential and Logarithmic Functions', '4.4 · Additional Applications; Exponential Models'] },
-            ].map(({ ch, items }) => (
-              <div key={ch}>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>{ch}</div>
-                {items.map(item => (
-                  <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
-                    <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px' }}>
+              {chapters.map(({ ch, items, live = [] }) => {
+                const liveMap = Object.fromEntries(live.map(l => [l.label, l.href]));
+                return (
+                  <div key={ch} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '16px 18px' }}>
+                    <div style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.18em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '3px' }}>{ch.split('—')[0].trim()}</div>
+                    <div style={{ fontFamily: 'var(--fh)', fontSize: '.88rem', color: 'var(--text)', marginBottom: '12px', lineHeight: 1.3 }}>{ch.split('—')[1]?.trim()}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '12px' }}>
+                      {items.map(item => {
+                        const href = liveMap[item];
+                        return href ? (
+                          <Link key={item} href={href} style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--teal)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontSize: '.55rem' }}>✦</span>{item}
+                          </Link>
+                        ) : (
+                          <span key={item} style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', opacity: .4 }}>{item}</span>
+                        );
+                      })}
+                    </div>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
+                      {live.length > 0 ? (
+                        <Link href={`/courses/calc1/ch5-quiz`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.64rem', letterSpacing: '.08em', textTransform: 'uppercase', background: 'rgba(56,201,176,.12)', color: 'var(--teal)', border: '1px solid rgba(56,201,176,.3)', borderRadius: '6px', padding: '5px 10px', textDecoration: 'none' }}>⚡ Take Quiz</Link>
+                      ) : (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.64rem', letterSpacing: '.08em', textTransform: 'uppercase', background: 'var(--bg)', color: 'var(--text3)', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 10px', opacity: .4 }}>📝 Quiz Coming</span>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            ))}
-
-            {/* Ch 5 — live rows + coming soon */}
-            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>Chapter 5 — Integration</div>
-            {[
-              { href: '/courses/calc1/s51', title: '5.1 · Indefinite Integration and Differential Equations', sub: 'Antiderivatives · Rules · IVPs · Continuous Compounding' },
-              { href: '/courses/calc1/s52', title: '5.2 · Integration by Substitution', sub: 'Substitution Types · Word Problems · U-Choice Quiz' },
-              { href: '/courses/calc1/s53', title: '5.3 · The Definite Integral and the Fundamental Theorem of Calculus', sub: 'Definite Integrals · Fundamental Theorem of Calculus' },
-            ].map(({ href, title, sub }) => (
-              <Link key={href} href={href} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)', textDecoration: 'none', color: 'inherit' }}>
-                <div>
-                  <div style={{ fontSize: '.9rem', color: 'var(--text)' }}>{title}</div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', color: 'var(--text3)', marginTop: '2px' }}>{sub}</div>
-                </div>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.65rem', color: 'var(--teal)', flexShrink: 0, marginLeft: '16px' }}>✦ Live</span>
-              </Link>
-            ))}
-            {['5.4 · Applying Definite Integration: Distribution of Wealth and Average Value', '5.5 · Additional Applications of Integration to Business and Economics'].map(item => (
-              <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
-              </div>
-            ))}
-
-            {/* Ch 6 */}
-            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--text3)', padding: '6px 0', borderBottom: '1px solid var(--border)', marginBottom: '8px', marginTop: '20px' }}>Chapter 6 — Additional Topics in Integration</div>
-            {['6.1 · Integration by Parts; Integral Tables', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Introduction to Continuous Probability'].map(item => (
-              <div key={item} style={{ opacity: .38, padding: '10px 0', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.9rem', color: 'var(--text2)' }}>{item}</span>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Coming soon</span>
-              </div>
-            ))}
+                );
+              })}
+            </div>
 
           </div>
 
