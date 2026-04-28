@@ -1,5 +1,6 @@
 'use client';
 import Navbar from '../../../components/Navbar';
+import Footer from '../../../components/Footer';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
@@ -86,7 +87,8 @@ function ToggleAnswer({ label = 'Show Solution', children }) {
     if (!el) return;
     const visible = el.style.display === 'block';
     el.style.display = visible ? 'none' : 'block';
-    if (!visible && window.MathJax) window.MathJax.typesetPromise([el]);
+    // Same fix here:
+    if (!visible && window.MathJax?.typesetPromise) window.MathJax.typesetPromise([el]);
   };
   return (
     <>
@@ -199,20 +201,21 @@ export default function Calc1S51() {
   };
 
   const showRule = () => {
-    const key   = ruleSelRef.current?.value || 'x3';
-    const steps = RULES[key];
-    if (!steps || !ruleOutputRef.current) return;
-    let html = '';
-    steps.forEach((s,i) => {
-      if (!s) return;
-      const last = i === steps.length-1;
-      html += `<div style="margin-bottom:10px;color:${last?'#fbbf24':'#e8e2d9'}">`;
-      if (!last) html += `<span style="color:#9ca3af;font-size:.72rem;margin-right:8px">Step ${i+1}.</span>`;
-      html += s + '</div>';
-    });
-    ruleOutputRef.current.innerHTML = html;
-    if (window.MathJax) window.MathJax.typesetPromise([ruleOutputRef.current]);
-  };
+  const key = ruleSelRef.current?.value || 'x3';
+  const steps = RULES[key];
+  if (!steps || !ruleOutputRef.current) return;
+  let html = '';
+  steps.forEach((s, i) => {
+    if (!s) return;
+    const last = i === steps.length - 1;
+    html += `<div style="margin-bottom:10px;color:${last ? '#fbbf24' : '#e8e2d9'}">`;
+    if (!last) html += `<span style="color:#9ca3af;font-size:.72rem;margin-right:8px">Step ${i + 1}.</span>`;
+    html += s + '</div>';
+  });
+  ruleOutputRef.current.innerHTML = html;
+  // Check typesetPromise specifically, not just MathJax
+  if (window.MathJax?.typesetPromise) window.MathJax.typesetPromise([ruleOutputRef.current]);
+};
 
   useEffect(() => {
     const handleScroll = () => {
@@ -423,7 +426,7 @@ export default function Calc1S51() {
 
               <div style={S.defBox}>
                 <div style={{...S.lbl,color:'#1a6b6b'}}>Definition — Antiderivative</div>
-                <p style={{...S.p,marginBottom:0}}>{'A function $F(x)$ is an \\textbf{antiderivative} of $f(x)$ if $F\'(x) = f(x)$ for all $x$ in the domain.'}</p>
+                <p style={{...S.p,marginBottom:0}}>{'A function $F(x)$ is an '}<strong>antiderivative</strong>{' of $f(x)$ if $F\'(x) = f(x)$ for all $x$ in the domain.'}</p>
               </div>
 
               <div style={{...S.card,...S.cardTl}}>
@@ -455,7 +458,7 @@ export default function Calc1S51() {
               <svg viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg" style={{width:'100%',maxWidth:'620px',display:'block',margin:'28px auto'}}>
                 <defs>
                     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </marker>
                 </defs>
                 <rect x="10" y="10" width="660" height="260" rx="14" fill="#fdf8f0" stroke="#e0d6c8" strokeWidth="1"/>
@@ -496,7 +499,9 @@ export default function Calc1S51() {
                 </table>
               </div>
 
-              <div style={S.calloutTeal}><strong>Key difference:</strong> {'The \\textit{indefinite} integral $\\int f(x)\\,dx$ is a \\textit{family of functions} (with $+C$). The \\textit{definite} integral $\\int_a^b f(x)\\,dx$ is a \\textit{number}. We study the definite integral in §5.3.'}</div>
+              <div style={S.calloutTeal}>
+                <strong>Key difference:</strong> The <em>indefinite</em> integral {'$\\int f(x)\\,dx$'} is a <em>family of functions</em> (with {'$+C$'}). The <em>definite</em> integral {'$\\int_a^b f(x)\\,dx$'} is a <em>number</em>. We study the definite integral in §5.3.
+              </div>
             </section>
 
             {/* ══ §4  INTEGRATION RULES ══ */}
@@ -826,6 +831,8 @@ export default function Calc1S51() {
 
         </main>
       </div>
+
+      <Footer />
     </>
   );
 }
