@@ -32,6 +32,7 @@ const chapters = [
       { label: '5.1 · Indefinite Integration', href: '/courses/calc1/s51' },
       { label: '5.2 · Integration by Substitution', href: '/courses/calc1/s52' },
       { label: '5.3 · The Definite Integral & FTC', href: '/courses/calc1/s53' },
+      { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54' },
     ],
     defaultOpen: true,
   },
