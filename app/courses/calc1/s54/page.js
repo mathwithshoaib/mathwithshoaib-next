@@ -161,97 +161,413 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
 function AreaBetweenWidget() {
   const canvasRef = useRef(null);
-  const [fnPair, setFnPair] = useState('parabolas');
-  const [showRects, setShowRects] = useState(true);
-  const [nRects, setNRects] = useState(8);
 
-  const PAIRS = {
-    parabolas: { f: x => -0.3*x*x+3, g: x => 0.3*x*x+0.5, a: -2.4, b: 2.4 },
-    linecurve: { f: x => x+2, g: x => x*x, a: -0.9, b: 2.2 },
-    sincos:    { f: x => 1.8*Math.sin(x)+2.5, g: x => 0.8*Math.cos(x)+0.5, a: 0, b: Math.PI },
+  // ── Function libraries ─────────────────────────────────────────────────
+  const F_OPTIONS = [
+    { label: 'f(x) = −0.3x² + 3',        fn: x => -0.3*x*x + 3 },
+    { label: 'f(x) = sin(x) + 2',         fn: x => Math.sin(x) + 2 },
+    { label: 'f(x) = x + 2',             fn: x => x + 2 },
+    { label: 'f(x) = −x² + 4',           fn: x => -x*x + 4 },
+    { label: 'f(x) = e^(0.4x)',           fn: x => Math.exp(0.4*x) },
+    { label: 'f(x) = 2cos(x) + 3',       fn: x => 2*Math.cos(x) + 3 },
+    { label: 'f(x) = √(x+3) + 1',        fn: x => Math.sqrt(Math.max(0, x+3)) + 1 },
+    { label: 'f(x) = 0.5x² − x + 3',     fn: x => 0.5*x*x - x + 3 },
+    { label: 'f(x) = ln(x+3) + 2',       fn: x => Math.log(x+3) + 2 },
+    { label: 'f(x) = 3 − 0.1x³',         fn: x => 3 - 0.1*x*x*x },
+  ];
+
+  const G_OPTIONS = [
+    { label: 'g(x) = 0.3x² + 0.5',       fn: x => 0.3*x*x + 0.5 },
+    { label: 'g(x) = x²',                fn: x => x*x },
+    { label: 'g(x) = 0.5sin(x) + 0.5',  fn: x => 0.5*Math.sin(x) + 0.5 },
+    { label: 'g(x) = x − 1',             fn: x => x - 1 },
+    { label: 'g(x) = 0.2x² − 0.5',      fn: x => 0.2*x*x - 0.5 },
+    { label: 'g(x) = e^(0.2x) − 1',     fn: x => Math.exp(0.2*x) - 1 },
+    { label: 'g(x) = cos(x)',            fn: x => Math.cos(x) },
+    { label: 'g(x) = 0.3x³ − x',        fn: x => 0.3*x*x*x - x },
+    { label: 'g(x) = −0.5x + 1',        fn: x => -0.5*x + 1 },
+    { label: 'g(x) = |x| − 1',          fn: x => Math.abs(x) - 1 },
+  ];
+
+  // ── State ──────────────────────────────────────────────────────────────
+  const [fIdx, setFIdx]         = useState(0);
+  const [gIdx, setGIdx]         = useState(0);
+  const [aVal, setAVal]         = useState(-2);
+  const [bVal, setBVal]         = useState(2);
+  const [nRects, setNRects]     = useState(8);
+  const [inputVal, setInputVal] = useState('8');
+  const [inputErr, setInputErr] = useState(false);
+  const [method, setMethod]     = useState('mid');   // 'left'|'mid'|'right'
+  const [showRects, setShowRects] = useState(true);
+  const [aInput, setAInput]     = useState('-2');
+  const [bInput, setBInput]     = useState('2');
+  const [boundsErr, setBoundsErr] = useState('');
+  const [warning, setWarning]   = useState('');
+
+  // ── Numerical integration (exact via many rectangles) ──────────────────
+  const computeExact = (f, g, a, b) => {
+    const N = 4000;
+    const dx = (b - a) / N;
+    let sum = 0;
+    for (let i = 0; i < N; i++) {
+      const x = a + (i + 0.5) * dx;
+      sum += Math.abs(f(x) - g(x));
+    }
+    return sum * dx;
   };
 
+  const computeEstimate = (f, g, a, b, n, meth) => {
+    const dx = (b - a) / n;
+    let sum = 0;
+    for (let i = 0; i < n; i++) {
+      let x;
+      if (meth === 'left')  x = a + i * dx;
+      else if (meth === 'right') x = a + (i + 1) * dx;
+      else x = a + (i + 0.5) * dx;
+      sum += Math.abs(f(x) - g(x));
+    }
+    return sum * dx;
+  };
+
+  // ── Draw ───────────────────────────────────────────────────────────────
   const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas || !canvas.offsetWidth) return;
-    const dpr = window.devicePixelRatio||1;
-    const W = canvas.offsetWidth, H = 280;
-    canvas.width = W*dpr; canvas.height = H*dpr;
-    const ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr);
-    const d = PAIRS[fnPair];
-    const {f,g,a,b} = d;
-    const pad = {l:50,r:20,t:20,b:36};
-    const gW = W-pad.l-pad.r, gH = H-pad.t-pad.b;
-    let yMin=Infinity, yMax=-Infinity;
-    for(let i=0;i<=300;i++){const x=a+(b-a)*i/300; yMin=Math.min(yMin,f(x),g(x)); yMax=Math.max(yMax,f(x),g(x));}
-    yMin-=0.4; yMax+=0.4;
-    const tX=x=>pad.l+(x-a)/(b-a)*gW;
-    const tY=y=>pad.t+gH-(y-yMin)/(yMax-yMin)*gH;
-    ctx.fillStyle='#111827'; ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle='#1f2937'; ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){const y=yMin+(yMax-yMin)*i/4; ctx.beginPath(); ctx.moveTo(pad.l,tY(y)); ctx.lineTo(pad.l+gW,tY(y)); ctx.stroke(); ctx.fillStyle='#6b7280'; ctx.font='10px IBM Plex Mono,monospace'; ctx.textAlign='right'; ctx.fillText(y.toFixed(1),pad.l-4,tY(y)+4);}
-    ctx.beginPath(); ctx.moveTo(tX(a),tY(f(a)));
-    for(let i=1;i<=300;i++){const x=a+(b-a)*i/300; ctx.lineTo(tX(x),tY(f(x)));}
-    for(let i=300;i>=0;i--){const x=a+(b-a)*i/300; ctx.lineTo(tX(x),tY(g(x)));}
-    ctx.closePath(); ctx.fillStyle='rgba(212,160,23,0.28)'; ctx.fill();
-    if(showRects){
-      const dx=(b-a)/nRects;
-      for(let i=0;i<nRects;i++){
-        const xm=a+(i+0.5)*dx; const fh=f(xm),gh=g(xm);
-        const rx=tX(a+i*dx), rw=Math.max(1,tX(a+(i+1)*dx)-rx);
-        ctx.fillStyle='rgba(56,201,176,0.22)'; ctx.fillRect(rx,tY(fh),rw,tY(gh)-tY(fh));
-        ctx.strokeStyle='#38c9b0'; ctx.lineWidth=1; ctx.strokeRect(rx,tY(fh),rw,tY(gh)-tY(fh));
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth, H = 300;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+
+    const f = F_OPTIONS[fIdx].fn;
+    const g = G_OPTIONS[gIdx].fn;
+    const a = aVal, b = bVal;
+
+    const pad = { l: 54, r: 22, t: 22, b: 40 };
+    const gW = W - pad.l - pad.r, gH = H - pad.t - pad.b;
+
+    // Auto y-range
+    let yMin = Infinity, yMax = -Infinity;
+    const WARN_THRESHOLD = 1e6;
+    let hasInvalid = false;
+    for (let i = 0; i <= 300; i++) {
+      const x = a + (b - a) * i / 300;
+      const fv = f(x), gv = g(x);
+      if (!isFinite(fv) || !isFinite(gv) || Math.abs(fv) > WARN_THRESHOLD || Math.abs(gv) > WARN_THRESHOLD) { hasInvalid = true; continue; }
+      yMin = Math.min(yMin, fv, gv);
+      yMax = Math.max(yMax, fv, gv);
+    }
+    if (!isFinite(yMin) || !isFinite(yMax)) { yMin = -2; yMax = 5; }
+    const yPad = Math.max(0.5, (yMax - yMin) * 0.12);
+    yMin -= yPad; yMax += yPad;
+
+    const tX = x => pad.l + (x - a) / (b - a) * gW;
+    const tY = y => pad.t + gH - (y - yMin) / (yMax - yMin) * gH;
+
+    // Background
+    ctx.fillStyle = '#111827'; ctx.fillRect(0, 0, W, H);
+
+    // Grid lines
+    const nGridY = 5;
+    for (let i = 0; i <= nGridY; i++) {
+      const y = yMin + (yMax - yMin) * i / nGridY;
+      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.l, tY(y)); ctx.lineTo(pad.l + gW, tY(y)); ctx.stroke();
+      ctx.fillStyle = '#6b7280'; ctx.font = '10px IBM Plex Mono,monospace'; ctx.textAlign = 'right';
+      ctx.fillText(y.toFixed(1), pad.l - 4, tY(y) + 4);
+    }
+
+    // x-axis ticks
+    const nGridX = Math.min(8, Math.ceil(b - a));
+    for (let i = 0; i <= nGridX; i++) {
+      const x = a + (b - a) * i / nGridX;
+      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(tX(x), pad.t); ctx.lineTo(tX(x), pad.t + gH); ctx.stroke();
+      ctx.fillStyle = '#6b7280'; ctx.font = '10px IBM Plex Mono,monospace'; ctx.textAlign = 'center';
+      ctx.fillText(x.toFixed(1), tX(x), pad.t + gH + 16);
+    }
+
+    // Zero axes
+    if (yMin < 0 && yMax > 0) {
+      ctx.strokeStyle = '#374151'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(pad.l, tY(0)); ctx.lineTo(pad.l + gW, tY(0)); ctx.stroke();
+    }
+    if (a < 0 && b > 0) {
+      ctx.strokeStyle = '#374151'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(tX(0), pad.t); ctx.lineTo(tX(0), pad.t + gH); ctx.stroke();
+    }
+
+    // Shaded region (absolute |f-g|)
+    const STEPS = 400;
+    // Split into sub-segments by sign of f-g
+    let segments = [];
+    let curSeg = null;
+    for (let i = 0; i <= STEPS; i++) {
+      const x = a + (b - a) * i / STEPS;
+      const fv = f(x), gv = g(x);
+      const top = Math.max(fv, gv), bot = Math.min(fv, gv);
+      const fOnTop = fv >= gv;
+      if (!curSeg || curSeg.fOnTop !== fOnTop) {
+        if (curSeg) segments.push(curSeg);
+        curSeg = { fOnTop, pts: [] };
+      }
+      curSeg.pts.push({ x, top, bot, fv, gv });
+    }
+    if (curSeg) segments.push(curSeg);
+
+    segments.forEach(seg => {
+      ctx.beginPath();
+      ctx.moveTo(tX(seg.pts[0].x), tY(seg.pts[0].top));
+      seg.pts.forEach(p => ctx.lineTo(tX(p.x), tY(p.top)));
+      for (let i = seg.pts.length - 1; i >= 0; i--) ctx.lineTo(tX(seg.pts[i].x), tY(seg.pts[i].bot));
+      ctx.closePath();
+      ctx.fillStyle = seg.fOnTop ? 'rgba(212,160,23,0.25)' : 'rgba(139,92,246,0.20)';
+      ctx.fill();
+    });
+
+    // Riemann rectangles
+    if (showRects) {
+      const dx = (b - a) / nRects;
+      for (let i = 0; i < nRects; i++) {
+        let xSample;
+        if (method === 'left')  xSample = a + i * dx;
+        else if (method === 'right') xSample = a + (i + 1) * dx;
+        else xSample = a + (i + 0.5) * dx;
+
+        const fv = f(xSample), gv = g(xSample);
+        const topY = Math.max(fv, gv), botY = Math.min(fv, gv);
+        const rx = tX(a + i * dx);
+        const rw = Math.max(1, tX(a + (i + 1) * dx) - rx);
+        const fOnTop = fv >= gv;
+
+        ctx.fillStyle = fOnTop ? 'rgba(56,201,176,0.25)' : 'rgba(167,139,250,0.25)';
+        ctx.fillRect(rx, tY(topY), rw, tY(botY) - tY(topY));
+        ctx.strokeStyle = fOnTop ? '#38c9b0' : '#a78bfa';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(rx, tY(topY), rw, tY(botY) - tY(topY));
+
+        // Sample point dot
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(tX(xSample), tY((fv + gv) / 2), 2.5, 0, Math.PI * 2); ctx.fill();
       }
     }
-    ctx.beginPath(); ctx.moveTo(tX(a),tY(f(a)));
-    for(let i=1;i<=300;i++){const x=a+(b-a)*i/300; ctx.lineTo(tX(x),tY(f(x)));}
-    ctx.strokeStyle='#c0392b'; ctx.lineWidth=2.5; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tX(a),tY(g(a)));
-    for(let i=1;i<=300;i++){const x=a+(b-a)*i/300; ctx.lineTo(tX(x),tY(g(x)));}
-    ctx.strokeStyle='#2980b9'; ctx.lineWidth=2.5; ctx.stroke();
-    ctx.strokeStyle='#4b5563'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+gH); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(pad.l,pad.t+gH); ctx.lineTo(pad.l+gW,pad.t+gH); ctx.stroke();
-    ctx.fillStyle='#c0392b'; ctx.font='bold 12px serif'; ctx.textAlign='left'; ctx.fillText('f(x)',tX(b)-36,tY(f(b))-8);
-    ctx.fillStyle='#2980b9'; ctx.fillText('g(x)',tX(b)-36,tY(g(b))+16);
-    ctx.fillStyle='#d4a017'; ctx.font='bold 11px IBM Plex Mono,monospace'; ctx.textAlign='center';
-    const midX=(a+b)/2; ctx.fillText('A = ∫[f−g]dx',tX(midX),tY((f(midX)+g(midX))/2));
-    ctx.fillStyle='#9ca3af'; ctx.font='11px IBM Plex Mono,monospace';
-    ctx.fillText('a',tX(a),H-6); ctx.fillText('b',tX(b),H-6);
+
+    // f(x) curve
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i <= 400; i++) {
+      const x = a + (b - a) * i / 400;
+      const y = f(x);
+      if (!isFinite(y) || Math.abs(y) > WARN_THRESHOLD) { started = false; continue; }
+      if (!started) { ctx.moveTo(tX(x), tY(y)); started = true; }
+      else ctx.lineTo(tX(x), tY(y));
+    }
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.5; ctx.stroke();
+
+    // g(x) curve
+    ctx.beginPath();
+    started = false;
+    for (let i = 0; i <= 400; i++) {
+      const x = a + (b - a) * i / 400;
+      const y = g(x);
+      if (!isFinite(y) || Math.abs(y) > WARN_THRESHOLD) { started = false; continue; }
+      if (!started) { ctx.moveTo(tX(x), tY(y)); started = true; }
+      else ctx.lineTo(tX(x), tY(y));
+    }
+    ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2.5; ctx.stroke();
+
+    // Axes frame
+    ctx.strokeStyle = '#4b5563'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + gH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t + gH); ctx.lineTo(pad.l + gW, pad.t + gH); ctx.stroke();
+
+    // Labels on curves
+    const fEnd = f(b), gEnd = g(b);
+    ctx.font = 'bold 12px serif';
+    ctx.fillStyle = '#ef4444'; ctx.textAlign = 'right';
+    if (isFinite(fEnd) && Math.abs(fEnd) < WARN_THRESHOLD)
+      ctx.fillText('f(x)', tX(b) - 2, tY(fEnd) - 8);
+    ctx.fillStyle = '#3b82f6';
+    if (isFinite(gEnd) && Math.abs(gEnd) < WARN_THRESHOLD)
+      ctx.fillText('g(x)', tX(b) - 2, tY(gEnd) + 18);
+
+    // Area label in middle
+    const midX = (a + b) / 2;
+    const fMid = f(midX), gMid = g(midX);
+    if (isFinite(fMid) && isFinite(gMid)) {
+      ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 11px IBM Plex Mono,monospace'; ctx.textAlign = 'center';
+      ctx.fillText('A = ∫|f−g|dx', tX(midX), tY((fMid + gMid) / 2) - 10);
+    }
+
+    // a and b markers
+    ctx.fillStyle = '#9ca3af'; ctx.font = '11px IBM Plex Mono,monospace'; ctx.textAlign = 'center';
+    ctx.fillText('a='+a.toFixed(1), tX(a), H - 4);
+    ctx.fillText('b='+b.toFixed(1), tX(b), H - 4);
   };
 
-  useEffect(()=>{draw();},[fnPair,showRects,nRects]);
-  useEffect(()=>{ const h=()=>draw(); window.addEventListener('resize',h,{passive:true}); return ()=>window.removeEventListener('resize',h); },[fnPair,showRects,nRects]);
+  useEffect(() => { draw(); }, [fIdx, gIdx, aVal, bVal, nRects, method, showRects]);
+  useEffect(() => {
+    const h = () => draw();
+    window.addEventListener('resize', h, { passive: true });
+    return () => window.removeEventListener('resize', h);
+  }, [fIdx, gIdx, aVal, bVal, nRects, method, showRects]);
+
+  // ── Derived stats ──────────────────────────────────────────────────────
+  const f = F_OPTIONS[fIdx].fn;
+  const g = G_OPTIONS[gIdx].fn;
+  const exact    = computeExact(f, g, aVal, bVal);
+  const estimate = computeEstimate(f, g, aVal, bVal, nRects, method);
+  const error    = Math.abs(exact - estimate);
+  const errPct   = exact > 1e-10 ? (error / exact * 100) : 0;
+
+  // ── Handlers ───────────────────────────────────────────────────────────
+  const handleNInput = (v) => {
+    setInputVal(v);
+    const n = parseInt(v);
+    if (!isNaN(n) && n >= 1 && n <= 200) { setNRects(n); setInputErr(false); }
+    else setInputErr(true);
+  };
+
+  const handleBounds = () => {
+    const a = parseFloat(aInput), b = parseFloat(bInput);
+    if (isNaN(a) || isNaN(b)) { setBoundsErr('Enter valid numbers.'); return; }
+    if (b <= a) { setBoundsErr('b must be greater than a.'); return; }
+    if (b - a > 20) { setBoundsErr('Interval too wide (max width 20).'); return; }
+    setBoundsErr('');
+    setAVal(a); setBVal(b);
+  };
+
+  // Colour tokens
+  const LABEL_STYLE = { fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', letterSpacing:'.1em', textTransform:'uppercase', color:'#9ca3af' };
+  const SELECT_STYLE = { fontFamily:"'IBM Plex Mono',monospace", fontSize:'.76rem', background:'#1f2937', color:'#e8e2d9', border:'1px solid #374151', borderRadius:'6px', padding:'6px 10px', cursor:'pointer', width:'100%' };
+  const INPUT_STYLE = (err) => ({ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.82rem', background:'#1f2937', color:'#e8e2d9', border:`1px solid ${err?'#ef4444':'#374151'}`, borderRadius:'6px', padding:'5px 9px', width:'72px', outline:'none' });
+  const STAT_BOX = (accent) => ({ background:'#1f2937', border:`1px solid ${accent}`, borderRadius:'8px', padding:'10px 14px', flex:1, minWidth:'110px' });
+  const METHOD_BTN = (active, col) => ({ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', letterSpacing:'.08em', textTransform:'uppercase', background: active ? col : '#1f2937', color: active ? '#111827' : '#9ca3af', border:`1px solid ${active ? col : '#374151'}`, borderRadius:'5px', padding:'5px 12px', cursor:'pointer', transition:'all .15s' });
 
   return (
     <div style={S.widget}>
-      <div style={S.wt}>📐 Area Between Two Curves — Interactive Explorer</div>
-      <canvas ref={canvasRef} style={{display:'block',width:'100%',height:'280px',borderRadius:'8px',background:'#111827'}}/>
-      <div style={{display:'flex',flexWrap:'wrap',gap:'14px',marginTop:'16px',alignItems:'center'}}>
-        <div style={{display:'flex',flexDirection:'column',gap:'4px',flex:1,minWidth:'200px'}}>
-          <label style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'#9ca3af'}}>Function Pair</label>
-          <select value={fnPair} onChange={e=>setFnPair(e.target.value)} style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.78rem',background:'#1f2937',color:'#e8e2d9',border:'1px solid #374151',borderRadius:'6px',padding:'5px 10px',cursor:'pointer'}}>
-            <option value="parabolas">Two parabolas</option>
-            <option value="linecurve">Line vs parabola</option>
-            <option value="sincos">sin vs cos</option>
-          </select>
-        </div>
-        <div style={{display:'flex',flexDirection:'column',gap:'4px',flex:1,minWidth:'160px'}}>
-          <label style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.68rem',letterSpacing:'.1em',textTransform:'uppercase',color:'#9ca3af'}}>
-            Rectangles: <span style={{color:'#d4a017',fontWeight:600}}>{nRects}</span>
-          </label>
-          <input type="range" min="2" max="40" value={nRects} onInput={e=>setNRects(parseInt(e.target.value))} style={{WebkitAppearance:'none',width:'100%',height:'5px',background:'#374151',borderRadius:'3px',outline:'none'}}/>
-        </div>
-        <div style={{display:'flex',alignItems:'center',gap:'8px',paddingTop:'18px'}}>
-          <input type="checkbox" id="showR" checked={showRects} onChange={e=>setShowRects(e.target.checked)} style={{cursor:'pointer'}}/>
-          <label htmlFor="showR" style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.72rem',color:'#38c9b0',cursor:'pointer'}}>Show rectangles</label>
+      {/* Header */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'8px', marginBottom:'14px' }}>
+        <div style={S.wt}>📐 Area Between Two Curves — Explorer</div>
+        <div style={{ display:'flex', gap:'6px' }}>
+          {[['left','LEFT'],['mid','MID'],['right','RIGHT']].map(([k,label])=>(
+            <button key={k} style={METHOD_BTN(method===k,'#38c9b0')} onClick={()=>setMethod(k)}>{label}</button>
+          ))}
         </div>
       </div>
-      <div style={{display:'flex',gap:'20px',marginTop:'12px',flexWrap:'wrap'}}>
-        <div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{width:'18px',height:'3px',background:'#c0392b',borderRadius:'2px'}}></div><span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.7rem',color:'#9ca3af'}}>f(x) — top</span></div>
-        <div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{width:'18px',height:'3px',background:'#2980b9',borderRadius:'2px'}}></div><span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.7rem',color:'#9ca3af'}}>g(x) — bottom</span></div>
-        <div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{width:'18px',height:'10px',background:'rgba(212,160,23,0.4)',borderRadius:'2px'}}></div><span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.7rem',color:'#9ca3af'}}>Area between</span></div>
-        <div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{width:'18px',height:'10px',background:'rgba(56,201,176,0.3)',border:'1px solid #38c9b0',borderRadius:'2px'}}></div><span style={{fontFamily:"'IBM Plex Mono',monospace",fontSize:'.7rem',color:'#9ca3af'}}>Riemann rectangles [f−g]</span></div>
+
+      {/* Function selectors */}
+      <div style={{ display:'flex', gap:'14px', flexWrap:'wrap', marginBottom:'14px' }}>
+        <div style={{ flex:1, minWidth:'220px' }}>
+          <div style={{...LABEL_STYLE, marginBottom:'5px', color:'#ef4444'}}>Top curve f(x) — choose or swap</div>
+          <select value={fIdx} onChange={e=>setFIdx(parseInt(e.target.value))} style={{...SELECT_STYLE, borderColor:'#ef444466'}}>
+            {F_OPTIONS.map((o,i)=><option key={i} value={i}>{o.label}</option>)}
+          </select>
+        </div>
+        <div style={{ flex:1, minWidth:'220px' }}>
+          <div style={{...LABEL_STYLE, marginBottom:'5px', color:'#3b82f6'}}>Bottom curve g(x)</div>
+          <select value={gIdx} onChange={e=>setGIdx(parseInt(e.target.value))} style={{...SELECT_STYLE, borderColor:'#3b82f666'}}>
+            {G_OPTIONS.map((o,i)=><option key={i} value={i}>{o.label}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {/* Canvas */}
+      <canvas ref={canvasRef} style={{ display:'block', width:'100%', height:'300px', borderRadius:'10px', background:'#111827' }} />
+
+      {/* Bounds + n-rects controls */}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'14px', marginTop:'14px', alignItems:'flex-end' }}>
+        {/* Interval [a, b] */}
+        <div>
+          <div style={{...LABEL_STYLE, marginBottom:'5px'}}>Interval [a, b]</div>
+          <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+            <input value={aInput} onChange={e=>setAInput(e.target.value)} style={INPUT_STYLE(!!boundsErr)} placeholder="a"/>
+            <span style={{ color:'#6b7280', fontFamily:"'IBM Plex Mono',monospace" }}>to</span>
+            <input value={bInput} onChange={e=>setBInput(e.target.value)} style={INPUT_STYLE(!!boundsErr)} placeholder="b"/>
+            <button onClick={handleBounds} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.7rem', background:'#374151', color:'#d4a017', border:'1px solid #4b5563', borderRadius:'5px', padding:'5px 10px', cursor:'pointer' }}>Set</button>
+          </div>
+          {boundsErr && <div style={{ color:'#ef4444', fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', marginTop:'4px' }}>{boundsErr}</div>}
+        </div>
+
+        {/* n-rects */}
+        <div style={{ flex:1, minWidth:'180px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'5px' }}>
+            <span style={LABEL_STYLE}>Rectangles</span>
+            <input
+              type="number" min="1" max="200"
+              value={inputVal}
+              onChange={e=>handleNInput(e.target.value)}
+              style={INPUT_STYLE(inputErr)}
+            />
+            {inputErr && <span style={{ color:'#ef4444', fontFamily:"'IBM Plex Mono',monospace", fontSize:'.62rem' }}>1–200</span>}
+          </div>
+          <input type="range" min="1" max="200" value={nRects}
+            onInput={e=>{ const v=parseInt(e.target.value); setNRects(v); setInputVal(String(v)); setInputErr(false); }}
+            style={{ WebkitAppearance:'none', width:'100%', height:'5px', background:'#374151', borderRadius:'3px', outline:'none' }}/>
+        </div>
+
+        {/* Show rects toggle */}
+        <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
+          <input type="checkbox" id="abwShowR" checked={showRects} onChange={e=>setShowRects(e.target.checked)} style={{ cursor:'pointer', width:'15px', height:'15px' }}/>
+          <label htmlFor="abwShowR" style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.72rem', color:'#38c9b0', cursor:'pointer' }}>Show rectangles</label>
+        </div>
+      </div>
+
+      {/* Stats panel */}
+      <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginTop:'16px' }}>
+        <div style={STAT_BOX('#d4a017')}>
+          <div style={{...LABEL_STYLE, color:'#d4a017', marginBottom:'4px'}}>Exact Area</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'1.1rem', color:'#fbbf24', fontWeight:700 }}>{exact.toFixed(6)}</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.62rem', color:'#6b7280', marginTop:'2px' }}>numerical (4000 pts)</div>
+        </div>
+        <div style={STAT_BOX('#38c9b0')}>
+          <div style={{...LABEL_STYLE, color:'#38c9b0', marginBottom:'4px'}}>Estimated ({method === 'left' ? 'Left' : method === 'right' ? 'Right' : 'Mid'})</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'1.1rem', color:'#6ee7b7', fontWeight:700 }}>{estimate.toFixed(6)}</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.62rem', color:'#6b7280', marginTop:'2px' }}>n = {nRects} rectangles</div>
+        </div>
+        <div style={STAT_BOX(errPct < 1 ? '#22c55e' : errPct < 5 ? '#f59e0b' : '#ef4444')}>
+          <div style={{...LABEL_STYLE, color: errPct < 1 ? '#22c55e' : errPct < 5 ? '#f59e0b' : '#ef4444', marginBottom:'4px'}}>Absolute Error</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'1.1rem', color: errPct < 1 ? '#86efac' : errPct < 5 ? '#fcd34d' : '#fca5a5', fontWeight:700 }}>{error.toFixed(6)}</div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.62rem', color:'#6b7280', marginTop:'2px' }}>≈ {errPct.toFixed(2)}% off</div>
+        </div>
+        <div style={{ ...STAT_BOX('#6366f1'), display:'flex', flexDirection:'column', justifyContent:'center' }}>
+          <div style={{...LABEL_STYLE, color:'#818cf8', marginBottom:'4px'}}>Accuracy</div>
+          <div style={{ height:'8px', background:'#374151', borderRadius:'4px', overflow:'hidden', marginTop:'4px' }}>
+            <div style={{ width:`${Math.min(100, 100 - errPct).toFixed(1)}%`, height:'100%', background: errPct < 1 ? '#22c55e' : errPct < 5 ? '#f59e0b' : '#ef4444', borderRadius:'4px', transition:'width .3s' }}/>
+          </div>
+          <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', color:'#818cf8', marginTop:'4px' }}>{Math.max(0, 100 - errPct).toFixed(2)}%</div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ display:'flex', gap:'18px', marginTop:'14px', flexWrap:'wrap' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <div style={{ width:'20px', height:'3px', background:'#ef4444', borderRadius:'2px' }}></div>
+          <span style={{...LABEL_STYLE, textTransform:'none'}}>f(x) — selected top</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <div style={{ width:'20px', height:'3px', background:'#3b82f6', borderRadius:'2px' }}></div>
+          <span style={{...LABEL_STYLE, textTransform:'none'}}>g(x) — selected bottom</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <div style={{ width:'20px', height:'12px', background:'rgba(212,160,23,0.35)', borderRadius:'2px' }}></div>
+          <span style={{...LABEL_STYLE, textTransform:'none'}}>f &gt; g region (gold)</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <div style={{ width:'20px', height:'12px', background:'rgba(139,92,246,0.3)', borderRadius:'2px' }}></div>
+          <span style={{...LABEL_STYLE, textTransform:'none'}}>g &gt; f region (violet)</span>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+          <div style={{ width:'10px', height:'10px', borderRadius:'50%', background:'#f59e0b' }}></div>
+          <span style={{...LABEL_STYLE, textTransform:'none'}}>sample point</span>
+        </div>
+      </div>
+
+      {/* Insight note */}
+      <div style={{ marginTop:'14px', background:'#1f2937', borderRadius:'8px', padding:'10px 14px', borderLeft:'3px solid #d4a017' }}>
+        <span style={{...LABEL_STYLE, color:'#d4a017'}}>💡 Try this: </span>
+        <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.72rem', color:'#9ca3af' }}>
+          Set f = −x²+4 and g = x²−0.5, interval [−1.5, 1.5]. Drag n from 4 → 200 and watch the estimate converge to the exact value. Notice mid-point converges fastest!
+        </span>
       </div>
     </div>
   );
