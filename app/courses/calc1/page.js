@@ -33,6 +33,7 @@ const chapters = [
       { label: '5.2 · Integration by Substitution', href: '/courses/calc1/s52' },
       { label: '5.3 · The Definite Integral & FTC', href: '/courses/calc1/s53' },
       { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54' },
+      { label: '5.5 · Applications to Business', href: '/courses/calc1/s55' },
     ],
     defaultOpen: true,
   },

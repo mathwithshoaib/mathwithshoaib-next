@@ -110,7 +110,7 @@ const TOC = [
     { label: '5.2 · Integration by Substitution', href: '/courses/calc1/s52', live: true },
     { label: '5.3 · The Definite Integral & FTC', href: '/courses/calc1/s53', live: true },
     { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54', live: true },
-    { label: '5.5 · Applications to Business', soon: true },
+    { label: '5.5 · Applications to Business', href: '/courses/calc1/s55', live: true },
   ]},
   { ch: 'Ch 6 — Additional Integration Topics', items: ['6.1 · Integration by Parts','6.2 · Numerical Integration','6.3 · Improper Integrals','6.4 · Continuous Probability'].map(l=>({label:l,soon:true})) },
 ];
