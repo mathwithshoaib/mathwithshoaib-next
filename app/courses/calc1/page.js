@@ -40,7 +40,12 @@ const chapters = [
   {
     ch: 'Ch 6 — Additional Integration Topics',
     items: ['6.1 · Integration by Parts', '6.2 · Numerical Integration', '6.3 · Improper Integrals', '6.4 · Continuous Probability'],
-    live: [],
+    live: [
+      { label: '6.1 · Integration by Parts',  href: '/courses/calc1/s61', live: true },
+      { label: '6.2 · Numerical Integration', soon: true },
+      { label: '6.3 · Improper Integrals',    soon: true },
+      { label: '6.4 · Continuous Probability',soon: true },
+    ],
   },
 ];
 

@@ -90,7 +90,12 @@ const TOC = [
     { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54', live: true },
     { label: '5.5 · Applications to Business', href: '/courses/calc1/s55', live: true },
   ]},
-  { ch: 'Ch 6 — Additional Integration Topics', items: ['6.1 · Integration by Parts','6.2 · Numerical Integration','6.3 · Improper Integrals','6.4 · Continuous Probability'].map(l=>({label:l,soon:true})) },
+  { ch: 'Ch 6 — Additional Integration Topics', items: [
+    { label: '6.1 · Integration by Parts',  href: '/courses/calc1/s61', live: true },
+    { label: '6.2 · Numerical Integration', soon: true },
+    { label: '6.3 · Improper Integrals',    soon: true },
+    { label: '6.4 · Continuous Probability',soon: true },
+  ]},
 ];
 
 // ─── MCQ Data ─────────────────────────────────────────────────────────────

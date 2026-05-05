@@ -1,10 +1,8 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import Script from 'next/script';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
-
 
 // ─── Supabase ─────────────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://ujmxucxfqohlvssoxpsc.supabase.co';
@@ -51,10 +49,12 @@ function frac(num, den) {
   return `\\frac{${num / g}}{${den / g}}`;
 }
 function gradeLabel(pct) {
-  if (pct >= 90) return { label: 'Excellent — A', cls: 'A' };
-  if (pct >= 75) return { label: 'Good — B', cls: 'B' };
-  if (pct >= 60) return { label: 'Satisfactory — C', cls: 'C' };
-  return { label: 'Needs Improvement — F', cls: 'F' };
+  if (pct >= 90) return { label: 'Excellent — A',       cls: 'A' };
+  if (pct >= 80) return { label: 'Very Good — B+',      cls: 'B' };
+  if (pct >= 70) return { label: 'Good — B',            cls: 'B' };
+  if (pct >= 60) return { label: 'Satisfactory — C',    cls: 'C' };
+  if (pct >= 50) return { label: 'Just Pass — D',       cls: 'C' };
+  return          { label: 'Needs Improvement — F',     cls: 'F' };
 }
 function formatTime(sec) {
   const m = Math.floor(sec / 60).toString().padStart(2, '0');
@@ -62,21 +62,44 @@ function formatTime(sec) {
   return `${m}:${s}`;
 }
 
-// ─── Question Bank ────────────────────────────────────────────────────────────
+// ─── MathJax typeset helper ───────────────────────────────────────────────────
+// Called after every React state change that affects visible math.
+// Uses MathJax's own promise queue so calls never pile up.
+let mjaxBusy = false;
+function typeset() {
+  if (mjaxBusy) return;
+  mjaxBusy = true;
+  // Small delay lets React finish committing DOM before MathJax scans it
+  setTimeout(() => {
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      window.MathJax.typesetPromise().then(() => {
+        mjaxBusy = false;
+      }).catch(() => {
+        mjaxBusy = false;
+      });
+    } else {
+      mjaxBusy = false;
+    }
+  }, 30);
+}
+
+// ─── Question Bank ─────────────────────────────────────────────────────────────
+// Add your own questions below by copying the pattern.
 const QUESTION_BANK = [
+
   // Q1 — Power Rule negative exponent
   () => {
     const n = randInt(2, 5);
     return {
-      text: `Rewrite and integrate: $\\displaystyle\\int \\dfrac{1}{x^{${n}}}\\,dx$`,
+      text: `Rewrite and integrate: \\(\\displaystyle\\int \\dfrac{1}{x^{${n}}}\\,dx\\)`,
       topic: 'Power Rule — Negative Exponent',
       options: shuffle([
-        { tex: `$\\dfrac{-1}{${n-1}}x^{-${n-1}} + C$`, correct: true },
-        { tex: `$\\ln|x^{${n}}| + C$`, correct: false },
-        { tex: `$\\dfrac{1}{${n+1}}x^{${n+1}} + C$`, correct: false },
-        { tex: `$-${n}x^{-${n+1}} + C$`, correct: false },
+        { tex: `\\(\\dfrac{-1}{${n-1}}x^{-${n-1}} + C\\)`, correct: true },
+        { tex: `\\(\\ln|x^{${n}}| + C\\)`,                   correct: false },
+        { tex: `\\(\\dfrac{1}{${n+1}}x^{${n+1}} + C\\)`,   correct: false },
+        { tex: `\\(-${n}x^{-${n+1}} + C\\)`,                correct: false },
       ]),
-      explanation: `Rewrite as $x^{-${n}}$. Power rule: $\\int x^{-${n}}\\,dx = \\dfrac{x^{-${n}+1}}{-${n}+1}+C = \\dfrac{-1}{${n-1}x^{${n-1}}}+C$.`,
+      explanation: `Rewrite as \\(x^{-${n}}\\). Power rule: \\(\\int x^{-${n}}\\,dx = \\dfrac{x^{${1-n}}}{${1-n}}+C = \\dfrac{-1}{${n-1}}x^{-${n-1}}+C\\).`,
     };
   },
 
@@ -548,6 +571,8 @@ const QUESTION_BANK = [
       explanation:`$\\int_{${part1}}^{${total}} f\\,dx = ${val_total} - ${val_part1} = ${val_part2}$.`,
     };
   },
+
+
 ];
 
 const TOTAL_Q = 10;
@@ -557,39 +582,39 @@ function pickQuestions() {
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-const ink='#1a1a2e', paper='#fdf8f0', cream='#f5ede0', accent='#c0392b';
-const gold='#d4a017', teal='#1a6b6b', sky='#2980b9', green='#27ae60', muted='#7f8c8d';
-const border='#e0d6c8', shadow='0 4px 24px rgba(26,26,46,.10)';
-const fm="'IBM Plex Mono', monospace", fb="'Source Sans 3', sans-serif", fh="'Playfair Display', Georgia, serif";
+const ink   = '#1a1a2e', paper = '#fdf8f0', cream = '#f5ede0', accent = '#c0392b';
+const gold  = '#d4a017', teal  = '#1a6b6b', green = '#27ae60', muted  = '#7f8c8d';
+const border= '#e0d6c8', shadow= '0 4px 24px rgba(26,26,46,.10)';
+const fm    = "'IBM Plex Mono', monospace";
+const fb    = "'Source Sans 3', sans-serif";
+const fh    = "'Playfair Display', Georgia, serif";
 
-const gradeColors = { A:[39,174,96], B:[26,107,107], C:[212,160,23], F:[192,57,43] };
-const gradeCssColors = { A: green, B: teal, C: gold, F: accent, W: muted };
+const gradeColors    = { A:[39,174,96], B:[26,107,107], C:[212,160,23], F:[192,57,43] };
+const gradeCssColors = { A: green, B: teal, C: gold, F: accent };
 
-// ─── Main Quiz Component ──────────────────────────────────────────────────────
+// ─── Main Component ────────────────────────────────────────────────────────────
 export default function Calc1Ch5Quiz() {
-  // Phases: 'form' | 'quiz' | 'result'
-  const [phase, setPhase] = useState('form');
+  const [phase,       setPhase]       = useState('form');
   const [studentInfo, setStudentInfo] = useState({ name:'', cls:'', inst:'LUMS', id:'' });
-  const [formError, setFormError] = useState(false);
-  const [questions, setQuestions] = useState([]);
-  const [currentQ, setCurrentQ] = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [chosen, setChosen] = useState(-1);
-  const [answered, setAnswered] = useState(false);
-  const [timerSec, setTimerSec] = useState(0);
-  const [timerActive, setTimerActive] = useState(false);
-  const [tabWarning, setTabWarning] = useState(false);
-  const [tabCount, setTabCount] = useState(0);
-  const [withdrawModal, setWithdrawModal] = useState(false);
-  const [resultData, setResultData] = useState(null);
-  const [stats, setStats] = useState({ total:'—', completed:'—', withdrawn:'—', avgPct:'—%', avgTime:'—' });
-  const questionRef = useRef(null);
-  const feedbackRef = useRef(null);
-  const timerRef = useRef(null);
-  const quizActiveRef = useRef(false);
-  const tabCountRef = useRef(0);
+  const [formError,   setFormError]   = useState(false);
+  const [questions,   setQuestions]   = useState([]);
+  const [currentQ,    setCurrentQ]    = useState(0);
+  const [answers,     setAnswers]     = useState([]);
+  const [chosen,      setChosen]      = useState(-1);
+  const [answered,    setAnswered]    = useState(false);
+  const [timerSec,    setTimerSec]    = useState(0);
+  const [tabWarning,  setTabWarning]  = useState(false);
+  const [withdrawModal,setWithdrawModal]=useState(false);
+  const [resultData,  setResultData]  = useState(null);
+  const [stats,       setStats]       = useState({ total:'—', completed:'—', withdrawn:'—', avgPct:'—%', avgTime:'—' });
 
-  // Load stats on mount
+  const timerRef       = useRef(null);
+  const timerDisplayRef= useRef(null);
+  const quizActiveRef  = useRef(false);
+  const tabCountRef    = useRef(0);
+  const timerSecRef    = useRef(0);
+
+  // ── Load stats ──
   useEffect(() => {
     sbGetStats().then(rows => {
       if (!rows.length) return;
@@ -597,15 +622,15 @@ export default function Calc1Ch5Quiz() {
       const withdrawn = rows.filter(r => r.status === 'withdrawn' || r.status === 'tab_cheat');
       let avgPct = '—%', avgTime = '—';
       if (completed.length) {
-        avgPct = (completed.reduce((s,r) => s+(r.percentage||0), 0) / completed.length).toFixed(1) + '%';
-        const ts = completed.filter(r => r.time_seconds > 0);
-        if (ts.length) avgTime = formatTime(Math.round(ts.reduce((s,r) => s+r.time_seconds,0)/ts.length));
+        avgPct = (completed.reduce((s,r)=>s+(r.percentage||0),0)/completed.length).toFixed(1)+'%';
+        const ts = completed.filter(r=>r.time_seconds>0);
+        if (ts.length) avgTime = formatTime(Math.round(ts.reduce((s,r)=>s+r.time_seconds,0)/ts.length));
       }
-      setStats({ total: String(rows.length), completed: String(completed.length), withdrawn: String(withdrawn.length), avgPct, avgTime });
-    }).catch(() => {});
+      setStats({ total:String(rows.length), completed:String(completed.length), withdrawn:String(withdrawn.length), avgPct, avgTime });
+    }).catch(()=>{});
   }, []);
 
-  // Tab visibility
+  // ── Tab detection ──
   useEffect(() => {
     const onVis = () => {
       if (!quizActiveRef.current) return;
@@ -624,34 +649,57 @@ export default function Calc1Ch5Quiz() {
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [answers]);
 
-  // Timer
+  // ── Load MathJax once ──
+  useEffect(() => {
+    if (document.getElementById('mjax-script')) return;
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['\\[','\\]']],
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
+      startup: {
+        ready() {
+          MathJax.startup.defaultReady();
+        }
+      }
+    };
+    const s = document.createElement('script');
+    s.id  = 'mjax-script';
+    s.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+    s.async = true;
+    document.head.appendChild(s);
+  }, []);
+
+  // ── Typeset whenever question or answer state changes ──
+  useEffect(() => {
+    if (phase === 'quiz') typeset();
+  }, [currentQ, answered, phase]);
+
+  // ── Typeset result page ──
+  useEffect(() => {
+    if (phase === 'result') typeset();
+  }, [phase]);
+
+  // Cleanup
+  useEffect(() => () => clearInterval(timerRef.current), []);
+
+  // ── Timer — writes directly to DOM, no React re-render ──
   const stopTimer = useCallback(() => {
     clearInterval(timerRef.current);
-    setTimerActive(false);
   }, []);
 
   const startTimer = useCallback(() => {
+    timerSecRef.current = 0;
     setTimerSec(0);
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => setTimerSec(s => s + 1), 1000);
-    setTimerActive(true);
+    timerRef.current = setInterval(() => {
+      timerSecRef.current += 1;
+      if (timerDisplayRef.current) {
+        timerDisplayRef.current.textContent = formatTime(timerSecRef.current);
+      }
+    }, 1000);
   }, []);
-
-  // MathJax re-typeset when question or feedback changes
-  useEffect(() => {
-    if (questionRef.current && window.MathJax?.typesetPromise) {
-      window.MathJax.typesetPromise([questionRef.current]);
-    }
-  }, [currentQ, answered]);
-
-  useEffect(() => {
-    if (feedbackRef.current && window.MathJax?.typesetPromise && answered) {
-      window.MathJax.typesetPromise([feedbackRef.current]);
-    }
-  }, [answered]);
-
-  // Cleanup timer on unmount
-  useEffect(() => () => clearInterval(timerRef.current), []);
 
   // ── Start Quiz ──
   const startQuiz = () => {
@@ -684,10 +732,11 @@ export default function Calc1Ch5Quiz() {
 
   // ── Next Question ──
   const nextQuestion = () => {
+    const newAnswers = [...answers];
     if (currentQ + 1 >= TOTAL_Q) {
       quizActiveRef.current = false;
       stopTimer();
-      finishQuiz('completed', [...answers, { chosen, correct: questions[currentQ].options[chosen]?.correct, topic: questions[currentQ].topic }]);
+      finishQuiz('completed', newAnswers);
     } else {
       setCurrentQ(q => q + 1);
       setAnswered(false);
@@ -695,38 +744,34 @@ export default function Calc1Ch5Quiz() {
     }
   };
 
-  // ── Finish Quiz ──
+  // ── Finish ──
   const finishQuiz = useCallback(async (status, finalAnswers) => {
     const score = finalAnswers.filter(a => a.correct).length;
-    const pct = finalAnswers.length ? Math.round(score / TOTAL_Q * 100) : 0;
+    const pct   = finalAnswers.length ? Math.round(score / TOTAL_Q * 100) : 0;
     const grade = gradeLabel(pct);
-    const now = new Date();
+    const now   = new Date();
     const dateStr = now.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
-    setResultData({ score, pct, grade, dateStr, status, finalAnswers, timeTaken: timerRef.current ? timerSec : timerSec });
+    const elapsed = timerSecRef.current;
+    setResultData({ score, pct, grade, dateStr, status, finalAnswers, timeTaken: elapsed });
     setPhase('result');
-
     try {
       await sbInsert({
-        student_name: studentInfo.name,
-        student_class: studentInfo.cls,
-        institute: studentInfo.inst,
-        campus_id: studentInfo.id || null,
-        score, total: TOTAL_Q, percentage: pct, status,
-        time_seconds: timerSec,
+        student_name: studentInfo.name, student_class: studentInfo.cls,
+        institute: studentInfo.inst, campus_id: studentInfo.id || null,
+        score, total: TOTAL_Q, percentage: pct, status, time_seconds: elapsed,
       });
-      // Refresh stats
       const rows = await sbGetStats();
-      const completed = rows.filter(r => r.status === 'completed');
-      const withdrawn = rows.filter(r => r.status === 'withdrawn' || r.status === 'tab_cheat');
-      let avgPct = '—%', avgTime = '—';
-      if (completed.length) {
-        avgPct = (completed.reduce((s,r) => s+(r.percentage||0),0)/completed.length).toFixed(1)+'%';
-        const ts = completed.filter(r => r.time_seconds > 0);
-        if (ts.length) avgTime = formatTime(Math.round(ts.reduce((s,r) => s+r.time_seconds,0)/ts.length));
+      const comp = rows.filter(r=>r.status==='completed');
+      const with_ = rows.filter(r=>r.status==='withdrawn'||r.status==='tab_cheat');
+      let avgPct='—%', avgTime='—';
+      if (comp.length) {
+        avgPct = (comp.reduce((s,r)=>s+(r.percentage||0),0)/comp.length).toFixed(1)+'%';
+        const ts = comp.filter(r=>r.time_seconds>0);
+        if (ts.length) avgTime = formatTime(Math.round(ts.reduce((s,r)=>s+r.time_seconds,0)/ts.length));
       }
-      setStats({ total: String(rows.length), completed: String(completed.length), withdrawn: String(withdrawn.length), avgPct, avgTime });
+      setStats({ total:String(rows.length), completed:String(comp.length), withdrawn:String(with_.length), avgPct, avgTime });
     } catch(e) {}
-  }, [studentInfo, timerSec]);
+  }, [studentInfo]);
 
   // ── Withdraw ──
   const confirmWithdraw = () => {
@@ -746,6 +791,7 @@ export default function Calc1Ch5Quiz() {
     setCurrentQ(0);
     setAnswered(false);
     setChosen(-1);
+    timerSecRef.current = 0;
     setTimerSec(0);
     setTabWarning(false);
     tabCountRef.current = 0;
@@ -759,101 +805,98 @@ export default function Calc1Ch5Quiz() {
     const { score, pct, grade, dateStr, finalAnswers, timeTaken } = resultData;
     const W=210, pad=20;
     const gc = gradeColors[grade.cls] || [127,140,141];
-    const gcCss = gradeCssColors[grade.cls] || muted;
 
     doc.setFillColor(26,26,46); doc.rect(0,0,W,60,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(212,160,23);
-    doc.text('MATH-101 · CALCULUS I · LUMS', W/2, 18, {align:'center'});
+    doc.text('MATH-101 · CALCULUS I · LUMS', W/2,18,{align:'center'});
     doc.setFontSize(22); doc.setTextColor(253,248,240);
-    doc.text('Integration Quiz — Chapter 5', W/2, 32, {align:'center'});
+    doc.text('Integration Quiz — Chapter 5', W/2,32,{align:'center'});
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(200,190,180);
-    doc.text('Official Result Card', W/2, 42, {align:'center'});
-    doc.text(dateStr, W/2, 50, {align:'center'});
-    doc.setDrawColor(...gc); doc.setLineWidth(2); doc.circle(W/2, 82, 18);
+    doc.text('Official Result Card', W/2,42,{align:'center'});
+    doc.text(dateStr, W/2,50,{align:'center'});
+    doc.setDrawColor(...gc); doc.setLineWidth(2); doc.circle(W/2,82,18);
     doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(...gc);
-    doc.text(String(score), W/2, 87, {align:'center'});
-    doc.setFontSize(9); doc.setTextColor(127,140,141); doc.text(`/ ${TOTAL_Q}`, W/2, 94, {align:'center'});
+    doc.text(String(score), W/2,87,{align:'center'});
+    doc.setFontSize(9); doc.setTextColor(127,140,141);
+    doc.text(`/ ${TOTAL_Q}`, W/2,94,{align:'center'});
     doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(26,26,46);
-    doc.text(studentInfo.name, W/2, 112, {align:'center'});
+    doc.text(studentInfo.name, W/2,112,{align:'center'});
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(127,140,141);
-    doc.text(`${studentInfo.cls}  ·  ${studentInfo.inst}`, W/2, 119, {align:'center'});
-    if (studentInfo.id) doc.text(`Campus ID: ${studentInfo.id}`, W/2, 125, {align:'center'});
+    doc.text(`${studentInfo.cls}  ·  ${studentInfo.inst}`, W/2,119,{align:'center'});
+    if (studentInfo.id) doc.text(`Campus ID: ${studentInfo.id}`, W/2,125,{align:'center'});
     doc.setFillColor(...gc); doc.roundedRect(W/2-30,130,60,10,3,3,'F');
     doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
-    doc.text(grade.label.toUpperCase(), W/2, 136.5, {align:'center'});
-    const boxes=[{label:'Score',value:`${score} / ${TOTAL_Q}`},{label:'Percentage',value:`${pct}%`},{label:'Time Taken',value:formatTime(timeTaken)},{label:'Institute',value:studentInfo.inst}];
+    doc.text(grade.label.toUpperCase(), W/2,136.5,{align:'center'});
+    const boxes=[{label:'Score',value:`${score} / ${TOTAL_Q}`},{label:'Percentage',value:`${pct}%`},{label:'Time',value:formatTime(timeTaken)},{label:'Institute',value:studentInfo.inst}];
     const bw=(W-pad*2-15)/4;
-    boxes.forEach((b,i) => {
+    boxes.forEach((b,i)=>{
       const bx=pad+i*(bw+5);
       doc.setFillColor(245,237,224); doc.roundedRect(bx,148,bw,18,3,3,'F');
       doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(127,140,141);
-      doc.text(b.label.toUpperCase(), bx+bw/2, 154, {align:'center'});
+      doc.text(b.label.toUpperCase(),bx+bw/2,154,{align:'center'});
       doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(26,107,107);
-      doc.text(b.value, bx+bw/2, 161, {align:'center'});
+      doc.text(b.value,bx+bw/2,161,{align:'center'});
     });
     doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(26,26,46);
-    doc.text('Question Breakdown', pad, 178);
+    doc.text('Question Breakdown', pad,178);
     doc.setLineWidth(0.3); doc.setDrawColor(224,214,200); doc.line(pad,180,W-pad,180);
-    finalAnswers.forEach((a,i) => {
+    finalAnswers.forEach((a,i)=>{
       const y=186+i*7;
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(26,26,46);
       doc.text(`Q${i+1}: ${a.topic}`, pad, y);
       doc.setFont('helvetica','bold'); doc.setTextColor(...(a.correct?[39,174,96]:[192,57,43]));
-      doc.text(a.correct?'✓ Correct':'✗ Wrong', W-pad, y, {align:'right'});
+      doc.text(a.correct?'✓ Correct':'✗ Wrong', W-pad, y,{align:'right'});
       doc.setDrawColor(224,214,200); doc.setLineWidth(0.2); doc.line(pad,y+1.5,W-pad,y+1.5);
     });
     const sigY=262;
     doc.setDrawColor(224,214,200); doc.setLineWidth(0.5); doc.line(W-pad-60,sigY,W-pad,sigY);
     doc.setFont('helvetica','bolditalic'); doc.setFontSize(13); doc.setTextColor(26,26,46);
-    doc.text('Muhammad Shoaib Khan', W-pad, sigY-3, {align:'right'});
+    doc.text('Muhammad Shoaib Khan', W-pad,sigY-3,{align:'right'});
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(127,140,141);
-    doc.text('Teaching Fellow · Calculus I · LUMS', W-pad, sigY+5, {align:'right'});
+    doc.text('Teaching Fellow · Calculus I · LUMS', W-pad,sigY+5,{align:'right'});
     doc.setFillColor(26,26,46); doc.rect(0,275,W,22,'F');
     doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(200,190,180);
-    doc.text('mathwithshoaib.github.io  ·  bssk.khan@gmail.com  ·  LUMS, Lahore, Pakistan', W/2, 283, {align:'center'});
-    doc.setTextColor(212,160,23); doc.text(`Generated ${dateStr}`, W/2, 289, {align:'center'});
+    doc.text('mathwithshoaib.github.io  ·  bssk.khan@gmail.com  ·  LUMS, Lahore, Pakistan', W/2,283,{align:'center'});
+    doc.setTextColor(212,160,23);
+    doc.text(`Generated ${dateStr}`, W/2,289,{align:'center'});
     doc.save(`Calculus_Quiz_${studentInfo.name.replace(/\s+/g,'_')}.pdf`);
   };
 
-  const q = questions[currentQ];
-  const optLetters = ['A','B','C','D'];
-  const rd = resultData;
-  const scoreForResult = rd ? rd.finalAnswers.filter(a => a.correct).length : 0;
-  const gradeCssColor = rd ? (gradeCssColors[rd.grade.cls] || muted) : teal;
+  const q              = questions[currentQ];
+  const optLetters     = ['A','B','C','D'];
+  const rd             = resultData;
+  const scoreForResult = rd ? rd.finalAnswers.filter(a=>a.correct).length : 0;
+  const gradeCssColor  = rd ? (gradeCssColors[rd.grade.cls] || muted) : teal;
 
   return (
     <>
       <Navbar activePage="courses" />
-      <Script id="mjax-cfg" strategy="beforeInteractive">{`
-        window.MathJax = {
-          tex: { inlineMath:[['$','$'],['\\\\(','\\\\)']], displayMath:[['$$','$$'],['\\\\[','\\\\]']] },
-          options:{ skipHtmlTags:['script','noscript','style','textarea','pre'] }
-        };
-      `}</Script>
-      <Script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" strategy="afterInteractive" />
-      <Script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" strategy="afterInteractive" />
+
+      {/* jsPDF */}
+      <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        defer
+      />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@300;400;500;600&display=swap');
         *{box-sizing:border-box}
         .opt-btn:hover:not(:disabled){border-color:${teal}!important;background:#eef7f7!important}
-        .start-btn:hover{background:#145555!important;transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,107,107,.3)}
-        .nav-btn-primary:hover{background:#145555!important}
-        .action-btn-primary:hover{background:#145555!important}
+        .start-btn:hover{background:#145555!important}
+        .nav-btn:hover{background:#145555!important}
+        .action-primary:hover{background:#145555!important}
         .withdraw-btn:hover{background:${accent}!important;color:#fff!important}
         .modal-danger:hover{background:#a93226!important}
-        .modal-cancel:hover{border-color:${teal}!important}
-        .lec-nav-a:hover{color:${accent}!important;border-color:${accent}!important}
         @media(max-width:580px){
           .quiz-container{padding:20px 16px 40px!important}
           .quiz-card{padding:22px 18px!important}
           .stats-bar{gap:18px!important}
-          .quiz-page-hero{padding:36px 16px 28px!important}
-          .mcq-grid{grid-template-columns:1fr!important}
+          .quiz-hero{padding:36px 16px 28px!important}
         }
+        @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
       `}</style>
 
-      {/* ── BREADCRUMB + COURSE SWITCHER ── */}
+      {/* ── BREADCRUMB ── */}
       <div style={{position:'sticky',top:'calc(var(--nav-h) + 3px)',zIndex:500,background:'var(--bg2)',borderBottom:'1px solid var(--border)'}}>
         <div style={{padding:'8px 24px',display:'flex',alignItems:'center',gap:'8px',fontFamily:'var(--fm)',fontSize:'.72rem',color:'var(--text3)',borderBottom:'1px solid var(--border)'}}>
           <Link href="/" style={{color:'var(--amber)',textDecoration:'none'}}>Home</Link><span>›</span>
@@ -869,18 +912,18 @@ export default function Calc1Ch5Quiz() {
       </div>
 
       {/* ── HERO ── */}
-      <div className="quiz-page-hero" style={{background:ink,color:paper,padding:'52px 24px 40px',textAlign:'center',position:'relative',overflow:'hidden'}}>
+      <div className="quiz-hero" style={{background:ink,color:paper,padding:'52px 24px 40px',textAlign:'center',position:'relative',overflow:'hidden'}}>
         <div style={{position:'absolute',inset:0,background:'repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,.025) 40px,rgba(255,255,255,.025) 41px)',pointerEvents:'none'}}/>
         <div style={{fontFamily:fm,fontSize:'.68rem',letterSpacing:'.24em',textTransform:'uppercase',color:gold,marginBottom:'10px',position:'relative'}}>MATH-101 · Calculus I · LUMS</div>
         <h1 style={{fontFamily:fh,fontSize:'clamp(1.6rem,4vw,2.6rem)',fontWeight:700,position:'relative',marginBottom:'6px'}}>
-          Integration Quiz — <em style={{color:gold,fontStyle:'italic'}}>Chapter 5</em>
+          Integration Quiz — <em style={{color:gold}}>Chapter 5</em>
         </h1>
         <p style={{fontSize:'.95rem',color:'#c9c2b8',position:'relative'}}>Indefinite Integration · Substitution · Definite Integrals · Applications</p>
       </div>
 
       {/* ── STATS BAR ── */}
       <div className="stats-bar" style={{background:'#fff',borderBottom:`1px solid ${border}`,padding:'14px 24px',display:'flex',justifyContent:'center',gap:'36px',flexWrap:'wrap'}}>
-        {[['Total Attempts',stats.total],['Completed',stats.completed],['Withdrawn',stats.withdrawn],['Avg Score %',stats.avgPct],['Avg Time',stats.avgTime]].map(([lbl,val])=>(
+        {[['Total Attempts',stats.total],['Completed',stats.completed],['Withdrawn',stats.withdrawn],['Avg Score',stats.avgPct],['Avg Time',stats.avgTime]].map(([lbl,val])=>(
           <div key={lbl} style={{textAlign:'center'}}>
             <span style={{fontFamily:fm,fontSize:'1.3rem',fontWeight:700,color:teal,display:'block'}}>{val}</span>
             <span style={{fontFamily:fm,fontSize:'.58rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted}}>{lbl}</span>
@@ -891,29 +934,29 @@ export default function Calc1Ch5Quiz() {
       {/* ── WITHDRAW MODAL ── */}
       {withdrawModal && (
         <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <div style={{background:'#fff',borderRadius:'16px',padding:'36px 40px',maxWidth:'400px',width:'90%',boxShadow:'0 20px 60px rgba(0,0,0,.3)',textAlign:'center'}}>
+          <div style={{background:'#fff',borderRadius:'16px',padding:'36px 40px',maxWidth:'400px',width:'90%',textAlign:'center'}}>
             <h3 style={{fontFamily:fh,fontSize:'1.4rem',color:ink,marginBottom:'10px'}}>Withdraw from Quiz?</h3>
-            <p style={{color:muted,fontSize:'.93rem',marginBottom:'24px'}}>Your progress will not be saved. This attempt will be recorded as <strong>Withdrawn</strong>. Are you sure?</p>
+            <p style={{color:muted,fontSize:'.93rem',marginBottom:'24px'}}>This attempt will be recorded as <strong>Withdrawn</strong>.</p>
             <div style={{display:'flex',gap:'12px',justifyContent:'center'}}>
-              <button className="modal-cancel" onClick={()=>setWithdrawModal(false)} style={{padding:'10px 28px',borderRadius:'8px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:`1px solid ${border}`,background:cream,color:ink}}>Keep Going</button>
+              <button onClick={()=>setWithdrawModal(false)} style={{padding:'10px 28px',borderRadius:'8px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:`1px solid ${border}`,background:cream,color:ink}}>Keep Going</button>
               <button className="modal-danger" onClick={confirmWithdraw} style={{padding:'10px 28px',borderRadius:'8px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:'none',background:accent,color:'#fff'}}>Yes, Withdraw</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── MAIN CONTAINER ── */}
+      {/* ── MAIN ── */}
       <div className="quiz-container" style={{maxWidth:'720px',margin:'0 auto',padding:'32px 24px 60px',fontFamily:fb,color:ink,background:paper}}>
 
-        {/* ── FORM PHASE ── */}
+        {/* FORM */}
         {phase === 'form' && (
           <div className="quiz-card" style={{background:'#fff',border:`1px solid ${border}`,borderRadius:'14px',padding:'32px 36px',boxShadow:shadow}}>
             <div style={{fontFamily:fh,fontSize:'1.5rem',fontWeight:700,color:ink,marginBottom:'6px'}}>Before You Begin</div>
             <div style={{color:muted,fontSize:'.92rem',marginBottom:'28px'}}>Enter your details. Your name will appear on your result card.</div>
             {[
-              {label:'Full Name *', key:'name', placeholder:'e.g. Muhammad Shoaib Khan'},
-              {label:'Class / Section *', key:'cls', placeholder:'e.g. MATH-101 Section A'},
-              {label:'Institute *', key:'inst', placeholder:'e.g. LUMS'},
+              {label:'Full Name *',       key:'name', placeholder:'e.g. Muhammad Shoaib Khan'},
+              {label:'Class / Section *', key:'cls',  placeholder:'e.g. MATH-101 Section A'},
+              {label:'Institute *',       key:'inst', placeholder:'e.g. LUMS'},
             ].map(({label,key,placeholder})=>(
               <div key={key} style={{marginBottom:'20px'}}>
                 <label style={{display:'block',fontFamily:fm,fontSize:'.68rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted,marginBottom:'7px'}}>{label}</label>
@@ -922,72 +965,99 @@ export default function Calc1Ch5Quiz() {
               </div>
             ))}
             <div style={{marginBottom:'20px'}}>
-              <label style={{display:'block',fontFamily:fm,fontSize:'.68rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted,marginBottom:'7px'}}>Campus ID <span style={{fontFamily:fm,fontSize:'.64rem',color:'#aaa',marginLeft:'6px'}}>(optional)</span></label>
+              <label style={{display:'block',fontFamily:fm,fontSize:'.68rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted,marginBottom:'7px'}}>
+                Campus ID <span style={{fontSize:'.64rem',color:'#aaa',marginLeft:'6px'}}>(optional)</span>
+              </label>
               <input type="text" value={studentInfo.id} onChange={e=>setStudentInfo(s=>({...s,id:e.target.value}))} placeholder="e.g. 24010001"
                 style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${border}`,borderRadius:'8px',fontFamily:fb,fontSize:'1rem',color:ink,background:paper,outline:'none'}}/>
             </div>
-            <button className="start-btn" onClick={startQuiz} style={{width:'100%',padding:'14px',background:teal,color:'#fff',border:'none',borderRadius:'10px',fontFamily:fm,fontSize:'.82rem',letterSpacing:'.12em',textTransform:'uppercase',cursor:'pointer',transition:'all .2s',marginTop:'8px'}}>Start Quiz →</button>
-            {formError && <div style={{color:accent,fontFamily:fm,fontSize:'.78rem',marginTop:'12px'}}>Please fill in your name, class, and institute before starting.</div>}
+            <button className="start-btn" onClick={startQuiz}
+              style={{width:'100%',padding:'14px',background:teal,color:'#fff',border:'none',borderRadius:'10px',fontFamily:fm,fontSize:'.82rem',letterSpacing:'.12em',textTransform:'uppercase',cursor:'pointer',transition:'all .2s',marginTop:'8px'}}>
+              Start Quiz →
+            </button>
+            {formError && <div style={{color:accent,fontFamily:fm,fontSize:'.78rem',marginTop:'12px'}}>Please fill in your name, class, and institute.</div>}
           </div>
         )}
 
-        {/* ── QUIZ PHASE ── */}
+        {/* QUIZ */}
         {phase === 'quiz' && q && (
           <div>
-            {/* Meta */}
+            {/* Header */}
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'14px',flexWrap:'wrap',gap:'10px'}}>
               <div style={{fontFamily:fh,fontSize:'1.05rem',color:ink}}>Good luck, {studentInfo.name}!</div>
               <div style={{fontFamily:fm,fontSize:'.75rem',color:muted}}>Question {currentQ+1} of {TOTAL_Q}</div>
             </div>
-            {/* Progress bar */}
+
+            {/* Progress */}
             <div style={{background:cream,borderRadius:'99px',height:'6px',marginBottom:'12px',overflow:'hidden'}}>
               <div style={{height:'100%',background:teal,borderRadius:'99px',transition:'width .4s ease',width:`${(currentQ/TOTAL_Q)*100}%`}}/>
             </div>
+
             {/* Tab warning */}
             {tabWarning && (
-              <div style={{background:'#fff3cd',border:`1.5px solid ${gold}`,borderRadius:'10px',padding:'12px 18px',marginBottom:'14px',fontFamily:fm,fontSize:'.78rem',color:'#856404',display:'flex',alignItems:'center',gap:'10px'}}>
-                ⚠ <strong>Warning:</strong>&nbsp; Tab switching detected. Switch again and you will be automatically withdrawn.
+              <div style={{background:'#fff3cd',border:`1.5px solid ${gold}`,borderRadius:'10px',padding:'12px 18px',marginBottom:'14px',fontFamily:fm,fontSize:'.78rem',color:'#856404'}}>
+                ⚠ <strong>Warning:</strong> Tab switching detected. Switch again and you will be withdrawn.
               </div>
             )}
-            {/* Timer bar */}
+
+            {/* Timer */}
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',background:cream,borderRadius:'10px',padding:'8px 16px',marginBottom:'16px',fontFamily:fm,fontSize:'.78rem',gap:'12px',flexWrap:'wrap'}}>
-              <div style={{display:'flex',alignItems:'center',gap:'8px',color:timerSec>900?accent:teal,fontWeight:700,fontSize:'.92rem'}}>
-                <span style={{width:'8px',height:'8px',borderRadius:'50%',background:timerSec>900?accent:teal,display:'inline-block',animation:'pulse 1.2s infinite'}}/>
-                Time: {formatTime(timerSec)}
+              <div style={{display:'flex',alignItems:'center',gap:'8px',color:teal,fontWeight:700,fontSize:'.92rem'}}>
+                <span style={{width:'8px',height:'8px',borderRadius:'50%',background:teal,display:'inline-block',animation:'pulse 1.2s infinite'}}/>
+                Time: <span ref={timerDisplayRef}>00:00</span>
               </div>
-              <button className="withdraw-btn" onClick={()=>setWithdrawModal(true)} style={{padding:'6px 14px',background:'transparent',border:`1.5px solid ${accent}`,borderRadius:'7px',color:accent,fontFamily:fm,fontSize:'.68rem',letterSpacing:'.08em',textTransform:'uppercase',cursor:'pointer',transition:'all .2s'}}>✕ Withdraw</button>
+              <button className="withdraw-btn" onClick={()=>setWithdrawModal(true)}
+                style={{padding:'6px 14px',background:'transparent',border:`1.5px solid ${accent}`,borderRadius:'7px',color:accent,fontFamily:fm,fontSize:'.68rem',letterSpacing:'.08em',textTransform:'uppercase',cursor:'pointer',transition:'all .2s'}}>
+                ✕ Withdraw
+              </button>
             </div>
+
             {/* Question card */}
-            <div className="quiz-card" ref={questionRef} style={{background:'#fff',border:`1px solid ${border}`,borderRadius:'14px',padding:'32px 36px',boxShadow:shadow}}>
-              <div style={{fontFamily:fm,fontSize:'.66rem',letterSpacing:'.2em',textTransform:'uppercase',color:accent,marginBottom:'10px'}}>Question {currentQ+1} of {TOTAL_Q} · {q.topic}</div>
-              <div style={{fontFamily:fh,fontSize:'1.18rem',fontWeight:400,color:ink,marginBottom:'22px',lineHeight:1.6}} dangerouslySetInnerHTML={{__html:q.text}}/>
+            <div className="quiz-card" style={{background:'#fff',border:`1px solid ${border}`,borderRadius:'14px',padding:'32px 36px',boxShadow:shadow}}>
+              <div style={{fontFamily:fm,fontSize:'.66rem',letterSpacing:'.2em',textTransform:'uppercase',color:accent,marginBottom:'10px'}}>
+                Question {currentQ+1} of {TOTAL_Q} · {q.topic}
+              </div>
+
+              {/* Question text — uses \(...\) delimiters which MathJax processes on text nodes */}
+              <div
+                style={{fontFamily:fh,fontSize:'1.18rem',fontWeight:400,color:ink,marginBottom:'22px',lineHeight:1.6}}
+                dangerouslySetInnerHTML={{__html: q.text}}
+              />
+
               <div style={{fontFamily:fm,fontSize:'.68rem',color:muted,marginBottom:'18px'}}>1 mark</div>
+
               {/* Options */}
-              <div className="mcq-grid" style={{display:'flex',flexDirection:'column',gap:'10px',marginBottom:'20px'}}>
-                {q.options.map((opt,i)=>{
-                  let borderColor=border, bg=paper, color=ink;
-                  if(answered){
-                    if(opt.correct){borderColor=green;bg='#f0faf4';color=green;}
-                    else if(i===chosen&&!opt.correct){borderColor=accent;bg='#fff5f5';color=accent;}
+              <div style={{display:'flex',flexDirection:'column',gap:'10px',marginBottom:'20px'}}>
+                {q.options.map((opt,i) => {
+                  let bc=border, bg=paper, col=ink;
+                  if (answered) {
+                    if (opt.correct)                    { bc=green;  bg='#f0faf4'; col=green;  }
+                    else if (i===chosen && !opt.correct){ bc=accent; bg='#fff5f5'; col=accent; }
                   }
                   return (
                     <button key={i} className="opt-btn" onClick={()=>selectOption(i)} disabled={answered}
-                      style={{padding:'13px 18px',border:`1.5px solid ${borderColor}`,borderRadius:'10px',background:bg,color,fontFamily:fb,fontSize:'.97rem',cursor:answered?'default':'pointer',textAlign:'left',transition:'all .2s',display:'flex',alignItems:'center',gap:'12px'}}>
-                      <span style={{width:'28px',height:'28px',borderRadius:'50%',background:opt.correct&&answered?green:(i===chosen&&answered&&!opt.correct?accent:cream),display:'flex',alignItems:'center',justifyContent:'center',fontFamily:fm,fontSize:'.75rem',fontWeight:600,flexShrink:0,color:answered&&(opt.correct||(i===chosen&&!opt.correct))?'#fff':ink,transition:'all .2s'}}>{optLetters[i]}</span>
-                      <span dangerouslySetInnerHTML={{__html:opt.tex}}/>
+                      style={{padding:'13px 18px',border:`1.5px solid ${bc}`,borderRadius:'10px',background:bg,color:col,fontFamily:fb,fontSize:'.97rem',cursor:answered?'default':'pointer',textAlign:'left',transition:'all .2s',display:'flex',alignItems:'center',gap:'12px'}}>
+                      <span style={{width:'28px',height:'28px',borderRadius:'50%',background:opt.correct&&answered?green:(i===chosen&&answered&&!opt.correct?accent:cream),display:'flex',alignItems:'center',justifyContent:'center',fontFamily:fm,fontSize:'.75rem',fontWeight:600,flexShrink:0,color:answered&&(opt.correct||(i===chosen&&!opt.correct))?'#fff':ink,transition:'all .2s'}}>
+                        {optLetters[i]}
+                      </span>
+                      {/* Plain text — MathJax processes \(...\) inside text nodes correctly */}
+                      <span dangerouslySetInnerHTML={{__html: opt.tex}}/>
                     </button>
                   );
                 })}
               </div>
+
               {/* Feedback */}
               {answered && (
-                <div ref={feedbackRef} style={{padding:'12px 16px',borderRadius:'8px',fontSize:'.93rem',marginBottom:'16px',background:q.options[chosen]?.correct?'#f0faf4':'#fff5f5',borderLeft:`3px solid ${q.options[chosen]?.correct?green:accent}`,color:q.options[chosen]?.correct?'#1a5c36':'#7a1a1a'}}
+                <div style={{padding:'12px 16px',borderRadius:'8px',fontSize:'.93rem',marginBottom:'16px',background:q.options[chosen]?.correct?'#f0faf4':'#fff5f5',borderLeft:`3px solid ${q.options[chosen]?.correct?green:accent}`,color:q.options[chosen]?.correct?'#1a5c36':'#7a1a1a'}}
                   dangerouslySetInnerHTML={{__html:(q.options[chosen]?.correct?'✓ Correct! ':'✗ Incorrect. ')+q.explanation}}/>
               )}
-              {/* Next button */}
+
+              {/* Next */}
               {answered && (
-                <div style={{display:'flex',justifyContent:'flex-end',gap:'12px',marginTop:'8px'}}>
-                  <button className="nav-btn-primary" onClick={nextQuestion} style={{padding:'10px 24px',borderRadius:'8px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:'none',background:teal,color:'#fff',transition:'all .2s'}}>
+                <div style={{display:'flex',justifyContent:'flex-end',marginTop:'8px'}}>
+                  <button className="nav-btn" onClick={nextQuestion}
+                    style={{padding:'10px 24px',borderRadius:'8px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:'none',background:teal,color:'#fff',transition:'all .2s'}}>
                     {currentQ===TOTAL_Q-1?'See Results →':'Next Question →'}
                   </button>
                 </div>
@@ -996,34 +1066,45 @@ export default function Calc1Ch5Quiz() {
           </div>
         )}
 
-        {/* ── RESULT PHASE ── */}
+        {/* RESULT */}
         {phase === 'result' && rd && (
           <div className="quiz-card" style={{background:'#fff',border:`1px solid ${border}`,borderRadius:'14px',padding:'32px 36px',boxShadow:shadow}}>
             {/* Score circle */}
             <div style={{textAlign:'center',marginBottom:'28px'}}>
               <div style={{width:'120px',height:'120px',borderRadius:'50%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',margin:'0 auto 16px',border:`4px solid ${gradeCssColor}`}}>
-                <div style={{fontFamily:fm,fontSize:'2rem',fontWeight:700,color:gradeCssColor,lineHeight:1}}>{rd.status==='completed'?scoreForResult:'—'}</div>
-                <div style={{fontFamily:fm,fontSize:'.82rem',color:muted}}>{rd.status==='completed'?`/ ${TOTAL_Q}`:''}</div>
+                <div style={{fontFamily:fm,fontSize:'2rem',fontWeight:700,color:gradeCssColor,lineHeight:1}}>
+                  {rd.status==='completed'?scoreForResult:'—'}
+                </div>
+                <div style={{fontFamily:fm,fontSize:'.82rem',color:muted}}>
+                  {rd.status==='completed'?`/ ${TOTAL_Q}`:''}
+                </div>
               </div>
               <div style={{fontFamily:fh,fontSize:'1.4rem',color:ink,marginBottom:'4px'}}>{studentInfo.name}</div>
               <div style={{fontFamily:fm,fontSize:'.9rem',letterSpacing:'.1em',textTransform:'uppercase',color:gradeCssColor}}>
                 {rd.status==='tab_cheat'?'Disqualified':rd.status==='withdrawn'?'Withdrawn':rd.grade.label}
               </div>
-              {(rd.status==='withdrawn'||rd.status==='tab_cheat')&&(
+              {(rd.status==='withdrawn'||rd.status==='tab_cheat') && (
                 <div style={{marginTop:'8px',fontFamily:fm,fontSize:'.78rem',color:muted}}>
                   {rd.status==='tab_cheat'?'Automatically withdrawn — tab switching detected.':'Quiz withdrawn by student.'}
                 </div>
               )}
             </div>
-            {/* Stats row */}
+
+            {/* Stats */}
             <div style={{display:'flex',gap:'14px',flexWrap:'wrap',marginBottom:'20px'}}>
-              {[['Score',rd.status==='completed'?`${scoreForResult} / ${TOTAL_Q}`:`${scoreForResult} answered`],['Percentage',rd.status==='completed'?`${rd.pct}%`:'—'],['Time Taken',formatTime(rd.timeTaken)],['Institute',studentInfo.inst]].map(([lbl,val])=>(
+              {[
+                ['Score',      rd.status==='completed'?`${scoreForResult} / ${TOTAL_Q}`:`${scoreForResult} answered`],
+                ['Percentage', rd.status==='completed'?`${rd.pct}%`:'—'],
+                ['Time Taken', formatTime(rd.timeTaken)],
+                ['Institute',  studentInfo.inst],
+              ].map(([lbl,val])=>(
                 <div key={lbl} style={{flex:1,minWidth:'120px',background:cream,borderRadius:'10px',padding:'12px 16px',textAlign:'center'}}>
                   <div style={{fontFamily:fm,fontSize:'.58rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted,marginBottom:'4px'}}>{lbl}</div>
                   <div style={{fontFamily:fm,fontSize:'1rem',fontWeight:700,color:teal}}>{val}</div>
                 </div>
               ))}
             </div>
+
             {/* Breakdown */}
             <div style={{margin:'20px 0'}}>
               {rd.finalAnswers.map((a,i)=>(
@@ -1033,25 +1114,34 @@ export default function Calc1Ch5Quiz() {
                 </div>
               ))}
             </div>
+
             {/* Signature */}
             <div style={{marginTop:'28px',paddingTop:'20px',borderTop:`1px solid ${border}`,textAlign:'right'}}>
               <div style={{fontFamily:fh,fontSize:'1.3rem',fontStyle:'italic',color:ink}}>Muhammad Shoaib Khan</div>
               <div style={{fontFamily:fm,fontSize:'.68rem',color:muted,marginTop:'2px'}}>Teaching Fellow · Calculus I · LUMS</div>
               <div style={{fontFamily:fm,fontSize:'.68rem',color:muted,marginTop:'4px'}}>{rd.dateStr}</div>
             </div>
+
             {/* Actions */}
             <div style={{display:'flex',gap:'12px',flexWrap:'wrap',marginTop:'24px'}}>
-              {rd.status==='completed'&&(
-                <button className="action-btn-primary" onClick={downloadPDF} style={{flex:1,minWidth:'140px',padding:'12px 20px',borderRadius:'10px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:'none',background:teal,color:'#fff',transition:'all .2s'}}>⬇ Download Result Card (PDF)</button>
+              {rd.status==='completed' && (
+                <button className="action-primary" onClick={downloadPDF}
+                  style={{flex:1,minWidth:'140px',padding:'12px 20px',borderRadius:'10px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:'none',background:teal,color:'#fff',transition:'all .2s'}}>
+                  ⬇ Download Result (PDF)
+                </button>
               )}
-              <button onClick={retake} style={{flex:1,minWidth:'140px',padding:'12px 20px',borderRadius:'10px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:`1px solid ${border}`,background:cream,color:ink,transition:'all .2s'}}>↺ Try Again</button>
+              <button onClick={retake}
+                style={{flex:1,minWidth:'140px',padding:'12px 20px',borderRadius:'10px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',border:`1px solid ${border}`,background:cream,color:ink,transition:'all .2s'}}>
+                ↺ Try Again
+              </button>
+              <Link href="/courses/calc1"
+                style={{flex:1,minWidth:'140px',padding:'12px 20px',borderRadius:'10px',fontFamily:fm,fontSize:'.76rem',letterSpacing:'.1em',textTransform:'uppercase',textDecoration:'none',textAlign:'center',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px',border:`1px solid ${teal}`,background:'#eef7f7',color:teal}}>
+                ← Back to Course
+              </Link>
             </div>
           </div>
         )}
       </div>
-
-      {/* Pulse animation for timer dot */}
-      <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}`}</style>
 
       <Footer />
     </>
