@@ -97,16 +97,21 @@ function StarRating({ value, onChange, readonly = false, size = 20 }) {
 
 // ─── Review Form ───────────────────────────────────────────────────────────
 function ReviewForm({ onSubmitted }) {
-  const [form, setForm] = useState({ name: '', course: 'Calculus I', institute: '', stars: 0, comment: '' });
+  const [form, setForm] = useState({ name: '', institute: '', stars: 0, comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const submit = async () => {
     if (!form.name || !form.stars) { setError('Please fill in your name and rating.'); return; }
     setSubmitting(true); setError('');
-    const ok = await sbPostReview({ ...form, created_at: new Date().toISOString() });
+    const ok = await sbPostReview({
+      student_name: form.name,
+      institute: form.institute,
+      stars: form.stars,
+      comment: form.comment,
+    });
     setSubmitting(false);
-    if (ok) { setForm({ name: '', course: 'Calculus I', institute: '', stars: 0, comment: '' }); onSubmitted(); }
+    if (ok) { setForm({ name: '', institute: '', stars: 0, comment: '' }); onSubmitted(); }
     else setError('Something went wrong. Please try again.');
   };
 
