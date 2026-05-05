@@ -189,18 +189,19 @@ function Sidebar({ open, setOpen }) {
 // ─── IBP Explorer Widget ──────────────────────────────────────────────────
 function IBPExplorer() {
   const [sel, setSel] = useState(0);
+  const containerRef = useRef(null);
 
   const EXAMPLES = [
     {
       label: '∫ x·eˣ dx',
-      f: 'x \\cdot e^x',
+      f: 'x e^x',
       u: 'x',
       dv: 'e^x\\,dx',
       du: 'dx',
       v:  'e^x',
-      result: 'x e^x - e^x + C = e^x(x-1)+C',
+      result: 'e^x(x-1)+C',
       colour: '#ef4444',
-      note: 'u = x because its derivative (1) is simpler. dv = eˣdx because eˣ integrates easily.',
+      note: 'u = x (simpler derivative). dv = eˣdx (easy to integrate).',
     },
     {
       label: '∫ x·ln x dx',
@@ -211,7 +212,7 @@ function IBPExplorer() {
       v:  '\\dfrac{x^2}{2}',
       result: '\\dfrac{x^2}{2}\\ln x - \\dfrac{x^2}{4} + C',
       colour: '#f97316',
-      note: 'u = ln x because we know how to differentiate it. dv = x dx.',
+      note: 'u = ln x (LIATE: logarithm first). dv = x dx.',
     },
     {
       label: '∫ x²·eˣ dx',
@@ -220,9 +221,9 @@ function IBPExplorer() {
       dv: 'e^x\\,dx',
       du: '2x\\,dx',
       v:  'e^x',
-      result: 'x^2 e^x - 2xe^x + 2e^x + C = e^x(x^2-2x+2)+C',
+      result: 'e^x(x^2-2x+2)+C',
       colour: '#a78bfa',
-      note: 'Needs IBP twice — each time reducing the power of x by 1.',
+      note: 'Needs IBP twice — each round reduces the power of x by 1.',
     },
     {
       label: '∫ ln x dx',
@@ -233,40 +234,7 @@ function IBPExplorer() {
       v:  'x',
       result: 'x\\ln x - x + C',
       colour: '#22c55e',
-      note: 'Trick: write ∫ln x dx = ∫ln x · 1 dx. Let u = ln x, dv = dx.',
-    },
-    {
-      label: '∫ x·sin x dx',
-      f: 'x \\sin x',
-      u: 'x',
-      dv: '\\sin x\\,dx',
-      du: 'dx',
-      v:  '-\\cos x',
-      result: '-x\\cos x + \\sin x + C',
-      colour: '#3b82f6',
-      note: 'u = x (simpler derivative), dv = sin x dx (easy to integrate).',
-    },
-    {
-      label: '∫ x·cos x dx',
-      f: 'x \\cos x',
-      u: 'x',
-      dv: '\\cos x\\,dx',
-      du: 'dx',
-      v:  '\\sin x',
-      result: 'x\\sin x + \\cos x + C',
-      colour: '#14b8a6',
-      note: 'Same approach as x·sin x but with cos x.',
-    },
-    {
-      label: '∫ eˣ·sin x dx',
-      f: 'e^x \\sin x',
-      u: 'e^x',
-      dv: '\\sin x\\,dx',
-      du: 'e^x\\,dx',
-      v:  '-\\cos x',
-      result: '\\dfrac{e^x(\\sin x - \\cos x)}{2} + C',
-      colour: '#ec4899',
-      note: 'Apply IBP twice — the original integral reappears, then solve algebraically!',
+      note: 'Trick: write ∫ln x dx = ∫ln x · 1 dx. Then u = ln x, dv = dx.',
     },
     {
       label: '∫ √x·ln x dx',
@@ -279,191 +247,130 @@ function IBPExplorer() {
       colour: '#d4a017',
       note: 'u = ln x (hard to integrate), dv = √x dx (easy to integrate).',
     },
+    {
+      label: '∫ x²·ln x dx',
+      f: 'x^2 \\ln x',
+      u: '\\ln x',
+      dv: 'x^2\\,dx',
+      du: '\\dfrac{1}{x}dx',
+      v:  '\\dfrac{x^3}{3}',
+      result: '\\dfrac{x^3}{3}\\ln x - \\dfrac{x^3}{9} + C',
+      colour: '#14b8a6',
+      note: 'Logarithm always takes u by LIATE. Only one IBP needed.',
+    },
   ];
 
   const ex = EXAMPLES[sel];
 
-  const MathDisplay = ({ tex, inline=false }) => (
-    <span dangerouslySetInnerHTML={{ __html: inline ? `\\(${tex}\\)` : `\\[${tex}\\]` }}/>
-  );
+  // Re-typeset whenever selection changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const t = setTimeout(() => {
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise([containerRef.current]).catch(() => {});
+      }
+    }, 80);
+    return () => clearTimeout(t);
+  }, [sel]);
+
+  const M = ({ t }) => <span dangerouslySetInnerHTML={{ __html: `\\(${t}\\)` }}/>;
 
   return (
-    <div style={S.widget}>
-      <div style={S.wt}>🔢 Integration by Parts — Formula Explorer</div>
+    <div ref={containerRef} style={{ background:'#1a1a2e', borderRadius:'12px', padding:'18px 20px', margin:'24px 0', color:'#e8e2d9' }}>
+      <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', letterSpacing:'.18em', textTransform:'uppercase', color:'#d4a017', marginBottom:'12px' }}>
+        🔢 Integration by Parts — Formula Explorer
+      </div>
 
-      {/* Selector */}
-      <div style={{ display:'flex', flexWrap:'wrap', gap:'6px', marginBottom:'18px' }}>
+      {/* Selector buttons */}
+      <div style={{ display:'flex', flexWrap:'wrap', gap:'5px', marginBottom:'14px' }}>
         {EXAMPLES.map((e,i) => (
-          <button key={i} onClick={()=>setSel(i)} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.06em', background:sel===i?e.colour:'#1f2937', color:sel===i?'#fff':'#9ca3af', border:`1.5px solid ${sel===i?e.colour:'#374151'}`, borderRadius:'5px', padding:'4px 10px', cursor:'pointer' }}>
+          <button key={i} onClick={()=>setSel(i)} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.62rem', letterSpacing:'.04em', background:sel===i?e.colour:'#1f2937', color:sel===i?'#fff':'#9ca3af', border:`1.5px solid ${sel===i?e.colour:'#374151'}`, borderRadius:'4px', padding:'3px 9px', cursor:'pointer' }}>
             {e.label}
           </button>
         ))}
       </div>
 
-      {/* The formula breakdown */}
-      <div style={{ background:'#0f172a', borderRadius:'12px', padding:'22px 24px' }}>
+      {/* Two-column grid layout */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px' }}>
 
-        {/* Original integral */}
-        <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#64748b', marginBottom:'8px' }}>The integral</div>
-        <div style={{ fontSize:'1.3rem', textAlign:'center', padding:'10px', background:'#1e293b', borderRadius:'8px', marginBottom:'16px', color:'#e2e8f0' }}>
-          <MathDisplay tex={`\\int ${ex.f}\\,dx`}/>
-        </div>
+        {/* Left column: Integral + Steps */}
+        <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
 
-        {/* u and dv assignment */}
-        <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#64748b', marginBottom:'8px' }}>Step 1 — Assign u and dv</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'16px' }}>
-          <div style={{ background:'#1e293b', borderRadius:'8px', padding:'14px', textAlign:'center', border:`2px solid ${ex.colour}` }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.6rem', color:ex.colour, letterSpacing:'.12em', textTransform:'uppercase', marginBottom:'6px' }}>u =</div>
-            <div style={{ color:'#e2e8f0', fontSize:'1.1rem' }}><MathDisplay tex={ex.u} inline/></div>
-          </div>
-          <div style={{ background:'#1e293b', borderRadius:'8px', padding:'14px', textAlign:'center', border:'2px solid #38c9b0' }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.6rem', color:'#38c9b0', letterSpacing:'.12em', textTransform:'uppercase', marginBottom:'6px' }}>dv =</div>
-            <div style={{ color:'#e2e8f0', fontSize:'1.1rem' }}><MathDisplay tex={ex.dv} inline/></div>
-          </div>
-        </div>
-
-        {/* du and v */}
-        <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#64748b', marginBottom:'8px' }}>Step 2 — Compute du and v</div>
-        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'16px' }}>
-          <div style={{ background:'#1e293b', borderRadius:'8px', padding:'14px', textAlign:'center', border:`2px solid ${ex.colour}44` }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.6rem', color:ex.colour+'aa', letterSpacing:'.12em', textTransform:'uppercase', marginBottom:'6px' }}>du =</div>
-            <div style={{ color:'#94a3b8', fontSize:'1.1rem' }}><MathDisplay tex={ex.du} inline/></div>
-          </div>
-          <div style={{ background:'#1e293b', borderRadius:'8px', padding:'14px', textAlign:'center', border:'2px solid #38c9b044' }}>
-            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.6rem', color:'#38c9b0aa', letterSpacing:'.12em', textTransform:'uppercase', marginBottom:'6px' }}>v = ∫dv =</div>
-            <div style={{ color:'#94a3b8', fontSize:'1.1rem' }}><MathDisplay tex={ex.v} inline/></div>
-          </div>
-        </div>
-
-        {/* The IBP formula */}
-        <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#64748b', marginBottom:'8px' }}>Step 3 — Apply ∫u·dv = uv − ∫v·du</div>
-        <div style={{ background:'#1e293b', borderRadius:'8px', padding:'16px', marginBottom:'12px' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'12px', flexWrap:'wrap', color:'#e2e8f0' }}>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.58rem', color:ex.colour, marginBottom:'2px' }}>u</div>
-              <MathDisplay tex={ex.u} inline/>
+          {/* Integral */}
+          <div style={{ background:'#0f172a', borderRadius:'8px', padding:'10px 14px' }}>
+            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.55rem', letterSpacing:'.12em', textTransform:'uppercase', color:'#64748b', marginBottom:'4px' }}>The Integral</div>
+            <div style={{ textAlign:'center', color:'#e2e8f0', fontSize:'.95rem' }}>
+              <M t={`\\int ${ex.f}\\,dx`}/>
             </div>
-            <span style={{ color:'#64748b', fontSize:'1.2rem' }}>·</span>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.58rem', color:'#38c9b0', marginBottom:'2px' }}>v</div>
-              <MathDisplay tex={ex.v} inline/>
+          </div>
+
+          {/* u and dv */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'6px' }}>
+            <div style={{ background:'#0f172a', borderRadius:'6px', padding:'8px 10px', border:`1.5px solid ${ex.colour}`, textAlign:'center' }}>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.52rem', color:ex.colour, textTransform:'uppercase', marginBottom:'3px' }}>u =</div>
+              <div style={{ color:'#e2e8f0', fontSize:'.9rem' }}><M t={ex.u}/></div>
             </div>
-            <span style={{ color:'#64748b', fontSize:'1.4rem', fontWeight:700 }}>−</span>
-            <span style={{ color:'#64748b', fontSize:'2rem' }}>∫</span>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.58rem', color:'#38c9b0', marginBottom:'2px' }}>v</div>
-              <MathDisplay tex={ex.v} inline/>
+            <div style={{ background:'#0f172a', borderRadius:'6px', padding:'8px 10px', border:'1.5px solid #38c9b0', textAlign:'center' }}>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.52rem', color:'#38c9b0', textTransform:'uppercase', marginBottom:'3px' }}>dv =</div>
+              <div style={{ color:'#e2e8f0', fontSize:'.9rem' }}><M t={ex.dv}/></div>
             </div>
-            <span style={{ color:'#64748b', fontSize:'1.1rem' }}>·</span>
-            <div style={{ textAlign:'center' }}>
-              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.58rem', color:ex.colour, marginBottom:'2px' }}>du</div>
-              <MathDisplay tex={ex.du} inline/>
+            <div style={{ background:'#0f172a', borderRadius:'6px', padding:'8px 10px', border:`1.5px solid ${ex.colour}44`, textAlign:'center' }}>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.52rem', color:`${ex.colour}aa`, textTransform:'uppercase', marginBottom:'3px' }}>du =</div>
+              <div style={{ color:'#94a3b8', fontSize:'.9rem' }}><M t={ex.du}/></div>
+            </div>
+            <div style={{ background:'#0f172a', borderRadius:'6px', padding:'8px 10px', border:'1.5px solid #38c9b044', textAlign:'center' }}>
+              <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.52rem', color:'#38c9b0aa', textTransform:'uppercase', marginBottom:'3px' }}>v =</div>
+              <div style={{ color:'#94a3b8', fontSize:'.9rem' }}><M t={ex.v}/></div>
             </div>
           </div>
         </div>
 
-        {/* Result */}
-        <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#64748b', marginBottom:'8px' }}>Result</div>
-        <div style={{ background:`${ex.colour}18`, border:`1.5px solid ${ex.colour}`, borderRadius:'8px', padding:'14px', textAlign:'center', color:'#e2e8f0', fontSize:'1.1rem', marginBottom:'12px' }}>
-          <MathDisplay tex={`\\int ${ex.f}\\,dx = ${ex.result}`}/>
-        </div>
+        {/* Right column: Formula + Result + Note */}
+        <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
 
-        {/* Note */}
-        <div style={{ background:'#1e293b', borderRadius:'6px', padding:'10px 14px', fontFamily:"'IBM Plex Mono',monospace", fontSize:'.7rem', color:'#94a3b8', lineHeight:1.6 }}>
-          💡 {ex.note}
+          {/* Formula application */}
+          <div style={{ background:'#0f172a', borderRadius:'8px', padding:'10px 14px' }}>
+            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.55rem', letterSpacing:'.12em', textTransform:'uppercase', color:'#64748b', marginBottom:'6px' }}>Apply: ∫u·dv = uv − ∫v·du</div>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px', flexWrap:'wrap', color:'#e2e8f0', fontSize:'.85rem' }}>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.48rem', color:ex.colour }}>u</div>
+                <M t={ex.u}/>
+              </div>
+              <span style={{ color:'#64748b' }}>·</span>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.48rem', color:'#38c9b0' }}>v</div>
+                <M t={ex.v}/>
+              </div>
+              <span style={{ color:'#64748b', fontWeight:700 }}>−</span>
+              <span style={{ color:'#64748b' }}>∫</span>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.48rem', color:'#38c9b0' }}>v</div>
+                <M t={ex.v}/>
+              </div>
+              <span style={{ color:'#64748b' }}>·</span>
+              <div style={{ textAlign:'center' }}>
+                <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.48rem', color:ex.colour }}>du</div>
+                <M t={ex.du}/>
+              </div>
+            </div>
+          </div>
+
+          {/* Result */}
+          <div style={{ background:`${ex.colour}18`, border:`1.5px solid ${ex.colour}`, borderRadius:'8px', padding:'10px 14px', textAlign:'center' }}>
+            <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.55rem', color:ex.colour, textTransform:'uppercase', marginBottom:'4px' }}>Result</div>
+            <div style={{ color:'#e2e8f0', fontSize:'.88rem' }}>
+              <M t={`\\int ${ex.f}\\,dx = ${ex.result}`}/>
+            </div>
+          </div>
+
+          {/* Note */}
+          <div style={{ background:'#1e293b', borderRadius:'6px', padding:'8px 12px', fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', color:'#94a3b8', lineHeight:1.5, flex:1 }}>
+            💡 {ex.note}
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-// ─── PDF Download for Integral Table ─────────────────────────────────────
-function downloadIntegralTablePDF() {
-  if (!window.jspdf) { alert('PDF library not loaded yet, please try again in a moment.'); return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
-  const W = 210, pad = 16;
-
-  // Header
-  doc.setFillColor(26,26,46); doc.rect(0,0,W,48,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(212,160,23);
-  doc.text('MATH-101 · CALCULUS I · LUMS', W/2, 14, {align:'center'});
-  doc.setFontSize(18); doc.setTextColor(253,248,240);
-  doc.text('Table of Integrals — Chapter 6', W/2, 26, {align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(200,190,180);
-  doc.text('Section 6.1 · Integration by Parts & Integral Tables', W/2, 36, {align:'center'});
-  doc.text('Muhammad Shoaib Khan · Teaching Fellow · mathwithshoaib.vercel.app', W/2, 43, {align:'center'});
-
-  let y = 56;
-  const col1 = pad, col2 = 22, lineH = 7;
-
-  const section = (title) => {
-    doc.setFillColor(245,237,224); doc.rect(pad, y-4, W-pad*2, 8, 'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(26,26,46);
-    doc.text(title, W/2, y+1, {align:'center'});
-    y += 10;
-  };
-
-  const row = (num, formula) => {
-    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(192,57,43);
-    doc.text(String(num)+'.', col1+2, y);
-    doc.setFont('helvetica','normal'); doc.setTextColor(26,26,46);
-    doc.text(formula, col2, y);
-    doc.setDrawColor(224,214,200); doc.setLineWidth(0.2); doc.line(pad,y+2,W-pad,y+2);
-    y += lineH;
-  };
-
-  section('Forms Involving a + bu');
-  row(1, '∫ u/(a+bu) du = (1/b²)[a+bu − a·ln|a+bu|] + C');
-  row(2, '∫ u²/(a+bu) du = (1/(2b³))[(a+bu)² − 4a(a+bu) + 2a²·ln|a+bu|] + C');
-  row(3, '∫ u/(a+bu)² du = (1/b²)[a/(a+bu) + ln|a+bu|] + C');
-  row(4, '∫ u/√(a+bu) du = (2/(3b²))(bu−2a)√(a+bu) + C');
-  row(5, '∫ du/(u√(a+bu)) = (1/√a)·ln|(√(a+bu)−√a)/(√(a+bu)+√a)| + C,  a > 0');
-  row(6, '∫ du/(u(a+bu)) = (1/a)·ln|u/(a+bu)| + C');
-  row(7, '∫ du/(u²(a+bu)) = −(1/(au)) + (b/a²)·ln|(a+bu)/u| + C');
-  row(8, '∫ du/(u²(a+bu)²) = −(1/a²)[1/u + b/(a+bu)] + (2b/a³)·ln|u/(a+bu)| + C');
-
-  y += 2;
-  section('Forms Involving a² + u²');
-  row(9,  '∫√(a²+u²) du = (u/2)√(a²+u²) + (a²/2)·ln|u+√(a²+u²)| + C');
-  row(10, '∫ du/√(a²+u²) = ln|u+√(a²+u²)| + C');
-  row(11, '∫ du/(u√(a²+u²)) = −(1/a)·ln|(√(a²+u²)+a)/u| + C');
-  row(12, '∫ du/(a²+u²)^(3/2) = u/(a²√(a²+u²)) + C');
-  row(13, '∫ u²√(a²+u²) du = (u/8)(2u²+a²)√(a²+u²) − (a⁴/8)·ln|u+√(a²+u²)| + C');
-
-  y += 2;
-  section('Forms Involving a² − u²  and  u² − a²');
-  row(14, '∫ du/(u√(a²−u²)) = −(1/a)·ln|(a+√(a²−u²))/u| + C');
-  row(15, '∫ du/(u²√(a²−u²)) = −√(a²−u²)/(a²u) + C');
-  row(16, '∫ du/(a²−u²) = (1/(2a))·ln|(a+u)/(a−u)| + C');
-  row(17, '∫ √(a²−u²)/u du = √(a²−u²) − a·ln|(a+√(a²−u²))/u| + C');
-  row(18, '∫√(u²−a²) du = (u/2)√(u²−a²) − (a²/2)·ln|u+√(u²−a²)| + C');
-  row(19, '∫√(u²−a²)/u² du = −√(u²−a²)/u + ln|u+√(u²−a²)| + C');
-  row(20, '∫ du/√(u²−a²) = ln|u+√(u²−a²)| + C');
-  row(21, '∫ du/(u²√(u²−a²)) = √(u²−a²)/(a²u) + C');
-
-  y += 2;
-  section('Forms Involving eᵃᵘ and ln u');
-  row(22, '∫ ueᵃᵘ du = (1/a²)(au−1)eᵃᵘ + C');
-  row(23, '∫ ln u du = u·ln u − u + C');
-  row(24, '∫ du/(u·ln u) = ln|ln u| + C');
-  row(25, '∫ uⁿ·ln u du = u^(n+1)/(n+1) · [ln u − 1/(n+1)] + C,  n ≠ −1');
-
-  y += 2;
-  section('Reduction Formulas');
-  row(26, '∫ uⁿeᵃᵘ du = (1/a)uⁿeᵃᵘ − (n/a)∫uⁿ⁻¹eᵃᵘ du');
-  row(27, '∫ (ln u)ⁿ du = u(ln u)ⁿ − n∫(ln u)ⁿ⁻¹ du');
-  row(28, '∫ uⁿ√(a+bu) du = [2/(b(2n+3))] · [uⁿ(a+bu)^(3/2) − na·∫uⁿ⁻¹√(a+bu) du],  n ≠ −3/2');
-
-  // Footer
-  const today = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
-  doc.setFillColor(26,26,46); doc.rect(0,280,W,17,'F');
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(200,190,180);
-  doc.text('mathwithshoaib.vercel.app  ·  bssk.khan@gmail.com  ·  LUMS, Lahore, Pakistan', W/2, 287, {align:'center'});
-  doc.setTextColor(212,160,23);
-  doc.text(`Generated ${today}  ·  Muhammad Shoaib Khan`, W/2, 293, {align:'center'});
-
-  doc.save('Integral_Table_Shoaib_LUMS.pdf');
 }
 
 export default function Calc1S61() {
@@ -880,73 +787,101 @@ export default function Calc1S61() {
                 <strong>Note:</strong> Some integrals — like {'$\\int \\frac{e^x}{x}\\,dx$'} — <em>cannot be evaluated by any method</em>. No closed-form antiderivative exists. The integral table only lists those that can be evaluated.
               </div>
 
-              {/* PDF Download Button */}
-              <div style={{ background:'#fff', border:'1px solid #e0d6c8', borderRadius:'12px', padding:'22px 26px', marginBottom:'26px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:'14px' }}>
-                <div>
-                  <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.7rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#c0392b', marginBottom:'4px' }}>Reference Sheet</div>
-                  <div style={{ fontFamily:"'Playfair Display',serif", fontSize:'1.1rem', fontWeight:700, color:'#1a1a2e', marginBottom:'4px' }}>Table of Integrals — 28 Formulas</div>
-                  <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.72rem', color:'#7f8c8d' }}>Forms: a+bu · a²+u² · a²−u² · u²−a² · eᵃᵘ · ln u · Reduction formulas</div>
-                </div>
-                <button onClick={downloadIntegralTablePDF} style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.76rem', letterSpacing:'.1em', textTransform:'uppercase', background:'#1a1a2e', color:'#d4a017', border:'none', borderRadius:'8px', padding:'11px 22px', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px' }}>
-                  ⬇ Download PDF (Branded)
-                </button>
-              </div>
-
               {/* Table display */}
-              <div style={{ background:'#fff', border:'1px solid #e0d6c8', borderRadius:'12px', padding:'22px 26px', marginBottom:'26px', overflowX:'auto' }}>
+              {/* Full integral table — all 28 formulas, two-column compact layout */}
+                <div style={{ background:'#fff', border:'1px solid #e0d6c8', borderRadius:'12px', padding:'22px 26px', marginBottom:'26px', overflowX:'auto' }}>
                 <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.18em', textTransform:'uppercase', color:'#d4a017', marginBottom:'14px' }}>Table 6.1 — A Short Table of Integrals</div>
 
                 {[
-                  { head:'Forms Involving a + bu', rows:[
-                    ['1', '\\displaystyle\\int\\frac{u}{a+bu}\\,du = \\frac{1}{b^2}\\left[a+bu-a\\ln|a+bu|\\right]+C'],
-                    ['3', '\\displaystyle\\int\\frac{u}{(a+bu)^2}\\,du = \\frac{1}{b^2}\\left[\\frac{a}{a+bu}+\\ln|a+bu|\\right]+C'],
-                    ['6', '\\displaystyle\\int\\frac{du}{u(a+bu)} = \\frac{1}{a}\\ln\\left|\\frac{u}{a+bu}\\right|+C'],
-                  ]},
-                  { head:'Forms Involving a² + u²', rows:[
-                    ['9',  '\\displaystyle\\int\\sqrt{a^2+u^2}\\,du = \\frac{u}{2}\\sqrt{a^2+u^2}+\\frac{a^2}{2}\\ln|u+\\sqrt{a^2+u^2}|+C'],
-                    ['10', '\\displaystyle\\int\\frac{du}{\\sqrt{a^2+u^2}} = \\ln|u+\\sqrt{a^2+u^2}|+C'],
-                    ['12', '\\displaystyle\\int\\frac{du}{(a^2+u^2)^{3/2}} = \\frac{u}{a^2\\sqrt{a^2+u^2}}+C'],
-                  ]},
-                  { head:'Forms Involving a² − u²  and  u² − a²', rows:[
-                    ['16', '\\displaystyle\\int\\frac{du}{a^2-u^2} = \\frac{1}{2a}\\ln\\left|\\frac{a+u}{a-u}\\right|+C'],
-                    ['18', '\\displaystyle\\int\\sqrt{u^2-a^2}\\,du = \\frac{u}{2}\\sqrt{u^2-a^2}-\\frac{a^2}{2}\\ln|u+\\sqrt{u^2-a^2}|+C'],
-                    ['20', '\\displaystyle\\int\\frac{du}{\\sqrt{u^2-a^2}} = \\ln|u+\\sqrt{u^2-a^2}|+C'],
-                  ]},
-                  { head:'Forms Involving eᵃᵘ and ln u', rows:[
-                    ['22', '\\displaystyle\\int ue^{au}\\,du = \\frac{1}{a^2}(au-1)e^{au}+C'],
-                    ['23', '\\displaystyle\\int\\ln u\\,du = u\\ln u - u+C'],
-                    ['25', '\\displaystyle\\int u^n\\ln u\\,du = \\frac{u^{n+1}}{n+1}\\left(\\ln u-\\frac{1}{n+1}\\right)+C,\\quad n\\neq -1'],
-                  ]},
-                  { head:'Reduction Formulas', rows:[
-                    ['26', '\\displaystyle\\int u^n e^{au}\\,du = \\frac{1}{a}u^n e^{au}-\\frac{n}{a}\\int u^{n-1}e^{au}\\,du'],
-                    ['27', '\\displaystyle\\int(\\ln u)^n\\,du = u(\\ln u)^n - n\\int(\\ln u)^{n-1}\\,du'],
-                  ]},
-                ].map(({head,rows})=>(
-                  <div key={head} style={{ marginBottom:'20px' }}>
-                    <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#1a6b6b', padding:'6px 10px', background:'#eef7f7', borderRadius:'6px', marginBottom:'8px' }}>{head}</div>
-                    {rows.map(([n,tex])=>(
-                      <div key={n} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'7px 8px', borderBottom:'1px solid #f0e8dc' }}>
-                        <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.8rem', fontWeight:700, color:'#c0392b', width:'20px', flexShrink:0 }}>{n}.</span>
-                        <span>{`$$${tex}$$`}</span>
-                      </div>
-                    ))}
-                  </div>
+                    {
+                    head: 'Forms Involving a + bu',
+                    rows: [
+                        ['1',  '\\displaystyle\\int\\frac{u}{a+bu}\\,du = \\frac{1}{b^2}\\left[a+bu-a\\ln|a+bu|\\right]+C'],
+                        ['2',  '\\displaystyle\\int\\frac{u^2}{a+bu}\\,du = \\frac{1}{2b^3}\\left[(a+bu)^2-4a(a+bu)+2a^2\\ln|a+bu|\\right]+C'],
+                        ['3',  '\\displaystyle\\int\\frac{u}{(a+bu)^2}\\,du = \\frac{1}{b^2}\\left[\\frac{a}{a+bu}+\\ln|a+bu|\\right]+C'],
+                        ['4',  '\\displaystyle\\int\\frac{u}{\\sqrt{a+bu}}\\,du = \\frac{2}{3b^2}(bu-2a)\\sqrt{a+bu}+C'],
+                        ['5',  '\\displaystyle\\int\\frac{du}{u\\sqrt{a+bu}} = \\frac{1}{\\sqrt{a}}\\ln\\left|\\frac{\\sqrt{a+bu}-\\sqrt{a}}{\\sqrt{a+bu}+\\sqrt{a}}\\right|+C,\\quad a>0'],
+                        ['6',  '\\displaystyle\\int\\frac{du}{u(a+bu)} = \\frac{1}{a}\\ln\\left|\\frac{u}{a+bu}\\right|+C'],
+                        ['7',  '\\displaystyle\\int\\frac{du}{u^2(a+bu)} = -\\frac{1}{au}+\\frac{b}{a^2}\\ln\\left|\\frac{a+bu}{u}\\right|+C'],
+                        ['8',  '\\displaystyle\\int\\frac{du}{u^2(a+bu)^2} = -\\frac{1}{a^2}\\left[\\frac{1}{u}+\\frac{b}{a+bu}\\right]+\\frac{2b}{a^3}\\ln\\left|\\frac{u}{a+bu}\\right|+C'],
+                    ],
+                    },
+                    {
+                    head: 'Forms Involving a² + u²',
+                    rows: [
+                        ['9',  '\\displaystyle\\int\\sqrt{a^2+u^2}\\,du = \\frac{u}{2}\\sqrt{a^2+u^2}+\\frac{a^2}{2}\\ln|u+\\sqrt{a^2+u^2}|+C'],
+                        ['10', '\\displaystyle\\int\\frac{du}{\\sqrt{a^2+u^2}} = \\ln|u+\\sqrt{a^2+u^2}|+C'],
+                        ['11', '\\displaystyle\\int\\frac{du}{u\\sqrt{a^2+u^2}} = -\\frac{1}{a}\\ln\\left|\\frac{\\sqrt{a^2+u^2}+a}{u}\\right|+C'],
+                        ['12', '\\displaystyle\\int\\frac{du}{(a^2+u^2)^{3/2}} = \\frac{u}{a^2\\sqrt{a^2+u^2}}+C'],
+                        ['13', '\\displaystyle\\int u^2\\sqrt{a^2+u^2}\\,du = \\frac{u}{8}(2u^2+a^2)\\sqrt{a^2+u^2}-\\frac{a^4}{8}\\ln|u+\\sqrt{a^2+u^2}|+C'],
+                    ],
+                    },
+                    {
+                    head: 'Forms Involving a² − u²',
+                    rows: [
+                        ['14', '\\displaystyle\\int\\frac{du}{u\\sqrt{a^2-u^2}} = -\\frac{1}{a}\\ln\\left|\\frac{a+\\sqrt{a^2-u^2}}{u}\\right|+C'],
+                        ['15', '\\displaystyle\\int\\frac{du}{u^2\\sqrt{a^2-u^2}} = -\\frac{\\sqrt{a^2-u^2}}{a^2 u}+C'],
+                        ['16', '\\displaystyle\\int\\frac{du}{a^2-u^2} = \\frac{1}{2a}\\ln\\left|\\frac{a+u}{a-u}\\right|+C'],
+                        ['17', '\\displaystyle\\int\\frac{\\sqrt{a^2-u^2}}{u}\\,du = \\sqrt{a^2-u^2}-a\\ln\\left|\\frac{a+\\sqrt{a^2-u^2}}{u}\\right|+C'],
+                    ],
+                    },
+                    {
+                    head: 'Forms Involving u² − a²',
+                    rows: [
+                        ['18', '\\displaystyle\\int\\sqrt{u^2-a^2}\\,du = \\frac{u}{2}\\sqrt{u^2-a^2}-\\frac{a^2}{2}\\ln|u+\\sqrt{u^2-a^2}|+C'],
+                        ['19', '\\displaystyle\\int\\frac{\\sqrt{u^2-a^2}}{u^2}\\,du = -\\frac{\\sqrt{u^2-a^2}}{u}+\\ln|u+\\sqrt{u^2-a^2}|+C'],
+                        ['20', '\\displaystyle\\int\\frac{du}{\\sqrt{u^2-a^2}} = \\ln|u+\\sqrt{u^2-a^2}|+C'],
+                        ['21', '\\displaystyle\\int\\frac{du}{u^2\\sqrt{u^2-a^2}} = \\frac{\\sqrt{u^2-a^2}}{a^2 u}+C'],
+                    ],
+                    },
+                    {
+                    head: 'Forms Involving eᵃᵘ and ln u',
+                    rows: [
+                        ['22', '\\displaystyle\\int ue^{au}\\,du = \\frac{1}{a^2}(au-1)e^{au}+C'],
+                        ['23', '\\displaystyle\\int\\ln u\\,du = u\\ln u-u+C'],
+                        ['24', '\\displaystyle\\int\\frac{du}{u\\ln u} = \\ln|\\ln u|+C'],
+                        ['25', '\\displaystyle\\int u^n\\ln u\\,du = \\frac{u^{n+1}}{n+1}\\!\\left(\\ln u-\\frac{1}{n+1}\\right)+C,\\quad n\\neq -1'],
+                    ],
+                    },
+                    {
+                    head: 'Reduction Formulas',
+                    rows: [
+                        ['26', '\\displaystyle\\int u^n e^{au}\\,du = \\frac{1}{a}u^n e^{au}-\\frac{n}{a}\\int u^{n-1}e^{au}\\,du'],
+                        ['27', '\\displaystyle\\int(\\ln u)^n\\,du = u(\\ln u)^n-n\\int(\\ln u)^{n-1}\\,du'],
+                        ['28', '\\displaystyle\\int u^n\\sqrt{a+bu}\\,du = \\frac{2}{b(2n+3)}\\!\\left[u^n(a+bu)^{3/2}-na\\int u^{n-1}\\sqrt{a+bu}\\,du\\right],\\quad n\\neq-\\tfrac{3}{2}'],
+                    ],
+                    },
+                ].map(({ head, rows }) => (
+                    <div key={head} style={{ marginBottom:'18px' }}>
+                    <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.65rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#1a6b6b', padding:'5px 10px', background:'#eef7f7', borderRadius:'5px', marginBottom:'8px' }}>{head}</div>
+                    {/* Two-column grid for formulas */}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0' }}>
+                        {rows.map(([n, tex], i) => (
+                        <div key={n} style={{ display:'flex', alignItems:'center', gap:'10px', padding:'5px 8px', borderBottom:'1px solid #f0e8dc', background: i%2===0 ? '#fdf8f0' : '#fff' }}>
+                            <span style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.75rem', fontWeight:700, color:'#c0392b', width:'18px', flexShrink:0 }}>{n}.</span>
+                            <span style={{ fontSize:'.88rem' }}>{`$${tex}$`}</span>
+                        </div>
+                        ))}
+                        {/* If odd number of rows, add empty cell to balance grid */}
+                        {rows.length % 2 !== 0 && <div style={{ padding:'5px 8px', borderBottom:'1px solid #f0e8dc' }}/>}
+                    </div>
+                    </div>
                 ))}
-              </div>
+                </div>
 
               {/* Table Examples */}
               <h3 style={S.h3teal}>Using the Table — Worked Examples</h3>
 
               <div style={{...S.card,...S.cardAl}}>
-                <h4 style={S.h4red}>Example 18 — {'$\\int\\dfrac{1}{3x^2+6}\\,dx$'}</h4>
-                <p style={S.p}>Match to a table form: {'$3x^2+6 = 3(x^2+2)$'}, so this looks like {'$\\int\\frac{du}{a^2+u^2}$'}.</p>
+                <h4 style={S.h4red}>Example 18 — {'$\\int\\dfrac{1}{x(3+2x)}\\,dx$'}</h4>
+                <p style={S.p}>Match to Form 6: {'$\\int\\dfrac{du}{u(a+bu)} = \\dfrac{1}{a}\\ln\\left|\\dfrac{u}{a+bu}\\right|+C$'}</p>
                 <ToggleAnswer label="Show Solution">
-                  <p style={S.p}><strong>Rewrite:</strong> {'$\\int\\frac{dx}{3x^2+6} = \\frac{1}{3}\\int\\frac{dx}{x^2+2}$'}</p>
-                  <p style={S.p}><strong>Match Form 12 context:</strong> This is actually {'$\\int\\frac{du}{a^2+u^2}$'} (arctan form, not in our table, but standard): {'$\\int\\frac{dx}{x^2+a^2} = \\frac{1}{a}\\arctan\\frac{x}{a}+C$'}.</p>
-                  <p style={S.p}>With {'$a^2=2$'}, {'$a=\\sqrt{2}$'}:</p>
-                  <p style={{textAlign:'center'}}>{'$$\\frac{1}{3}\\cdot\\frac{1}{\\sqrt{2}}\\arctan\\frac{x}{\\sqrt{2}}+C = \\boxed{\\frac{1}{3\\sqrt{2}}\\arctan\\frac{x}{\\sqrt{2}}+C}$$'}</p>
+                    <p style={S.p}><strong>Identify constants:</strong> {'$u=x$'}, {'$a=3$'}, {'$b=2$'}. The integrand matches Form 6 exactly — no substitution needed.</p>
+                    <p style={S.p}><strong>Apply Form 6 directly:</strong></p>
+                    <p style={{textAlign:'center'}}>{'$$\\int\\frac{dx}{x(3+2x)} = \\frac{1}{3}\\ln\\left|\\frac{x}{3+2x}\\right|+C$$'}</p>
+                    <p style={{...S.p,marginBottom:0}}><strong>Verify by differentiating:</strong> {'$\\frac{d}{dx}\\left[\\frac{1}{3}\\ln|x| - \\frac{1}{3}\\ln|3+2x|\\right] = \\frac{1}{3x} - \\frac{2}{3(3+2x)} = \\frac{3+2x-2x}{3x(3+2x)} = \\frac{1}{x(3+2x)}$ ✓'}</p>
                 </ToggleAnswer>
-              </div>
+                </div>
 
               <div style={{...S.card,...S.cardGl}}>
                 <h4 style={S.h4gold}>Example 19 — {'$\\int\\dfrac{1}{\\sqrt{4x^2-9}}\\,dx$'}</h4>
