@@ -36,6 +36,7 @@ const chapters = [
       { label: '5.5 · Applications to Business', href: '/courses/calc1/s55' },
     ],
     defaultOpen: true,
+    quiz: true,
   },
   {
     ch: 'Ch 6 — Additional Integration Topics',
@@ -50,7 +51,7 @@ const chapters = [
 ];
 
 export default function Calc1() {
-  const [open, setOpen] = useState({ 4: true }); // Ch5 open by default (index 4)
+  const [open, setOpen] = useState({}); 
 
   const toggle = (i) => setOpen(prev => ({ ...prev, [i]: !prev[i] }));
 
@@ -102,7 +103,7 @@ export default function Calc1() {
 
           {/* Accordion chapters */}
           <nav style={{ padding: '4px 0 24px' }}>
-            {chapters.map(({ ch, items, live = [] }, i) => {
+            {chapters.map(({ ch, items, live = []}, i) => {
               const isOpen = !!open[i];
               const liveMap = Object.fromEntries(live.map(l => [l.label, l.href]));
               const hasLive = live.length > 0;
@@ -218,7 +219,7 @@ export default function Calc1() {
             <p style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', marginBottom: '20px' }}>✦ = Live &nbsp;&nbsp;|&nbsp;&nbsp; Greyed out = Coming soon</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px' }}>
-              {chapters.map(({ ch, items, live = [] }) => {
+              {chapters.map(({ ch, items, live = [], quiz }) => {
                 const liveMap = Object.fromEntries(live.map(l => [l.label, l.href]));
                 return (
                   <div key={ch} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '16px 18px' }}>
@@ -237,7 +238,7 @@ export default function Calc1() {
                       })}
                     </div>
                     <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-                      {live.length > 0 ? (
+                      {quiz ? (
                         <Link href={`/courses/calc1/ch5-quiz`} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.64rem', letterSpacing: '.08em', textTransform: 'uppercase', background: 'rgba(56,201,176,.12)', color: 'var(--teal)', border: '1px solid rgba(56,201,176,.3)', borderRadius: '6px', padding: '5px 10px', textDecoration: 'none' }}>⚡ Take Quiz</Link>
                       ) : (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.64rem', letterSpacing: '.08em', textTransform: 'uppercase', background: 'var(--bg)', color: 'var(--text3)', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 10px', opacity: .4 }}>📝 Quiz Coming</span>

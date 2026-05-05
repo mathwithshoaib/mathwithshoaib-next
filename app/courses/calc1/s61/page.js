@@ -74,22 +74,50 @@ const S = {
 
 // ─── TOC ──────────────────────────────────────────────────────────────────
 const TOC = [
-  { ch:'Course Overview', items:[{ label:'Course Overview', href:'/courses/calc1' }] },
-  { ch:'Ch 5 — Integration', items:[
-    { label:'5.1 · Indefinite Integration',        href:'/courses/calc1/s51', live:true },
-    { label:'5.2 · Integration by Substitution',   href:'/courses/calc1/s52', live:true },
-    { label:'5.3 · Definite Integral & FTC',       href:'/courses/calc1/s53', live:true },
-    { label:'5.4 · Applying Definite Integration', href:'/courses/calc1/s54', live:true },
-    { label:'5.5 · Applications to Business',      href:'/courses/calc1/s55', live:true },
+  { ch: 'Course Overview', items: [{ label: 'Course Overview', href: '/courses/calc1' }] },
+  { ch: 'Ch 1 — Functions, Graphs & Limits', items: [
+    { label: '1.1 · Functions', soon: true },
+    { label: '1.2 · The Graph of a Function', soon: true },
+    { label: '1.3 · Lines and Linear Functions', soon: true },
+    { label: '1.4 · Functional Models', soon: true },
+    { label: '1.5 · Limits', soon: true },
+    { label: '1.6 · One-Sided Limits and Continuity', soon: true },
   ]},
-  { ch:'Ch 6 — Additional Integration Topics', items:[
-    { label:'6.1 · Integration by Parts',       href:'/courses/calc1/s61', active:true, live:true },
-    { label:'6.2 · Numerical Integration',      soon:true },
-    { label:'6.3 · Improper Integrals',         soon:true },
-    { label:'6.4 · Continuous Probability',     soon:true },
+  { ch: 'Ch 2 — Differentiation: Basic Concepts', items: [
+    { label: '2.1 · The Derivative', soon: true },
+    { label: '2.2 · Techniques of Differentiation', soon: true },
+    { label: '2.3 · Product and Quotient Rules', soon: true },
+    { label: '2.4 · The Chain Rule', soon: true },
+    { label: '2.5 · Marginal Analysis', soon: true },
+    { label: '2.6 · Implicit Differentiation', soon: true },
+  ]},
+  { ch: 'Ch 3 — Applications of the Derivative', items: [
+    { label: '3.1 · Increasing & Decreasing Functions', soon: true },
+    { label: '3.2 · Concavity & Inflection Points', soon: true },
+    { label: '3.3 · Curve Sketching', soon: true },
+    { label: '3.4 · Optimization; Elasticity', soon: true },
+    { label: '3.5 · Additional Optimization', soon: true },
+  ]},
+  { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: [
+    { label: '4.1 · Exponential Functions', soon: true },
+    { label: '4.2 · Logarithmic Functions', soon: true },
+    { label: '4.3 · Differentiation of Exp & Log', soon: true },
+    { label: '4.4 · Exponential Models', soon: true },
+  ]},
+  { ch: 'Ch 5 — Integration', items: [
+    { label: '5.1 · Indefinite Integration',        href: '/courses/calc1/s51', live: true },
+    { label: '5.2 · Integration by Substitution',   href: '/courses/calc1/s52', live: true },
+    { label: '5.3 · Definite Integral & FTC',       href: '/courses/calc1/s53', live: true },
+    { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54', live: true },
+    { label: '5.5 · Applications to Business',      href: '/courses/calc1/s55', live: true },
+  ]},
+  { ch: 'Ch 6 — Additional Integration Topics', items: [
+    { label: '6.1 · Integration by Parts',       href: '/courses/calc1/s61', active: true, live: true },
+    { label: '6.2 · Numerical Integration',      soon: true },
+    { label: '6.3 · Improper Integrals',         soon: true },
+    { label: '6.4 · Continuous Probability',     soon: true },
   ]},
 ];
-
 // ─── ToggleAnswer ──────────────────────────────────────────────────────────
 function ToggleAnswer({ label='Show Solution', children, btnStyle }) {
   const ref = useRef(null);
@@ -321,7 +349,7 @@ function IBPExplorer() {
               <MathDisplay tex={ex.v} inline/>
             </div>
             <span style={{ color:'#64748b', fontSize:'1.4rem', fontWeight:700 }}>−</span>
-            <span style={{ color:'#64748b', fontSize:'1.1rem' }}>∫</span>
+            <span style={{ color:'#64748b', fontSize:'2rem' }}>∫</span>
             <div style={{ textAlign:'center' }}>
               <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.58rem', color:'#38c9b0', marginBottom:'2px' }}>v</div>
               <MathDisplay tex={ex.v} inline/>
@@ -439,7 +467,7 @@ function downloadIntegralTablePDF() {
 }
 
 export default function Calc1S61() {
-  const [sidebarOpen, setSidebarOpen] = useState({ 2:true });
+  const [sidebarOpen, setSidebarOpen] = useState({ 6:true });
 
   useEffect(() => {
     const ti = setInterval(() => {
@@ -622,18 +650,18 @@ export default function Calc1S61() {
                 </ToggleAnswer>
               </div>
 
-              {/* Example 4 — eˣ sin x */}
+              {/* Example 4 — x³ ln²x */}
               <div style={{...S.card,...S.cardSl}}>
-                <h4 style={S.h4blue}>Example 4 — {'$\\int e^x\\sin x\\,dx$'} (Circular IBP!)</h4>
-                <p style={S.p}>A famous technique: apply IBP twice, then solve algebraically for the original integral.</p>
+                <h4 style={S.h4blue}>Example 4 — {'$\\int x^3 \\ln^2 x\\,dx$'} (IBP Twice — Power meets Log²!)</h4>
+                <p style={S.p}>A higher-degree polynomial paired with {'$\\ln^2 x$'} forces two full rounds of IBP with careful fraction tracking.</p>
                 <ToggleAnswer label="Show Solution">
-                  <p style={S.p}><strong>First IBP:</strong> {'$u = e^x$'}, {'$dv = \\sin x\\,dx$'}, {'$du = e^x\\,dx$'}, {'$v = -\\cos x$'}.</p>
-                  <p style={{textAlign:'center'}}>{'$$\\int e^x\\sin x\\,dx = -e^x\\cos x + \\int e^x\\cos x\\,dx \\quad\\cdots (*)$$'}</p>
-                  <p style={S.p}><strong>Second IBP on {'$\\int e^x\\cos x\\,dx$'}:</strong> {'$u=e^x$'}, {'$dv=\\cos x\\,dx$'}, {'$du=e^x\\,dx$'}, {'$v=\\sin x$'}.</p>
-                  <p style={{textAlign:'center'}}>{'$$\\int e^x\\cos x\\,dx = e^x\\sin x - \\int e^x\\sin x\\,dx$$'}</p>
+                  <p style={S.p}><strong>First IBP:</strong> {'$u = \\ln^2 x$'}, {'$dv = x^3\\,dx$'}, {'$du = \\dfrac{2\\ln x}{x}\\,dx$'}, {'$v = \\frac{x^4}{4}$'}.</p>
+                  <p style={{textAlign:'center'}}>{'$$\\int x^3 \\ln^2 x\\,dx = \\frac{x^4}{4}\\ln^2 x - \\frac{1}{2}\\int x^3 \\ln x\\,dx \\quad\\cdots (*)$$'}</p>
+                  <p style={S.p}><strong>Second IBP on {'$\\int x^3 \\ln x\\,dx$'}:</strong> {'$u = \\ln x$'}, {'$dv = x^3\\,dx$'}, {'$du = \\frac{1}{x}\\,dx$'}, {'$v = \\frac{x^4}{4}$'}.</p>
+                  <p style={{textAlign:'center'}}>{'$$\\int x^3 \\ln x\\,dx = \\frac{x^4}{4}\\ln x - \\frac{1}{4}\\int x^3\\,dx = \\frac{x^4}{4}\\ln x - \\frac{x^4}{16}$$'}</p>
                   <p style={S.p}><strong>Substitute back into (*):</strong></p>
-                  <p style={{textAlign:'center'}}>{'$$I = -e^x\\cos x + e^x\\sin x - I \\Rightarrow 2I = e^x(\\sin x - \\cos x)$$'}</p>
-                  <p style={{textAlign:'center'}}>{'$$\\boxed{\\int e^x\\sin x\\,dx = \\frac{e^x(\\sin x - \\cos x)}{2} + C}$$'}</p>
+                  <p style={{textAlign:'center'}}>{'$$\\int x^3 \\ln^2 x\\,dx = \\frac{x^4}{4}\\ln^2 x - \\frac{1}{2}\\!\\left(\\frac{x^4}{4}\\ln x - \\frac{x^4}{16}\\right) + C$$'}</p>
+                  <p style={{textAlign:'center'}}>{'$$\\boxed{\\int x^3\\ln^2 x\\,dx = \\frac{x^4}{4}\\ln^2 x - \\frac{x^4}{8}\\ln x + \\frac{x^4}{32} + C}$$'}</p>
                 </ToggleAnswer>
               </div>
 
@@ -652,10 +680,25 @@ export default function Calc1S61() {
               {/* Note: also solvable by substitution */}
               <div style={S.noteBox}>
                 <div style={{...S.lbl,color:'#2980b9'}}>📝 Important Note — Some Integrals Have Multiple Approaches</div>
-                <p style={S.p}>Consider {'$\\int xe^{x^2}\\,dx$'}. You can solve it two ways:</p>
-                <p style={S.p}><strong>Method 1 (Substitution):</strong> Let {'$u=x^2$'}, {'$du=2x\\,dx$'}. Then {'$\\int xe^{x^2}\\,dx = \\frac{1}{2}\\int e^u\\,du = \\frac{e^{x^2}}{2}+C$'}. ✓ Easy!</p>
-                <p style={S.p}><strong>Method 2 (IBP):</strong> {'$u=x$'}, {'$dv=e^{x^2}\\,dx$'}... but {'$\\int e^{x^2}\\,dx$'} has no closed form! ✗ IBP fails here.</p>
-                <p style={{...S.p,marginBottom:0}}>The lesson: <strong>always try substitution first</strong>. If the integrand has a composite function with its derivative present, use substitution. IBP is for products where substitution won't work. If a question does not specify the method, you are free to choose — but choose wisely!</p>
+                <p style={S.p}>Consider {'$\\int x^2 e^{x^3}\\,dx$'}. You can solve it two ways:</p>
+                <p style={S.p}><strong>Method 1 (Substitution):</strong> Let {'$u=x^3$'}, {'$du=3x^2\\,dx$'}, so {'$x^2\\,dx=\\frac{du}{3}$'}. Then {'$\\int x^2 e^{x^3}\\,dx = \\frac{1}{3}\\int e^u\\,du = \\frac{e^{x^3}}{3}+C$'}. ✓ Easy!</p>
+                <p style={S.p}><strong>Method 2 (IBP):</strong> {'$u=e^{x^3}$'}, {'$dv=x^2\\,dx$'}, {'$du=3x^2e^{x^3}\\,dx$'}, {'$v=\\frac{x^3}{3}$'}. Then {'$\\int x^2 e^{x^3}\\,dx = \\frac{x^3}{3}e^{x^3} - \\int x^3 e^{x^3}\\,dx$'}... which is harder than what we started with! ✗ IBP makes it worse.</p>
+                <p style={{...S.p, marginBottom:0}}>The lesson: <strong>always try substitution first</strong>. If the integrand has a composite function with its derivative present (here {'$x^2$'} is the derivative of {'$x^3$'}), substitution is the natural choice. IBP is for products where substitution won't simplify things.</p>
+
+                <hr style={{border:'none',borderTop:'1px solid #d0e8f8',margin:'14px 0'}}/>
+
+                <p style={S.p}>Now consider {'$\\int x\\sqrt{x+5}\\,dx$'}. Here <em>both</em> methods work cleanly — a great example to compare them side by side.</p>
+
+                <p style={S.p}><strong>Method 1 (Substitution):</strong> Let {'$u = x+5$'}, so {'$x = u-5$'} and {'$du = dx$'}.</p>
+                <p style={{textAlign:'center'}}>{'$$\\int x\\sqrt{x+5}\\,dx = \\int (u-5)\\sqrt{u}\\,du = \\int\\!\\left(u^{3/2} - 5u^{1/2}\\right)du$$'}</p>
+                <p style={{textAlign:'center'}}>{'$$= \\frac{2}{5}u^{5/2} - \\frac{10}{3}u^{3/2} + C = \\frac{2}{5}(x+5)^{5/2} - \\frac{10}{3}(x+5)^{3/2} + C$$'}</p>
+
+                <p style={S.p}><strong>Method 2 (IBP):</strong> {'$u=x$'}, {'$dv=\\sqrt{x+5}\\,dx$'}, {'$du=dx$'}, {'$v=\\frac{2}{3}(x+5)^{3/2}$'}.</p>
+                <p style={{textAlign:'center'}}>{'$$\\int x\\sqrt{x+5}\\,dx = \\frac{2x}{3}(x+5)^{3/2} - \\frac{2}{3}\\int(x+5)^{3/2}\\,dx$$'}</p>
+                <p style={{textAlign:'center'}}>{'$$= \\frac{2x}{3}(x+5)^{3/2} - \\frac{2}{3}\\cdot\\frac{2}{5}(x+5)^{5/2} + C$$'}</p>
+                <p style={{textAlign:'center'}}>{'$$= \\frac{2x}{3}(x+5)^{3/2} - \\frac{4}{15}(x+5)^{5/2} + C$$'}</p>
+
+                <p style={{...S.p,marginBottom:0}}>Both answers are equivalent — you can verify by factoring out {'$(x+5)^{3/2}$'}. The lesson: <strong>when both methods work, substitution is usually shorter</strong>. IBP is powerful but requires more steps. Always choose the method that minimises algebra!</p>
               </div>
             </section>
 
@@ -950,7 +993,7 @@ export default function Calc1S61() {
                 <p style={S.p}>A quantity {'$Q(t)$'} satisfies the <strong>logistic equation</strong> if:</p>
                 <p style={{textAlign:'center',fontSize:'1.15rem'}}>{'$$\\frac{dQ}{dt} = kQ(M-Q)$$'}</p>
                 <p style={S.p}>where {'$k > 0$'} is the growth rate constant and {'$M > 0$'} is the <strong>carrying capacity</strong> (the maximum possible value of {'$Q$'}).</p>
-                <p style={S.p}><strong>Solution:</strong> Separate variables and use <strong>partial fractions + Form 16</strong> from the table ('$\\int\\frac{du}{a^2-u^2}$').</p>
+                <p style={S.p}><strong>Solution:</strong> Separate variables and use <strong>partial fractions + Form 16</strong> from the table {'$\\int\\frac{du}{a^2-u^2}$'}.</p>
                 <p style={{textAlign:'center',fontSize:'1.1rem'}}>{'$$Q(t) = \\frac{M}{1+Ae^{-kMt}}, \\quad A = \\frac{M-Q_0}{Q_0}$$'}</p>
                 <p style={{...S.p,marginBottom:0,fontStyle:'italic',color:'#1a6b6b'}}>where {'$Q_0 = Q(0)$'} is the initial value.</p>
               </div>
