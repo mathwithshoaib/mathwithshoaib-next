@@ -219,7 +219,7 @@ function LHopitalExplorer() {
   const stepLabels = ['Check the form', 'Differentiate numerator & denominator', 'Apply — evaluate the new limit', preset.rounds >= 2 ? 'Apply again if needed' : null, preset.rounds >= 3 ? 'Apply a third time' : null].filter(Boolean);
 
   return (
-    <div ref={containerRef} style={{ background:'#1a1a2e', borderRadius:'12px', padding:'20px 22px', margin:'24px 0' }}>
+    <div ref={containerRef} className="dark-widget" style={{ background:'#1a1a2e', borderRadius:'12px', padding:'20px 22px', margin:'24px 0' }}>
       <div style={{ fontFamily:"'IBM Plex Mono',monospace", fontSize:'.68rem', letterSpacing:'.18em', textTransform:'uppercase', color:'#d4a017', marginBottom:'14px' }}>
         ⚡ L'Hôpital's Rule — Step-by-Step Explorer
       </div>
@@ -322,10 +322,16 @@ export default function Calc1A3() {
         .lec-sec{padding:52px 0 0;}
         .lec-sec:first-child{padding-top:44px;}
         @media(max-width:860px){.csb-hide{display:none!important;}.lec-inner-m{padding:0 18px 40px!important;}.lec-hero-m{padding:36px 20px 32px!important;}}
-      
-        mjx-container { color: #1a1a2e !important; }
-        mjx-container svg { color: #1a1a2e !important; }
-        .MathJax { color: #1a1a2e !important; }
+
+        /* Force dark ink on math — but NOT inside dark widgets */
+        .lec-content mjx-container { color: #1a1a2e !important; }
+        .lec-content mjx-container svg { color: #1a1a2e !important; }
+        .lec-content .MathJax { color: #1a1a2e !important; }
+
+        /* Inside dark widgets — keep math light */
+        .dark-widget mjx-container { color: #e2e8f0 !important; }
+        .dark-widget mjx-container svg { color: #e2e8f0 !important; }
+        .dark-widget .MathJax { color: #e2e8f0 !important; }
       `}</style>
 
       {/* SUBNAV */}
@@ -364,7 +370,7 @@ export default function Calc1A3() {
             ))}
           </nav>
 
-          <div style={S.lecInner} className="lec-inner-m">
+          <div style={S.lecInner} className="lec-inner-m lec-content">
 
             {/* ── MOTIVATION ── */}
             <section id="motivation" className="lec-sec">
