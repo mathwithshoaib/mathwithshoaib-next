@@ -92,6 +92,12 @@ const TOC = [
     { label: '6.3 · Improper Integrals',    soon: true },
     { label: '6.4 · Continuous Probability',soon: true },
   ]},
+  { ch: 'Appendix — Additional Topics', items: [
+    { label: 'A.1 · A Brief Review of Algebra',               soon: true },
+    { label: 'A.2 · Factoring Polynomials & Solving Systems', soon: true },
+    { label: 'A.3 · Evaluating Limits with L\'Hôpital\'s Rule', href: '/courses/calc1/a3', live: true },
+    { label: 'A.4 · The Summation Notation',                  soon: true },
+  ]},
 ];
 
 function ToggleAnswer({ label = 'Show Solution', children, btnStyle }) {

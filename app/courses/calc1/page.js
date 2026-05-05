@@ -48,6 +48,18 @@ const chapters = [
       { label: '6.4 · Continuous Probability',soon: true },
     ],
   },
+  {
+    ch: 'Appendix — Additional Topics',
+    items: [
+      'A.1 · A Brief Review of Algebra',
+      'A.2 · Factoring Polynomials & Solving Systems',
+      'A.3 · Evaluating Limits with L\'Hôpital\'s Rule',
+      'A.4 · The Summation Notation',
+    ],
+    live: [
+      { label: 'A.3 · Evaluating Limits with L\'Hôpital\'s Rule', href: '/courses/calc1/a3' },
+    ],
+  },
 ];
 
 export default function Calc1() {
