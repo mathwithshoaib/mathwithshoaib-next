@@ -463,7 +463,7 @@ const QUESTION_BANK = [
 
 ];
 
-const TOTAL_Q = 12;
+const TOTAL_Q = 10;
 function pickQuestions() {
   return shuffle([...QUESTION_BANK]).slice(0, TOTAL_Q).map(fn => fn());
 }
@@ -679,13 +679,8 @@ export default function Calc1Ch6Quiz() {
         {phase==='form'&&(
           <div className="quiz-card" style={{background:'#fff',border:`1px solid ${border}`,borderRadius:'14px',padding:'32px 36px',boxShadow:shadow}}>
             <div style={{fontFamily:fh,fontSize:'1.5rem',fontWeight:700,color:ink,marginBottom:'6px'}}>Before You Begin</div>
-            <div style={{color:muted,fontSize:'.92rem',marginBottom:'8px'}}>Enter your details. This quiz covers:</div>
-            <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'24px'}}>
-              {['§5.4 Applying Definite Integration','§5.5 Business Applications','§6.1 Integration by Parts & Tables','§A.3 L\'Hôpital\'s Rule'].map(s=>(
-                <span key={s} style={{fontFamily:fm,fontSize:'.62rem',background:'rgba(26,107,107,.08)',color:teal,border:`1px solid rgba(26,107,107,.2)`,borderRadius:'5px',padding:'3px 8px'}}>{s}</span>
-              ))}
-            </div>
-            {[{label:'Full Name *',key:'name',ph:'e.g. Muhammad Shoaib Khan'},{label:'Class / Section *',key:'cls',ph:'e.g. MATH-101 Section A'},{label:'Institute *',key:'inst',ph:'e.g. LUMS'}].map(({label,key,ph})=>(
+            <div style={{color:muted,fontSize:'.92rem',marginBottom:'8px'}}>Enter your details.</div>
+                {[{label:'Full Name *',key:'name',ph:'e.g. Muhammad Shoaib Khan'},{label:'Class / Section *',key:'cls',ph:'e.g. MATH-101 Section A'},{label:'Institute *',key:'inst',ph:'e.g. LUMS'}].map(({label,key,ph})=>(
               <div key={key} style={{marginBottom:'20px'}}>
                 <label style={{display:'block',fontFamily:fm,fontSize:'.68rem',letterSpacing:'.14em',textTransform:'uppercase',color:muted,marginBottom:'7px'}}>{label}</label>
                 <input type="text" value={studentInfo[key]} onChange={e=>setStudentInfo(s=>({...s,[key]:e.target.value}))} placeholder={ph} style={{width:'100%',padding:'11px 14px',border:`1.5px solid ${border}`,borderRadius:'8px',fontFamily:fb,fontSize:'1rem',color:ink,background:paper,outline:'none'}}/>
