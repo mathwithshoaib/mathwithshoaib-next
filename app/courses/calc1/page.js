@@ -35,11 +35,20 @@ async function sbUpdateReview(id, token, data) {
 }
 
 async function sbDeleteReview(id, token) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/course_reviews?id=eq.${id}&edit_token=eq.${token}`, {
-    method: 'DELETE',
-    headers: { 'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}` },
-  });
-  return res.ok;
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/course_reviews?id=eq.${id}&edit_token=eq.${token}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=representation',
+      },
+    }
+  );
+  if (!res.ok) return false;
+  const deleted = await res.json();
+  return deleted.length > 0;
 }
 
 // ─── localStorage token helpers ────────────────────────────────────────────
