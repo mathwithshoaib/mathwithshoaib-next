@@ -85,7 +85,12 @@ const chapters = [
   {
     ch: 'Ch 4 — Exponential & Logarithmic Functions',
     items: ['4.1 · Exponential Functions','4.2 · Logarithmic Functions','4.3 · Differentiation of Exp & Log','4.4 · Exponential Models'],
-    live: [],
+    live: [
+      { label:'4.1 · Exponential Functions',          href:'/courses/calc1/s41' },
+      { label:'4.2 · Logarithmic Functions',          href:'/courses/calc1/s42' },
+      { label:'4.3 · Differentiation of Exp & Log',   href:'/courses/calc1/s43' },
+      { label:'4.4 · Exponential Models',             soon:true },
+    ],
   },
   {
     ch: 'Ch 5 — Integration',

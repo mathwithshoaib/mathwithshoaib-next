@@ -82,7 +82,12 @@ const TOC = [
   { ch: 'Ch 1 — Functions, Graphs & Limits', items: ['1.1 · Functions','1.2 · The Graph of a Function','1.3 · Lines and Linear Functions','1.4 · Functional Models','1.5 · Limits','1.6 · One-Sided Limits and Continuity'].map(l=>({label:l,soon:true})) },
   { ch: 'Ch 2 — Differentiation: Basic Concepts', items: ['2.1 · The Derivative','2.2 · Techniques of Differentiation','2.3 · Product and Quotient Rules','2.4 · The Chain Rule','2.5 · Marginal Analysis','2.6 · Implicit Differentiation'].map(l=>({label:l,soon:true})) },
   { ch: 'Ch 3 — Applications of the Derivative', items: ['3.1 · Increasing & Decreasing Functions','3.2 · Concavity & Inflection Points','3.3 · Curve Sketching','3.4 · Optimization; Elasticity','3.5 · Additional Optimization'].map(l=>({label:l,soon:true})) },
-  { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: ['4.1 · Exponential Functions','4.2 · Logarithmic Functions','4.3 · Differentiation of Exp & Log','4.4 · Exponential Models'].map(l=>({label:l,soon:true})) },
+  { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: [
+    { label:'4.1 · Exponential Functions',          href:'/courses/calc1/s41', live:true },
+    { label:'4.2 · Logarithmic Functions',          href:'/courses/calc1/s42', live:true },
+    { label:'4.3 · Differentiation of Exp & Log',   href:'/courses/calc1/s43', live:true },
+    { label:'4.4 · Exponential Models',             soon:true }, 
+  ]},
   { ch: 'Ch 5 — Integration', items: [
     { label: '5.1 · Indefinite Integration', href: '/courses/calc1/s51', live: true },
     { label: '5.2 · Integration by Substitution', href: '/courses/calc1/s52', live: true },

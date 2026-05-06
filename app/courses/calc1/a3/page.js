@@ -87,11 +87,11 @@ const TOC = [
     { label:'3.4 · Optimization; Elasticity', soon:true },
     { label:'3.5 · Additional Optimization', soon:true },
   ]},
-  { ch:'Ch 4 — Exponential & Logarithmic Functions', items:[
-    { label:'4.1 · Exponential Functions', soon:true },
-    { label:'4.2 · Logarithmic Functions', soon:true },
-    { label:'4.3 · Differentiation of Exp & Log', soon:true },
-    { label:'4.4 · Exponential Models', soon:true },
+  { ch: 'Ch 4 — Exponential & Logarithmic Functions', items: [
+    { label:'4.1 · Exponential Functions',          href:'/courses/calc1/s41', live:true },
+    { label:'4.2 · Logarithmic Functions',          href:'/courses/calc1/s42', live:true },
+    { label:'4.3 · Differentiation of Exp & Log',   href:'/courses/calc1/s43', live:true },
+    { label:'4.4 · Exponential Models',             soon:true }, 
   ]},
   { ch:'Ch 5 — Integration', items:[
     { label:'5.1 · Indefinite Integration',        href:'/courses/calc1/s51', live:true },
