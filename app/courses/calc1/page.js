@@ -502,7 +502,10 @@ export default function Calc1() {
               {/* Chapter accordion cards */}
               <div style={{ marginBottom:'16px', display:'flex', alignItems:'baseline', justifyContent:'space-between', flexWrap:'wrap', gap:'8px' }}>
                 <h3 style={{ fontFamily:fh, fontSize:'1.3rem', color:'var(--text)' }}>Course Lecture Notes</h3>
-                <span style={{ fontFamily:fm, fontSize:'.68rem', color:'var(--text3)' }}>✦ = Live &nbsp;·&nbsp; Greyed = Coming soon</span>
+                <span style={{ fontFamily:fm, fontSize:'.68rem', color:'var(--text3)' }}>
+                  <span style={{ color:'var(--teal)' }}>✦ = Live</span>
+                  <span style={{ opacity:.5 }}> &nbsp;·&nbsp; Greyed = Coming soon</span>
+                </span>
               </div>
 
               <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
@@ -515,7 +518,10 @@ export default function Calc1() {
                   return (
                     <div key={ch} style={{ background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:'10px', overflow:'hidden' }}>
                       {/* Header row — always visible */}
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px' }}>
+                      <div
+                        onClick={()=>toggleCh(i)}
+                        style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', cursor:'pointer', userSelect:'none' }}
+                      >
                         <div style={{ flex:1 }}>
                           <div style={{ fontFamily:fm, fontSize:'.56rem', letterSpacing:'.18em', textTransform:'uppercase', color:'var(--amber)', marginBottom:'2px' }}>{chNum}</div>
                           <div style={{ fontFamily:fh, fontSize:'.9rem', color:'var(--text)', lineHeight:1.2 }}>{chName}</div>
@@ -524,9 +530,8 @@ export default function Calc1() {
                           {liveCount>0&&<span style={{ fontFamily:fm, fontSize:'.56rem', color:'var(--teal)', background:'rgba(56,201,176,.1)', border:'1px solid rgba(56,201,176,.2)', borderRadius:'4px', padding:'2px 7px' }}>{liveCount} live</span>}
                           {quiz&&<Link href="/courses/calc1/ch5-quiz" onClick={e=>e.stopPropagation()} style={{ fontFamily:fm, fontSize:'.58rem', letterSpacing:'.06em', textTransform:'uppercase', background:'rgba(56,201,176,.12)', color:'var(--teal)', border:'1px solid rgba(56,201,176,.3)', borderRadius:'5px', padding:'3px 8px', textDecoration:'none' }}>⚡ Quiz</Link>}
                           {quiz2&&<Link href="/courses/calc1/ch6-quiz" onClick={e=>e.stopPropagation()} style={{ fontFamily:fm, fontSize:'.58rem', letterSpacing:'.06em', textTransform:'uppercase', background:'rgba(41,128,185,.12)', color:'#60a5fa', border:'1px solid rgba(41,128,185,.3)', borderRadius:'5px', padding:'3px 8px', textDecoration:'none' }}>⚡ Quiz</Link>}
-                          <button onClick={()=>toggleCh(i)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text3)', fontSize:'.7rem', display:'inline-flex', alignItems:'center', gap:'3px', fontFamily:fm, padding:'2px 6px' }}>
-                            <span style={{ display:'inline-block', transform:isOpen?'rotate(180deg)':'rotate(0)', transition:'transform .2s', fontSize:'.65rem' }}>▾</span>
-                          </button>
+                          {/* Visible arrow — larger */}
+                          <span style={{ display:'inline-block', transform:isOpen?'rotate(180deg)':'rotate(0)', transition:'transform .25s', fontSize:'1rem', color:'var(--text3)', marginLeft:'4px' }}>▾</span>
                         </div>
                       </div>
 
