@@ -107,7 +107,7 @@ const TOC = [
   { ch: 'Ch 5 — Integration', items: [
     { label: '5.1 · Indefinite Integration',        href: '/courses/calc1/s51', live: true },
     { label: '5.2 · Integration by Substitution',   href: '/courses/calc1/s52', live: true },
-    { label: '5.3 · The Definite Integral & FTC',       href: '/courses/calc1/s53', live: true },
+    { label: '5.3 · The Definite Integral & FTC',   href: '/courses/calc1/s53', live: true },
     { label: '5.4 · Applying Definite Integration', href: '/courses/calc1/s54', live: true },
     { label: '5.5 · Applications to Business',      href: '/courses/calc1/s55', live: true },
   ]},
