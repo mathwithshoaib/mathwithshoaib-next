@@ -240,7 +240,7 @@ export default function LinAlg() {
             <span className="eyebrow">MATH-120 · Summer 2026 · SSE Core</span>
             <h1 style={{ fontSize: 'clamp(2rem,4vw,3.2rem)', marginBottom: '12px' }}>Linear Algebra <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>with Differential Equations</em></h1>
             <p style={{ maxWidth: '600px', fontSize: '1.02rem', color: 'var(--text2)' }}>
-              The grammar of every linear system in mathematics — taught from the <em>why</em>, not just the <em>how</em>. From row reduction to abstract vector spaces and differential equations, with proofs along the way.
+              The grammar of every linear system in mathematics, taught from the <em>why</em>, not just the <em>how</em>. From row reduction to abstract vector spaces and differential equations, with proofs along the way.
             </p>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
               <span className="tag tag-amber">Vector Spaces</span>
@@ -252,7 +252,7 @@ export default function LinAlg() {
             <div style={{ display: 'flex', gap: '36px', marginTop: '28px', flexWrap: 'wrap' }}>
               {[
                 ['Instructor', 'Imran Anwar'],
-                ['Credits', '3 · 2 lec + 1 tut / wk'],
+                ['Credits', '3ch - 4 lec / wk'],
                 ['Prerequisite', 'MATH-101 Calculus I'],
                 ['Textbook', 'Nicholson · Anton'],
               ].map(([k, v]) => (
