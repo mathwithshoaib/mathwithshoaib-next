@@ -152,17 +152,17 @@ const MOCK_EXAMS = [
 const SCHEDULE = {
   startHour: 9,
   endHour: 18,
-  days: ['Mon', 'Tue', 'Wed', 'Thu'],
+  days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
   events: [
-    { day: 0, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
-    { day: 1, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
-    { day: 2, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
-    { day: 3, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
+    { day: 0, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
+    { day: 1, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
+    { day: 2, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
+    { day: 3, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
     { day: 0, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 1, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 2, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 3, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
-    { day: 0, start: 10, end: 12, type: 'tutorial', title: 'Tutorial · Shoaib', loc: 'TBA' },
+    { day: 0, start: 10, end: 11.5, type: 'tutorial', title: 'Tutorial · Shoaib', loc: 'TBA' },
     // Hajra's tutorial + office hours: add here once decided, e.g.:
     // { day: 2, start: 10, end: 12, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
   ],
