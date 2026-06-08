@@ -147,6 +147,27 @@ const MOCK_EXAMS = [
   { title: 'Mock Final', detail: 'Comprehensive', href: null },
 ];
 
+// Weekly schedule. day: 0=Mon,1=Tue,2=Wed,3=Thu. Times in 24h decimal (13.5 = 1:30pm).
+// type controls colour: 'lecture' | 'tutorial' | 'office'
+const SCHEDULE = {
+  startHour: 9,
+  endHour: 18,
+  days: ['Mon', 'Tue', 'Wed', 'Thu'],
+  events: [
+    { day: 0, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
+    { day: 1, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
+    { day: 2, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
+    { day: 3, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'A11' },
+    { day: 0, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
+    { day: 1, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
+    { day: 2, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
+    { day: 3, start: 13, end: 14, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
+    { day: 0, start: 10, end: 12, type: 'tutorial', title: 'Tutorial · Shoaib', loc: 'TBA' },
+    // Hajra's tutorial + office hours: add here once decided, e.g.:
+    // { day: 2, start: 10, end: 12, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
+  ],
+};
+
 // Sidebar TOC — chapter groups for MATH-120.
 const SIDEBAR = [
   { ch: 'Week 1 — Systems & Networks', items: ['§1.2 Row Operations & Rank', '§1.3 Homogeneous Systems', '§1.4 Networks & Reactions'] },
@@ -310,6 +331,10 @@ export default function LinAlg() {
               </div>
             </details>
 
+            {/* ── SECTION · WEEKLY SCHEDULE ── */}
+            <SectionHeading num="02" title="Weekly Schedule" />
+            <Schedule />
+
             {/* ── SECTION 02 · TEACHING TEAM ── */}
             <SectionHeading num="02" title="Teaching Team" />
             <div className="grid-3" style={{ marginBottom: '8px' }}>
@@ -444,6 +469,79 @@ function Row({ label, value, isEmail }) {
       {isEmail && !isTBA
         ? <a href={`mailto:${value}`} style={{ color: 'var(--amber)' }}>{value}</a>
         : <span style={{ color: isTBA ? 'var(--text3)' : 'var(--text)', fontStyle: isTBA ? 'italic' : 'normal' }}>{value}</span>}
+    </div>
+  );
+}
+
+function Schedule() {
+  const { startHour, endHour, days, events } = SCHEDULE;
+  const totalMin = (endHour - startHour) * 60;
+  const pxPerMin = 0.9; // grid height scale
+  const gridH = totalMin * pxPerMin;
+  const colors = {
+    lecture:  { bg: 'rgba(232,160,32,.18)', bd: 'var(--amber)' },
+    tutorial: { bg: 'rgba(56,201,176,.18)', bd: 'var(--teal)' },
+    office:   { bg: 'rgba(155,128,232,.18)', bd: 'var(--violet)' },
+  };
+  const hours = [];
+  for (let h = startHour; h <= endHour; h++) hours.push(h);
+  const fmt = (t) => {
+    const h = Math.floor(t), m = Math.round((t - h) * 60);
+    const ap = h >= 12 ? 'pm' : 'am';
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}:${m.toString().padStart(2, '0')}${ap}`;
+  };
+
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--surface)' }}>
+      {/* legend */}
+      <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', padding: '14px 18px', borderBottom: '1px solid var(--border)', fontSize: '.78rem' }}>
+        {[['lecture', 'Lecture'], ['tutorial', 'Tutorial'], ['office', 'Office Hours']].map(([k, label]) => (
+          <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', color: 'var(--text2)' }}>
+            <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors[k].bg, border: `1px solid ${colors[k].bd}` }}></span>{label}
+          </span>
+        ))}
+      </div>
+
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `64px repeat(${days.length}, minmax(120px, 1fr))`, minWidth: '560px' }}>
+          {/* header row */}
+          <div style={{ borderBottom: '1px solid var(--border)' }}></div>
+          {days.map(d => (
+            <div key={d} style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text2)', borderBottom: '1px solid var(--border)', borderLeft: '1px solid var(--border)' }}>{d}</div>
+          ))}
+
+          {/* time gutter */}
+          <div style={{ position: 'relative', height: `${gridH}px` }}>
+            {hours.map(h => (
+              <div key={h} style={{ position: 'absolute', top: `${(h - startHour) * 60 * pxPerMin}px`, right: '8px', fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', transform: 'translateY(-50%)' }}>{fmt(h)}</div>
+            ))}
+          </div>
+
+          {/* day columns */}
+          {days.map((d, di) => (
+            <div key={d} style={{ position: 'relative', height: `${gridH}px`, borderLeft: '1px solid var(--border)' }}>
+              {/* hour gridlines */}
+              {hours.map(h => (
+                <div key={h} style={{ position: 'absolute', top: `${(h - startHour) * 60 * pxPerMin}px`, left: 0, right: 0, borderTop: '1px solid var(--border)', opacity: .5 }}></div>
+              ))}
+              {/* events for this day */}
+              {events.filter(e => e.day === di).map((e, ei) => {
+                const top = (e.start - startHour) * 60 * pxPerMin;
+                const h = (e.end - e.start) * 60 * pxPerMin;
+                const c = colors[e.type];
+                return (
+                  <div key={ei} style={{ position: 'absolute', top: `${top}px`, height: `${h}px`, left: '4px', right: '4px', background: c.bg, borderLeft: `3px solid ${c.bd}`, borderRadius: '5px', padding: '5px 7px', overflow: 'hidden' }}>
+                    <div style={{ fontSize: '.74rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>{e.title}</div>
+                    <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', color: 'var(--text2)', marginTop: '2px' }}>{fmt(e.start)}–{fmt(e.end)}</div>
+                    <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', color: 'var(--text3)' }}>{e.loc}</div>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
