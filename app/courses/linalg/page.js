@@ -18,11 +18,18 @@ export const metadata = {
 // Teaching team — fill Hajra's details once decided.
 const TEACHING_TEAM = [
   {
+    role: 'Instructor',
+    name: 'Imran Anwar',
+    email: 'imran.anwar@lums.edu.pk',      // ← update if needed
+    office: '9-155A (SSE Building)',                          // ← e.g. "9-xxx, SBASSE"
+    hours: '04:00 – 05:00 (Monday - Thursday)',                           // ← e.g. "Mon & Wed, 3–4 PM"
+  },
+  {
     role: 'Teaching Assistant',
     name: 'Muhammad Shoaib Khan',
     email: 'shoaib.khan@lums.edu.pk',      // ← update if needed
-    office: 'TBA',                          // ← e.g. "9-xxx, SBASSE"
-    hours: 'TBA',                           // ← e.g. "Mon & Wed, 3–4 PM"
+    office: '9-155 SSE',                          // ← e.g. "9-xxx, SBASSE"
+    hours: '01:00 - 02:00 (Monday - Thursday)',                           // ← e.g. "Mon & Wed, 3–4 PM"
   },
   {
     role: 'Teaching Assistant',
