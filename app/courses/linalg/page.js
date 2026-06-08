@@ -33,8 +33,8 @@ const TEACHING_TEAM = [
   },
   {
     role: 'Teaching Assistant',
-    name: 'Hajra',                          // ← update full name
-    email: 'TBA',                           // ← update
+    name: 'Hajra Mahmood',                          // ← update full name
+    email: '28100096@lums.edu.pk',                           // ← update
     office: 'TBA',                          // ← update
     hours: 'TBA',                           // ← update
   },
@@ -312,7 +312,7 @@ export default function LinAlg() {
 
             {/* ── SECTION 02 · TEACHING TEAM ── */}
             <SectionHeading num="02" title="Teaching Team" />
-            <div className="grid-2" style={{ marginBottom: '8px' }}>
+            <div className="grid-3" style={{ marginBottom: '8px' }}>
               {TEACHING_TEAM.map(t => (
                 <div key={t.name} className="card card-teal" style={{ padding: '22px 24px' }}>
                   <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: '8px' }}>{t.role}</div>
