@@ -40,7 +40,7 @@ const TEACHING_TEAM = [
   { role: 'Teaching Assistant', name: 'Muhammad Shoaib Khan', email: 'shoaib.khan@lums.edu.pk',
     office: '9-155 SSE', hours: '01:00 – 02:00 (Mon – Thu)' },
   { role: 'Teaching Assistant', name: 'Hajra Mahmood', email: '28100096@lums.edu.pk',
-    office: 'TBA', hours: 'TBA' },
+    office: 'Math Lobby', hours: 'Mon-Thr 5-6pm & Fri 4-5pm' },
 ];
 
 // Course timeline — static syllabus overview (no links).
@@ -115,7 +115,11 @@ const SCHEDULE = {
     { day: 2, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 3, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 0, start: 10, end: 11.5, type: 'tutorial', title: 'Tutorial · Shoaib', loc: 'TBA' },
-    // Add Hajra + any Friday events here.
+    { day: 0, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
+    { day: 1, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
+    { day: 2, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
+    { day: 4, start: 16, end: 17, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
+    { day: 4, start: 15, end: 16.5, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
   ],
 };
 
