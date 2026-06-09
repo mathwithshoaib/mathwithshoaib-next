@@ -28,9 +28,10 @@ import Footer from '../../components/Footer';
 */
 const LECTURES = [
   { week: 1, n: 1, slug: 'w1/lec1', title: 'The Language of Matrices', ref: '§1.1–1.2',
-    blurb: 'Sequences, matrices, systems of equations, row-echelon form', date: '9 June', live: true },
+    blurb: 'Sequences, matrices, systems of equations, row-echelon form', date: '8 June', live: true },
   // Template for the next one:
-  // { week: 1, n: 2, slug: 'w1/lec2', title: '', ref: '§1.2', blurb: '', date: '', live: false },
+  { week: 1, n: 2, slug: 'w1/lec2', title: 'Row Operations & Gaussian Elimination', ref: '§1.2', 
+    blurb: 'Elementary row operations and their applications', date: '9 June', live: true },
 ];
 
 // Teaching team.
