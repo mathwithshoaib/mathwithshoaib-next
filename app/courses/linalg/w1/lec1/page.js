@@ -592,12 +592,12 @@ export default function Lec1() {
             </Example>
 
             <Example n="5" title="Catalogue of matrix types">
-              <p><b>Row matrix</b>{String.raw` — one row, order $1 \times n$: $\quad \begin{pmatrix} 4 & 1 & -3 & 9 \end{pmatrix}$. Used to represent a data point with multiple features.`}</p>
-              <p><b>Column matrix (vector)</b>{String.raw` — one column, order $m \times 1$: $\quad \begin{pmatrix} 4 \\ 1 \\ 9 \end{pmatrix}$. The language of vectors in machine learning, physics, economics.`}</p>
-              <p><b>Square matrix</b>{String.raw` — $n \times n$. Most of the interesting theory (eigenvalues, determinants, inverses) lives here.`}</p>
-              <p><b>Zero matrix $O$</b>{String.raw` — all entries $0$. The additive identity: $A + O = A$.`}</p>
-              <p><b>Identity matrix $I_n$</b>{String.raw` — diagonal $1$s, off-diagonal $0$s. The multiplicative identity: $AI_n = I_n A = A$ (when $A$ is $n\times n$). Think of it as the number $1$ for matrices.`}</p>
-              <p><b>Diagonal matrix</b>{String.raw` — square, zeros everywhere except the main diagonal.`}</p>
+              <p><b>Row matrix:</b>{String.raw` One row, order $1 \times n$: $\quad \begin{pmatrix} 4 & 1 & -3 & 9 \end{pmatrix}$. Used to represent a data point with multiple features.`}</p>
+              <p><b>Column matrix (vector):</b>{String.raw` One column, order $m \times 1$: $\quad \begin{pmatrix} 4 \\ 1 \\ 9 \end{pmatrix}$. The language of vectors in machine learning, physics, economics.`}</p>
+              <p><b>Square matrix:</b>{String.raw` $n \times n$. Most of the interesting theory (eigenvalues, determinants, inverses) lives here.`}</p>
+              <p><b>Zero matrix $O$:</b>{String.raw` All entries $0$. The additive identity: $A + O = A$.`}</p>
+              <p><b>Identity matrix $I_n$:</b>{String.raw` Diagonal $1$s, off-diagonal $0$s. The multiplicative identity: $AI_n = I_n A = A$ (when $A$ is $n\times n$). Think of it as the number $1$ for matrices.`}</p>
+              <p><b>Diagonal matrix:</b>{String.raw` Square matrix with zeros everywhere except the main diagonal.`}</p>
             </Example>
 
             <Example n="6" title="Symmetric and triangular matrices — shapes you will see all term" advanced>
