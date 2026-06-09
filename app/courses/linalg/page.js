@@ -119,7 +119,7 @@ const SCHEDULE = {
     { day: 1, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
     { day: 2, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
     { day: 4, start: 16, end: 17, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 4, start: 15, end: 16.5, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
+    { day: 4, start: 14.5, end: 16, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
   ],
 };
 
