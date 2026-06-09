@@ -788,8 +788,9 @@ export default function Lec2() {
             <Example n="1.2.17" title="Car rental rates">
               <p>{String.raw`Three Nissans, two Fords, and four Chevrolets rent for \$106/day. Two Nissans, four Fords, three Chevrolets cost \$107/day. Four Nissans, three Fords, two Chevrolets cost \$102/day. Find each rate.`}</p>
               <Reveal>
-                <p style={{margin:'0 0 8px'}}>{String.raw`Let $n, f, c$ be the daily rates. System: $\begin{cases} 3n + 2f + 4c = 106 \\ 2n + 4f + 3c = 107 \\ 4n + 3f + 2c = 102 \end{cases}$`}</p>
-                <p style={{margin:0}}>{String.raw`Gaussian elimination gives the unique solution `}<b>{String.raw`$n = 10$, $f = 18$, $c = 15$`}</b>{String.raw` (dollars per day). Check eq 1: $3(10)+2(18)+4(15) = 30+36+60 = 126$… recompute carefully by elimination on the augmented matrix $\left(\begin{array}{ccc|c}3&2&4&106\\2&4&3&107\\4&3&2&102\end{array}\right)$ to obtain the rates; verify your result satisfies all three equations exactly.`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`Let $n, f, c$ be the daily rates (Nissan, Ford, Chevrolet). System: $\begin{cases} 3n + 2f + 4c = 106 \\ 2n + 4f + 3c = 107 \\ 4n + 3f + 2c = 102 \end{cases}$`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`Augmented matrix $\left(\begin{array}{ccc|c}3&2&4&106\\2&4&3&107\\4&3&2&102\end{array}\right)$. Reducing to REF and back-substituting gives a unique solution (three pivots, three variables).`}</p>
+                <p style={{margin:0}}>{String.raw`**Solution:** `}<b>{String.raw`$n = 10$, $f = 12$, $c = 13$`}</b>{String.raw` dollars per day. Check: eq 1 $= 3(10)+2(12)+4(13) = 30+24+52 = 106$ ✓; eq 2 $= 2(10)+4(12)+3(13) = 20+48+39 = 107$ ✓; eq 3 $= 4(10)+3(12)+2(13) = 40+36+26 = 102$ ✓.`}</p>
               </Reveal>
             </Example>
 
@@ -797,9 +798,10 @@ export default function Lec2() {
             <Example n="1.2.18" title="Club membership in equilibrium">
               <p>{String.raw`A school has three clubs; each student belongs to exactly one. After switching: Club A keeps $\tfrac{4}{10}$, sends $\tfrac{1}{10}$ to B, $\tfrac{5}{10}$ to C. Club B keeps $\tfrac{7}{10}$, sends $\tfrac{2}{10}$ to A, $\tfrac{1}{10}$ to C. Club C keeps $\tfrac{6}{10}$, sends $\tfrac{2}{10}$ to A, $\tfrac{2}{10}$ to B. If each club's fraction of the population is unchanged, find these fractions.`}</p>
               <Reveal>
-                <p style={{margin:'0 0 8px'}}>{String.raw`Let $a, b, c$ be the population fractions. "Unchanged" means inflow = current value for each club:`}</p>
-                <p style={{margin:'0 0 8px'}}>{String.raw`$\begin{cases} \tfrac{4}{10}a + \tfrac{2}{10}b + \tfrac{2}{10}c = a \\ \tfrac{1}{10}a + \tfrac{7}{10}b + \tfrac{2}{10}c = b \\ \tfrac{5}{10}a + \tfrac{1}{10}b + \tfrac{6}{10}c = c \end{cases}$ plus $a + b + c = 1$.`}</p>
-                <p style={{margin:0}}>{String.raw`Clearing denominators and moving terms gives a homogeneous system; together with $a+b+c=1$ it has a unique solution. Solving yields the equilibrium fractions $a, b, c$ — set up the augmented matrix, reduce to REF, and use the normalisation $a+b+c=1$ to pin down the one free parameter.`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`Let $a, b, c$ be the population fractions of clubs A, B, C. "Unchanged" means the total inflow to each club equals its current fraction. Reading the inflows (A keeps $\tfrac{4}{10}$ of itself, receives $\tfrac{2}{10}$ of B and $\tfrac{2}{10}$ of C, and so on):`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`$\begin{cases} \tfrac{4}{10}a + \tfrac{2}{10}b + \tfrac{2}{10}c = a \\ \tfrac{1}{10}a + \tfrac{7}{10}b + \tfrac{2}{10}c = b \\ \tfrac{5}{10}a + \tfrac{1}{10}b + \tfrac{6}{10}c = c \end{cases}$ together with $a + b + c = 1$.`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`Moving every variable to one side gives a homogeneous system $(M - I)\,\mathbf{x} = \mathbf{0}$. Its row reduction leaves one free variable (the three equilibrium equations are dependent), so the family of solutions is a single line; the normalisation $a+b+c=1$ picks out the one point on it that is a genuine set of population fractions.`}</p>
+                <p style={{margin:0}}>{String.raw`**Solution:** `}<b>{String.raw`$a = \tfrac{1}{4}$, $b = \tfrac{7}{20}$, $c = \tfrac{2}{5}$`}</b>{String.raw` — that is, $0.25$, $0.35$, $0.40$. Check they sum to $1$ ✓, and substituting back leaves each club's fraction unchanged ✓.`}</p>
               </Reveal>
             </Example>
 
