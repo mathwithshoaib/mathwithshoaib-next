@@ -48,6 +48,25 @@ function lecturesByWeek() {
 
 function Reveal({ label = 'Show solution', children }) {
   const [open, setOpen] = useState(false);
+  const bodyRef = useRef(null);
+
+  // When the panel opens, its LaTeX has only just been mounted into the DOM.
+  // MathJax already finished its page-load pass, so we must ask it to typeset
+  // this newly-revealed content specifically.
+  useEffect(() => {
+    if (!open) return;
+    let tries = 0;
+    const t = setInterval(() => {
+      tries++;
+      if (window.MathJax?.typesetPromise && bodyRef.current) {
+        window.MathJax.typesetPromise([bodyRef.current]);
+        clearInterval(t);
+      }
+      if (tries > 20) clearInterval(t);
+    }, 80);
+    return () => clearInterval(t);
+  }, [open]);
+
   return (
     <div style={{ margin: '16px 0' }}>
       <button onClick={() => setOpen(o => !o)} style={{
@@ -60,7 +79,7 @@ function Reveal({ label = 'Show solution', children }) {
         {open ? 'Hide solution' : label}
       </button>
       {open && (
-        <div style={{ marginTop: '12px', padding: '18px 22px', background: 'rgba(56,201,176,.06)', border: '1px solid #cfe8e2', borderRadius: '12px', lineHeight: 1.8 }}>
+        <div ref={bodyRef} style={{ marginTop: '12px', padding: '18px 22px', background: 'rgba(56,201,176,.06)', border: '1px solid #cfe8e2', borderRadius: '12px', lineHeight: 1.8 }}>
           {children}
         </div>
       )}
@@ -819,7 +838,8 @@ export default function Lec2() {
               <p>{String.raw`A boy finds \$1.05 in dimes (10¢), nickels (5¢), and pennies (1¢). There are 17 coins in all. How many of each type can he have?`}</p>
               <Reveal>
                 <p style={{margin:'0 0 8px'}}>{String.raw`Let $d, n, p$ be the counts. $\begin{cases} d + n + p = 17 \\ 10d + 5n + p = 105 \end{cases}$ — two equations, three unknowns, so expect a free variable (but constrained to non-negative integers).`}</p>
-                <p style={{margin:0}}>{String.raw`Subtracting: $9d + 4n = 88$. Solve for non-negative integer solutions: $d$ must make $88 - 9d$ divisible by 4 and non-negative. This gives a small finite set of valid $(d, n, p)$ triples — list them by testing $d = 0, 1, 2, \dots$ and keeping those with $n \ge 0$, $p \ge 0$. (The integer/non-negativity constraint is what makes the "infinitely many" algebraic family collapse to finitely many real-world answers.)`}</p>
+                <p style={{margin:'0 0 8px'}}>{String.raw`Subtracting the equations: $9d + 4n = 88$. We need non-negative integers, so $88 - 9d$ must be divisible by 4 and $\ge 0$. Testing $d = 0, 1, 2, \dots$: only $d = 4$ (giving $n = 13$) and $d = 8$ (giving $n = 4$) work; then $p = 17 - d - n$.`}</p>
+                <p style={{margin:0}}>{String.raw`**Two solutions:** `}<b>{String.raw`$(d, n, p) = (4, 13, 0)$`}</b>{String.raw` — 4 dimes, 13 nickels, 0 pennies; or `}<b>{String.raw`$(d, n, p) = (8, 4, 5)$`}</b>{String.raw` — 8 dimes, 4 nickels, 5 pennies. Check the first: value $= 40 + 65 + 0 = 105$¢ ✓, coins $= 17$ ✓. The integer/non-negativity constraint is what collapses the algebraic "infinitely many" family down to just these two real-world answers.`}</p>
               </Reveal>
             </Example>
 
@@ -856,7 +876,7 @@ export default function Lec2() {
                 <p style={{margin:'0 0 6px'}}>{String.raw`**f. False.** Consistency can depend on the constants — Example F showed one constant turning a consistent system inconsistent.`}</p>
                 <p style={{margin:'0 0 6px'}}>{String.raw`**g. False.** A $3\times5$ augmented matrix means 4 variables (5 columns minus the constant column). Consistent could still be unique if rank $= 4$… but rank $\le 3$ here (only 3 rows), and $3 < 4$, so actually it `}<i>will</i>{String.raw` have free variables — making g `}<b>True</b>{String.raw` in this specific shape. (Worth checking carefully: with 3 rows, rank $\le 3 < 4$ variables, so a consistent system has $\ge 1$ free variable, hence more than one solution.)`}</p>
                 <p style={{margin:'0 0 6px'}}>{String.raw`**h. True.** Rank cannot exceed the number of rows, which is 3.`}</p>
-                <p style={{margin:'0 0 6px'}}>{String.raw`**i. True.** If $\operatorname{rank} A = 3$ and $A$ has only 3 rows, there is no zero row in $A$'s REF to carry a contradictory nonzero constant, so $\operatorname{rank}(C) = \operatorname{rank}(A) = 3$ — consistent.`}</p>
+                <p style={{margin:'0 0 6px'}}>{String.raw`**i. False.** Here $A$ is the augmented matrix. We could have $\operatorname{rank}(A) = 3$ while $\operatorname{rank}(C) = 2$ — the extra independent direction coming from the constant column. For example $C = \left(\begin{array}{cccc}1&0&0&0\\0&1&0&0\\0&0&0&0\end{array}\right)$ with constants $\left(\begin{array}{c}0\\0\\1\end{array}\right)$: then $\operatorname{rank}(C) = 2 < 3 = \operatorname{rank}(A)$, so the system is inconsistent. Knowing $\operatorname{rank}(A) = 3$ alone does not guarantee consistency.`}</p>
                 <p style={{margin:0}}>{String.raw`**j. True.** $\operatorname{rank} C = 3$ with 3 rows means $C$'s REF has no zero row, so $\operatorname{rank}(A) = \operatorname{rank}(C)$ — consistent.`}</p>
                 <p style={{margin:'10px 0 0',fontSize:'.85rem',fontStyle:'italic'}}>These conceptual problems reward careful rank reasoning over computation — exactly the motto in action: think before you compute.</p>
               </Reveal>
