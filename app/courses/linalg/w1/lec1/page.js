@@ -726,7 +726,19 @@ export default function Lec1() {
 
             <p>Here is the key insight: in every step of elimination, the variables $x, y, z$ play no role. We add and subtract equations — but it is only the <b>coefficients</b> and <b>constants</b> that change. The variables are passengers. So we throw them off the bus.</p>
 
-            <p>Collect the coefficients into one matrix, the unknowns into a column, the constants into another column. The system becomes:</p>
+            <p>{String.raw`Take a concrete system. Three equations, three unknowns:`}</p>
+
+            <div style={{textAlign:'center',margin:'20px 0'}}>
+              <p style={{margin:0}}>{String.raw`$$\begin{cases} 2x + y - z = 8 \\ -3x - y + 2z = -11 \\ -2x + y + 2z = -3 \end{cases}$$`}</p>
+            </div>
+
+            <p>{String.raw`Now strip away the symbols. Line up the coefficients in a grid, stack the unknowns in a column, put the constants on the right. Nothing is lost — every number stays exactly where it was:`}</p>
+
+            <div style={{textAlign:'center',margin:'20px 0'}}>
+              <p style={{margin:0}}>{String.raw`$$\underbrace{\begin{pmatrix} 2 & 1 & -1 \\ -3 & -1 & 2 \\ -2 & 1 & 2 \end{pmatrix}}_{\large A} \underbrace{\begin{pmatrix} x \\ y \\ z \end{pmatrix}}_{\large X} = \underbrace{\begin{pmatrix} 8 \\ -11 \\ -3 \end{pmatrix}}_{\large b}$$`}</p>
+            </div>
+
+            <p>Collect the coefficients into one matrix, the unknowns into a column, the constants into another column. In general the system becomes:</p>
 
             <div style={{textAlign:'center',margin:'28px 0'}}>
               <p style={{margin:0}}>{String.raw`$$\underbrace{\begin{pmatrix} a_{11} & a_{12} & \cdots & a_{1n} \\ a_{21} & a_{22} & \cdots & a_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ a_{m1} & a_{m2} & \cdots & a_{mn} \end{pmatrix}}_{\large A\ (\text{coefficient matrix})} \underbrace{\begin{pmatrix} x_1 \\ x_2 \\ \vdots \\ x_n \end{pmatrix}}_{\large X\ (\text{unknowns})} = \underbrace{\begin{pmatrix} b_1 \\ b_2 \\ \vdots \\ b_m \end{pmatrix}}_{\large b\ (\text{constants})}$$`}</p>
