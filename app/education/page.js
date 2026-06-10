@@ -68,12 +68,7 @@ const DEGREES = [
   },
 ];
 
-const STATS = [
-  { n: '3',     label: 'Degrees Earned' },
-  { n: '3.85',  label: 'Top CGPA (MS)' },
-  { n: '88%',   label: 'MSc Aggregate' },
-  { n: '🥇',   label: 'Gold Medal' },
-];
+
 
 /* ══════════════════════════════════════════════════════
    PAGE
