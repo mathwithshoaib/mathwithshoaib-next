@@ -15,6 +15,7 @@ import Footer from '../../../../components/Footer';
 const LECTURES = [
   { week: 1, n: 1, slug: 'w1/lec1', title: 'The Language of Matrices', live: true },
   { week: 1, n: 2, slug: 'w1/lec2', title: 'Row Operations & Gaussian Elimination', live: true },
+  { week: 1, n: 3, slug: 'w1/lec3', title: 'RREF, Homogeneous Systems & Linear Combinations', live: true },
 ];
 const THIS_SLUG = 'w1/lec2';
 const PREV_HREF = '/courses/linalg/w1/lec1';
