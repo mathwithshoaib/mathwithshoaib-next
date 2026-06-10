@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
-import Navbar from '../../../../../components/Navbar';
-import Footer from '../../../../../components/Footer';
+import Navbar from '../../../../components/Navbar';
+import Footer from '../../../../components/Footer';
 
 /* ════════════════════════════════════════════════════════════
    MATH-120 · LECTURE 3
