@@ -110,15 +110,7 @@ export default function Education() {
             From a Gold Medal at GCU to an international Masters programme built in collaboration with ICTP Italy, and a fully funded year in France — a journey across continents and disciplines.
           </p>
 
-          {/* Stats strip */}
-          <div className="stats-strip reveal" style={{ maxWidth: '680px', marginTop: '44px' }}>
-            {STATS.map(s => (
-              <div key={s.label} className="stat">
-                <span className="stat-n">{s.n}</span>
-                <div className="stat-l">{s.label}</div>
-              </div>
-            ))}
-          </div>
+          
         </div>
       </section>
 
