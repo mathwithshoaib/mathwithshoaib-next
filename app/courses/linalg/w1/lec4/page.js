@@ -27,7 +27,7 @@ const LEC = {
   number: 'Lecture 4',
   title: 'Solution Structure & Real-World Applications',
   subtitle: 'Basic solutions, the particular-plus-homogeneous picture, and how linear systems run traffic grids and chemistry',
-  date: '12 June 2026',
+  date: '11 June 2026',
 };
 
 const ANCHORS = [
