@@ -372,8 +372,8 @@ export default function Lec3() {
                 </div>
                 <div className="sbs-card">
                   <div className="sbs-label">In REF but NOT RREF ✗</div>
-                  <p style={{margin:0,textAlign:'center'}}>{String.raw`$$\begin{pmatrix}1&2&0&3\\0&0&1&-1\\0&0&0&0\end{pmatrix}$$`}</p>
-                  <p style={{fontSize:'.85rem',color:'var(--lec-ink2)',marginTop:'10px',marginBottom:0}}>REF: staircase ✓, leading 1s ✓. But row 2's pivot (col 3) has nothing above it to clear — actually this already is RREF! The entries above a pivot only matter when they exist; column 3 has zero above the pivot in rows that are zero anyway.</p>
+                  <p style={{margin:0,textAlign:'center'}}>{String.raw`$$\begin{pmatrix}1&2&-1&3\\0&0&1&-1\\0&0&0&0\end{pmatrix}$$`}</p>
+                  <p style={{fontSize:'.85rem',color:'var(--lec-ink2)',marginTop:'10px',marginBottom:0}}>REF: staircase ✓, leading 1s ✓. But row 2's pivot (col 3) has nonzero entry above it.</p>
                 </div>
               </div>
             </Example>
