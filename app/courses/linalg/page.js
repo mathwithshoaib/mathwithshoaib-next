@@ -33,7 +33,9 @@ const LECTURES = [
   { week: 1, n: 2, slug: 'w1/lec2', title: 'Row Operations & Gaussian Elimination', ref: '§1.2', 
     blurb: 'Elementary row operations and their applications', date: '9 June', live: true },
   { week: 1, n: 3, slug: 'w1/lec3', title: 'RREF, Homogeneous Systems & Linear Combinations', ref: '§1.3',
-    blurb: 'Reduced row-echelon form, homogeneous systems, and linear combinations', date: '10 June', live: true }
+    blurb: 'Reduced row-echelon form, homogeneous systems, and linear combinations', date: '10 June', live: true },
+  { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', ref: '§1.4',
+    blurb: 'General solution structure, electrical networks, and chemical reactions', date: '11 June', live: true },
 ];
 
 // Teaching team.
