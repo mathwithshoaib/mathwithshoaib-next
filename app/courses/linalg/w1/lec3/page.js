@@ -157,6 +157,143 @@ function Widget({ title, children }) {
   );
 }
 
+/* ═══════════════ GEOMETRY: HOMO vs NON-HOMO SVGs ═══════════════ */
+
+/* Static side-by-side: two homogeneous lines (through origin) vs
+   two non-homogeneous lines (shifted). Pure SVG, no state. */
+function HomoNonHomoSVG() {
+  // helper to map math coords (-5..5) to svg pixels in a 220x220 box
+  const M = (v) => 110 + v * 18; // x: origin at 110, scale 18px/unit
+  const MY = (v) => 110 - v * 18; // y flips
+
+  const Grid = () => (
+    <g>
+      {[-4,-3,-2,-1,1,2,3,4].map(i=>(
+        <g key={i}>
+          <line x1={M(i)} y1="14" x2={M(i)} y2="206" stroke="#eee" strokeWidth="1"/>
+          <line x1="14" y1={MY(i)} x2="206" y2={MY(i)} stroke="#eee" strokeWidth="1"/>
+        </g>
+      ))}
+      <line x1="14" y1="110" x2="206" y2="110" stroke="#bbb" strokeWidth="1.4"/>
+      <line x1="110" y1="14" x2="110" y2="206" stroke="#bbb" strokeWidth="1.4"/>
+    </g>
+  );
+
+  return (
+    <div className="sbs">
+      {/* LEFT: homogeneous */}
+      <div className="sbs-card">
+        <div className="sbs-label">Homogeneous · both through origin</div>
+        <svg viewBox="0 0 220 220" style={{width:'100%',maxWidth:'260px',margin:'0 auto',display:'block'}}>
+          <Grid/>
+          {/* line 1: x - y = 0  -> y = x */}
+          <line x1={M(-5)} y1={MY(-5)} x2={M(5)} y2={MY(5)} stroke="#38c9b0" strokeWidth="2.4"/>
+          {/* line 2: x + 2y = 0 -> y = -x/2 */}
+          <line x1={M(-5)} y1={MY(2.5)} x2={M(5)} y2={MY(-2.5)} stroke="#9b80e8" strokeWidth="2.4"/>
+          {/* origin (shared solution) */}
+          <circle cx={M(0)} cy={MY(0)} r="4.5" fill="#e8a020"/>
+          <text x={M(0)+8} y={MY(0)-6} fontSize="10" fill="#c8860a" fontFamily="monospace">(0,0)</text>
+        </svg>
+        <p style={{fontSize:'.82rem',color:'var(--lec-ink2)',marginTop:'8px',marginBottom:0,lineHeight:1.6}}>
+          Both lines <b>must</b> pass through the origin — the trivial solution is always shared. They meet there (unique = trivial only) unless they coincide.
+        </p>
+      </div>
+
+      {/* RIGHT: non-homogeneous */}
+      <div className="sbs-card">
+        <div className="sbs-label">Non-homogeneous · shifted off origin</div>
+        <svg viewBox="0 0 220 220" style={{width:'100%',maxWidth:'260px',margin:'0 auto',display:'block'}}>
+          <Grid/>
+          {/* line 1: x - y = 2 -> y = x - 2 */}
+          <line x1={M(-3)} y1={MY(-5)} x2={M(5)} y2={MY(3)} stroke="#38c9b0" strokeWidth="2.4"/>
+          {/* line 2: x + 2y = -2 -> y = -(x+2)/2, parallel-ish different intercept */}
+          <line x1={M(-5)} y1={MY(1.5)} x2={M(5)} y2={MY(-3.5)} stroke="#9b80e8" strokeWidth="2.4"/>
+          {/* intersection point of the two: solve x-y=2, x+2y=-2 -> x=2/3*... compute */}
+          {/* x - y = 2 ; x + 2y = -2  => subtract: -3y=4 => y=-4/3, x=2-4/3=2/3 */}
+          <circle cx={M(2/3)} cy={MY(-4/3)} r="4.5" fill="#e06b6b"/>
+          <text x={M(2/3)+8} y={MY(-4/3)+12} fontSize="9.5" fill="#d85555" fontFamily="monospace">unique pt</text>
+          {/* origin marked but NOT on either line */}
+          <circle cx={M(0)} cy={MY(0)} r="3" fill="none" stroke="#bbb" strokeWidth="1.4"/>
+        </svg>
+        <p style={{fontSize:'.82rem',color:'var(--lec-ink2)',marginTop:'8px',marginBottom:0,lineHeight:1.6}}>
+          Neither line need pass through the origin. They can cross at one point, run parallel (no solution), or coincide — inconsistency becomes possible.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* Interactive: one homogeneous line ax+by=0 (fixed through origin) and its
+   shifted twin ax+by=c. Drag c to watch the line translate; the homogeneous
+   line stays pinned at the origin. */
+function ShiftLineApplet() {
+  const [c, setC] = useState(2);
+  const a = 1, b = -1; // line: x - y = c  (slope 1)
+
+  const W = 360, H = 320;
+  const ox = W/2, oy = H/2, s = 26; // origin + scale px/unit
+  const PX = (x)=> ox + x*s;
+  const PY = (y)=> oy - y*s;
+
+  // line x - y = k  => y = x - k. Draw between x=-6..6
+  const linePts = (k) => {
+    const x1=-6, y1=x1-k, x2=6, y2=x2-k;
+    return { x1:PX(x1), y1:PY(y1), x2:PX(x2), y2:PY(y2) };
+  };
+  const homo = linePts(0);
+  const shifted = linePts(c);
+
+  // particular solution with params=0: x=c... we use x-y=c, set y=0 => x=c. Point (c,0)
+  const px = PX(c), py = PY(0);
+
+  return (
+    <Widget title="Interactive · Drag c — watch the line slide off the origin">
+      <div style={{display:'flex',gap:'20px',flexWrap:'wrap',alignItems:'flex-start',justifyContent:'center'}}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',maxWidth:'380px',background:'#0b1020',borderRadius:'10px'}}>
+          {/* grid */}
+          {[-6,-5,-4,-3,-2,-1,1,2,3,4,5,6].map(i=>(
+            <g key={i}>
+              <line x1={PX(i)} y1="0" x2={PX(i)} y2={H} stroke="rgba(255,255,255,.05)" strokeWidth="1"/>
+              <line x1="0" y1={PY(i)} x2={W} y2={PY(i)} stroke="rgba(255,255,255,.05)" strokeWidth="1"/>
+            </g>
+          ))}
+          {/* axes */}
+          <line x1="0" y1={oy} x2={W} y2={oy} stroke="#5a5a8a" strokeWidth="1.4"/>
+          <line x1={ox} y1="0" x2={ox} y2={H} stroke="#5a5a8a" strokeWidth="1.4"/>
+          {/* homogeneous line (dashed teal, pinned at origin) */}
+          <line x1={homo.x1} y1={homo.y1} x2={homo.x2} y2={homo.y2} stroke="#38c9b0" strokeWidth="2.5" strokeDasharray="7 5"/>
+          {/* shifted line (solid amber) */}
+          <line x1={shifted.x1} y1={shifted.y1} x2={shifted.x2} y2={shifted.y2} stroke="#e8a020" strokeWidth="2.6"/>
+          {/* origin */}
+          <circle cx={ox} cy={oy} r="4.5" fill="#38c9b0"/>
+          <text x={ox+7} y={oy+15} fontSize="11" fill="#38c9b0" fontFamily="monospace">(0,0)</text>
+          {/* particular point */}
+          <circle cx={px} cy={py} r="5" fill="#e8a020"/>
+          <text x={px+8} y={py-7} fontSize="11" fill="#e8a020" fontFamily="monospace">xₚ=({c},0)</text>
+          {/* shift arrow from origin to particular point */}
+          {c!==0 && <line x1={ox} y1={oy} x2={px} y2={py} stroke="#9b80e8" strokeWidth="2" strokeDasharray="3 3"/>}
+        </svg>
+
+        <div style={{flex:'1 1 200px',minWidth:'200px'}}>
+          <div style={{fontFamily:'monospace',fontSize:'1rem',color:'#e8a020',padding:'8px 12px',background:'rgba(232,160,32,.08)',borderRadius:'8px',marginBottom:'14px'}}>
+            x − y = {c}
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'14px'}}>
+            <span style={{fontFamily:'monospace',color:'#e8a020',width:'18px'}}>c</span>
+            <input type="range" min={-5} max={5} step={1} value={c} onChange={e=>setC(+e.target.value)} style={{flex:1,accentColor:'#e8a020'}}/>
+            <span style={{fontFamily:'monospace',color:'#e8e8f0',width:'28px',textAlign:'right'}}>{c}</span>
+          </div>
+          <div style={{fontSize:'.82rem',color:'#a0a0d0',lineHeight:1.65}}>
+            <p style={{margin:'0 0 8px'}}><span style={{color:'#38c9b0'}}>━━</span> dashed teal: the homogeneous line <b style={{color:'#38c9b0'}}>x − y = 0</b>, locked through the origin.</p>
+            <p style={{margin:'0 0 8px'}}><span style={{color:'#e8a020'}}>━━</span> solid amber: the full line <b style={{color:'#e8a020'}}>x − y = c</b>. Same slope, shifted.</p>
+            <p style={{margin:0}}>Set <b style={{color:'#e8a020'}}>c = 0</b> and the two lines coincide — the shift vanishes and the full system <i>is</i> the homogeneous one.</p>
+          </div>
+        </div>
+      </div>
+    </Widget>
+  );
+}
+
 /* ═══════════════ PAGE ═══════════════ */
 export default function Lec3() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -565,6 +702,20 @@ export default function Lec3() {
                 <p style={{fontSize:'.9rem',color:'var(--lec-ink2)',lineHeight:1.7,margin:0}}>{String.raw`The line $ax + by = c$ with $c \ne 0$ is a `}<em>shift</em>{String.raw` of the line $ax + by = 0$ — same slope, moved away from the origin. Two non-homogeneous lines may be parallel (no solution), cross at a single point (unique solution), or coincide (infinitely many). Inconsistency is possible — a new phenomenon compared to the homogeneous case.`}</p>
               </div>
             </div>
+
+            {/* paste this block inside §7, right after the closing </div> of the
+                existing "In 2D — two lines" .sbs comparison block, and before the
+                "Generalisation to higher dimensions" heading */}
+
+            <p>Here is the same idea drawn out. On the left, two <b>homogeneous</b> lines — both forced through the origin. On the right, two <b>non-homogeneous</b> lines that have floated off the origin:</p>
+
+            <HomoNonHomoSVG/>
+
+            <p>Now make it move. The slider below controls the constant <span style={{fontFamily:'var(--fm)'}}>c</span> in {String.raw`$x - y = c$`}. Watch the amber line slide while its homogeneous twin (dashed teal) stays pinned at the origin. The purple arrow is the shift — your particular solution {String.raw`$\mathbf{x}_p$`}:</p>
+
+            <ShiftLineApplet/>
+
+            <p>This is the whole story of §7 in one picture: a non-homogeneous solution set is just the homogeneous one, <b>picked up and carried</b> by a particular solution. Set {String.raw`$c = 0$`} and the carry distance shrinks to nothing — the two lines merge.</p>
 
             <p style={{fontFamily:'var(--fh)',fontSize:'1.25rem',color:'var(--lec-ink)',margin:'32px 0 12px',fontWeight:600}}>Generalisation to higher dimensions</p>
 
