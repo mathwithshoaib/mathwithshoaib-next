@@ -525,7 +525,7 @@ export default function Lec5() {
               <p>{String.raw`If $A$ and $B$ are symmetric $n\times n$ matrices, show that $A+B$ is symmetric.`}</p>
               <p>{String.raw`$\textit{Proof.}$ Since $A^{\mathsf{T}}=A$ and $B^{\mathsf{T}}=B$, Theorem 2.1.2(4) gives`}</p>
               <p style={{textAlign:'center'}}>{String.raw`$$(A+B)^{\mathsf{T}} = A^{\mathsf{T}} + B^{\mathsf{T}} = A + B.$$`}</p>
-              <p>{String.raw`Hence $A+B$ is symmetric. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Hence $A+B$ is symmetric.`}</p>
             </Example>
 
             <Example n="4.12" title="A = 2Aᵀ implies A = 0 — Example 2.1.12 from Nicholson" advanced>
@@ -534,7 +534,7 @@ export default function Lec5() {
               <p style={{textAlign:'center'}}>{String.raw`$$A^{\mathsf{T}} = (2A^{\mathsf{T}})^{\mathsf{T}} = 2(A^{\mathsf{T}})^{\mathsf{T}} = 2A.$$`}</p>
               <p>{String.raw`Substituting $A^{\mathsf{T}}=2A$ back into $A=2A^{\mathsf{T}}$:`}</p>
               <p style={{textAlign:'center'}}>{String.raw`$$A = 2(2A) = 4A.$$`}</p>
-              <p>{String.raw`Subtracting $A$ from both sides: $3A=0$, so $A=\tfrac13\cdot 0 = 0$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Subtracting $A$ from both sides: $3A=0$, so $A=\tfrac13\cdot 0 = 0$.`}</p>
             </Example>
 
             {/* ─── §5 EXERCISES ─── */}
@@ -595,12 +595,12 @@ export default function Lec5() {
               <p style={{textAlign:'center'}}>{String.raw`$$A = a\begin{bmatrix}1&0\\0&0\end{bmatrix} + b\begin{bmatrix}0&1\\0&0\end{bmatrix} + c\begin{bmatrix}0&0\\1&0\end{bmatrix} + d\begin{bmatrix}0&0\\0&1\end{bmatrix}.$$`}</p>
               <p>{String.raw`$\textit{Proof.}$ Add the four scalar multiples entry by entry:`}</p>
               <p style={{textAlign:'center'}}>{String.raw`$$\begin{bmatrix}a&0\\0&0\end{bmatrix} +\begin{bmatrix}0&b\\0&0\end{bmatrix} +\begin{bmatrix}0&0\\c&0\end{bmatrix} +\begin{bmatrix}0&0\\0&d\end{bmatrix} =\begin{bmatrix}a&b\\c&d\end{bmatrix}=A.$$`}</p>
-              <p>{String.raw`Setting $a,b,c,d$ equal to the entries of $A$ gives the required representation. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Setting $a,b,c,d$ equal to the entries of $A$ gives the required representation.`}</p>
 
               <p style={{marginTop:'18px'}}>{String.raw`$\textbf{(b)}$ We claim $A = p\begin{bmatrix}1&0\\0&1\end{bmatrix} +q\begin{bmatrix}1&1\\0&0\end{bmatrix} +r\begin{bmatrix}1&0\\1&0\end{bmatrix} +s\begin{bmatrix}0&1\\1&0\end{bmatrix}$ for some $p,q,r,s$.`}</p>
               <p>Expanding:</p>
               <p style={{textAlign:'center'}}>{String.raw`$$\begin{bmatrix}p+q+r & q+s \\ r+s & p\end{bmatrix} = \begin{bmatrix}a&b\\c&d\end{bmatrix}.$$`}</p>
-              <p>{String.raw`Matching entries: $p=d$, $r+s=c$, $q+s=b$, $p+q+r=a$. From $p=d$: $q+r = a-d$. From $q+s=b$ and $r+s=c$: subtracting gives $q-r=b-c$, so $q=\tfrac{(a-d)+(b-c)}{2}$, $r=\tfrac{(a-d)-(b-c)}{2}$, $s=b-q$. This always has a solution, so the representation exists for any $A$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Matching entries: $p=d$, $r+s=c$, $q+s=b$, $p+q+r=a$. From $p=d$: $q+r = a-d$. From $q+s=b$ and $r+s=c$: subtracting gives $q-r=b-c$, so $q=\tfrac{(a-d)+(b-c)}{2}$, $r=\tfrac{(a-d)-(b-c)}{2}$, $s=b-q$. This always has a solution, so the representation exists for any $A$.`}</p>
             </Exercise>
 
             <Exercise id="2.1.10" title="Show r = s = t = 0">
@@ -608,20 +608,20 @@ export default function Lec5() {
               <p style={{textAlign:'center'}}>{String.raw`$$\text{entry 1:}\; r + 0 + 3t = 0,\quad \text{entry 2:}\; r + s + 0 = 0,\quad \text{entry 3:}\; -r + 2s + t = 0.$$`}</p>
               <p>{String.raw`This is a homogeneous system in $r,s,t$:`}</p>
               <p style={{textAlign:'center'}}>{String.raw`$$\begin{bmatrix}1&0&3\\1&1&0\\-1&2&1\end{bmatrix} \begin{pmatrix}r\\s\\t\end{pmatrix}=\begin{pmatrix}0\\0\\0\end{pmatrix}.$$`}</p>
-              <p>{String.raw`Computing the determinant: $1(1\cdot1-0\cdot2)-0+3(1\cdot2-1\cdot(-1)) = 1+3(3)=10\neq0$. Since the coefficient matrix is nonsingular, the only solution is $r=s=t=0$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Computing the determinant: $1(1\cdot1-0\cdot2)-0+3(1\cdot2-1\cdot(-1)) = 1+3(3)=10\neq0$. Since the coefficient matrix is nonsingular, the only solution is $r=s=t=0$.`}</p>
             </Exercise>
 
             <Exercise id="2.1.11">
               <p>{String.raw`$\textbf{(a)}$ Suppose $Q+A=A$ holds for every $m\times n$ matrix $A$. Show $Q=O_{mn}$.`}</p>
-              <p>{String.raw`$\textit{Proof.}$ By hypothesis, $Q+A=A$. Subtracting $A$: $Q=A-A=O$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`$\textit{Proof.}$ By hypothesis, $Q+A=A$. Subtracting $A$: $Q=A-A=O$.`}</p>
               <p>{String.raw`$\textbf{(b)}$ Suppose $A+A'=O_{mn}$. Show $A'=-A$.`}</p>
-              <p>{String.raw`$\textit{Proof.}$ $A+A'=O$ means $A'=O-A=-A$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`$\textit{Proof.}$ $A+A'=O$ means $A'=O-A=-A$.`}</p>
             </Exercise>
 
             <Exercise id="2.1.12" title="A = −A if and only if A = 0">
               <p>{String.raw`$\textbf{($\Rightarrow$)}$ Assume $A=-A$. Then $A+A=0$, so $2A=O$, hence $A=\tfrac{1}{2}O=O$.`}</p>
               <p>{String.raw`$\textbf{($\Leftarrow$)}$ If $A=O$, then $-A=-O=O=A$.`}</p>
-              <p>{String.raw`Therefore $A=-A$ if and only if $A=O$. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`Therefore $A=-A$ if and only if $A=O$.`}</p>
             </Exercise>
 
             <Exercise id="2.1.13" title="Diagonal matrices are closed under +, −, kA">
@@ -629,9 +629,9 @@ export default function Lec5() {
                 <p style={{margin:0}}>{String.raw`A square matrix $D=[d_{ij}]$ is called a `}<b>diagonal matrix</b>{String.raw` if every off-diagonal entry is zero: $d_{ij}=0$ whenever $i\neq j$. In other words, only the main-diagonal entries $d_{11},d_{22},\ldots, d_{nn}$ can be nonzero.`}</p>
               </DefBox>
               <p>{String.raw`Let $A=[a_{ij}]$ and $B=[b_{ij}]$ be diagonal $n\times n$ matrices, so $a_{ij}=0$ and $b_{ij}=0$ for all $i\neq j$.`}</p>
-              <p>{String.raw`$\textbf{(a)}$ $A+B$ is diagonal. The $(i,j)$-entry of $A+B$ is $a_{ij}+b_{ij}$. For $i\neq j$: $a_{ij}+b_{ij}=0+0=0$. So all off-diagonal entries of $A+B$ are zero; hence $A+B$ is diagonal. $\hfill\blacksquare$`}</p>
-              <p>{String.raw`$\textbf{(b)}$ $A-B$ is diagonal. The $(i,j)$-entry of $A-B$ is $a_{ij}-b_{ij}$. For $i\neq j$: $a_{ij}-b_{ij}=0-0=0$. So $A-B$ is diagonal. $\hfill\blacksquare$`}</p>
-              <p>{String.raw`$\textbf{(c)}$ $kA$ is diagonal for any scalar $k$. The $(i,j)$-entry of $kA$ is $k\,a_{ij}$. For $i\neq j$: $k\cdot a_{ij}=k\cdot0=0$. So $kA$ is diagonal. $\hfill\blacksquare$`}</p>
+              <p>{String.raw`$\textbf{(a)}$ $A+B$ is diagonal. The $(i,j)$-entry of $A+B$ is $a_{ij}+b_{ij}$. For $i\neq j$: $a_{ij}+b_{ij}=0+0=0$. So all off-diagonal entries of $A+B$ are zero; hence $A+B$ is diagonal.`}</p>
+              <p>{String.raw`$\textbf{(b)}$ $A-B$ is diagonal. The $(i,j)$-entry of $A-B$ is $a_{ij}-b_{ij}$. For $i\neq j$: $a_{ij}-b_{ij}=0-0=0$. So $A-B$ is diagonal.`}</p>
+              <p>{String.raw`$\textbf{(c)}$ $kA$ is diagonal for any scalar $k$. The $(i,j)$-entry of $kA$ is $k\,a_{ij}$. For $i\neq j$: $k\cdot a_{ij}=k\cdot0=0$. So $kA$ is diagonal.`}</p>
             </Exercise>
 
             <Exercise id="2.1.14" title="Find s and t for symmetry">
