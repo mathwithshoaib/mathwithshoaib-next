@@ -473,7 +473,7 @@ export default function Lec6() {
 
             <div style={{ display:'flex', flexDirection:'column', gap:'2px', margin:'20px 0' }}>
               {[
-                ['1','Set up','Write $A$ and $I$ side by side as $[A \mid I]$.'],
+                ['1','Set up','Write $A$ and $I$ side by side as $[\,A \mid I\,]$.'],
                 ['2','Reduce','Apply row operations to the entire augmented matrix, aiming to turn the left block into $I$.'],
                 ['3','Read off','When the left block is $I$, the right block is $A^{-1}$.'],
                 ['4','Singular check','If a full row of zeros appears in the left block, $A$ cannot reach $I$ — it is singular, and no inverse exists.'],
@@ -549,7 +549,7 @@ export default function Lec6() {
             </Callout>
 
             <div style={{ display:'flex', justifyContent:'center', margin:'24px 0' }}>
-              {false ? (
+              {true ? (
                 <Link href="/courses/linalg/notes/matrix-multiplication" style={{
                   fontFamily:'var(--fm)', fontSize:'.82rem', letterSpacing:'.04em', fontWeight:600,
                   color:'#1a1a2e', background:'var(--amber)', border:'none',
