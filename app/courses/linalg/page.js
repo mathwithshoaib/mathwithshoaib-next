@@ -36,6 +36,10 @@ const LECTURES = [
     blurb: 'Reduced row-echelon form, homogeneous systems, and linear combinations', date: '10 June', live: true },
   { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', ref: '§1.4',
     blurb: 'General solution structure, electrical networks, and chemical reactions', date: '11 June', live: true },
+  { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', ref: '§2.2–2.3',
+    blurb: 'Matrix addition, scalar multiplication, and the transpose operation', date: '15 June', live: true },
+  { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', ref: '§2.4',
+    blurb: 'Finding the inverse of a matrix and its applications', date: '16 June', live: true },
 ];
 
 // Teaching team.
