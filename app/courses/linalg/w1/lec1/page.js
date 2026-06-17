@@ -17,6 +17,7 @@ const LECTURES = [
   { week: 1, n: 3, slug: 'w1/lec3', title: 'RREF, Homogeneous Systems & Linear Combinations', live: true },
   { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', live: true },
   { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', live: true },
+  { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', live: true },
 ];
 const THIS_SLUG = 'w1/lec1';
 const PREV_HREF = '/courses/linalg';          // first lecture → back to course home
