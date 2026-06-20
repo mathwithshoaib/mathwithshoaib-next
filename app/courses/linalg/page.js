@@ -121,7 +121,7 @@ const MOCK_EXAMS = [
 
 // Weekly schedule. day: 0=Mon … 4=Fri. Times 24h decimal (13.5 = 1:30pm).
 const SCHEDULE = {
-  startHour: 11, endHour: 20,
+  startHour: 11, endHour: 19,
   days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
   events: [
     { day: 0, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
