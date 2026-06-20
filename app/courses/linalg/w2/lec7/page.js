@@ -24,7 +24,7 @@ const LECTURES = [
 ];
 const THIS_SLUG = 'w2/lec7';
 const PREV_HREF  = '/courses/linalg/w2/lec6';
-const NEXT_HREF  = '/courses/linalg/w3/lec8';
+const NEXT_HREF  = '/courses/linalg/w2/lec8';
 
 const LEC = {
   course: 'MATH-120 · Linear Algebra',
