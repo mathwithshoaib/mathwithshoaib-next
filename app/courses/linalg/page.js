@@ -52,8 +52,13 @@ const TEACHING_TEAM = [
     office: '9-155A (SSE Building)', hours: '04:00 – 05:00 (Mon – Thu)' },
   { role: 'Teaching Assistant', name: 'Muhammad Shoaib Khan', email: 'shoaib.khan@lums.edu.pk',
     office: '9-155 SSE', hours: '01:00 – 02:00 (Mon – Thu)' },
+  { role: 'Teaching Assistant', name: 'Azhar Javed', email: 'azhar.javed@lums.edu.pk',
+    office: '9-155 (SSE Building)', hours: 'TBA' },
+  { role: 'Teaching Assistant', name: 'Aqsa Noreen', email: '22070005@lums.edu.pk',
+    office: '9-155 (SSE Building)', hours: 'TBA' },
   { role: 'Teaching Assistant', name: 'Hajra Mahmood', email: '28100096@lums.edu.pk',
     office: 'Math Lobby', hours: 'Mon, Wed, Thu 5-6pm & Fri 4-5pm' },
+  
 ];
 
 // Course timeline — static syllabus overview (no links).
@@ -127,12 +132,13 @@ const SCHEDULE = {
     { day: 1, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 2, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
     { day: 3, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
-    { day: 0, start: 10, end: 11.5, type: 'tutorial', title: 'Tutorial · Shoaib', loc: 'TBA' },
+    { day: 0, start: 11, end: 12.5, type: 'tutorial', title: 'Tutorial · Aqsa', loc: 'TBA' },
+    { day: 3, start: 16, end: 17, type: 'tutorial', title: 'Tutorial · Azhar', loc: 'TBA' },
     { day: 0, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
     { day: 2, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
     { day: 3, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
     { day: 4, start: 16, end: 17, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 4, start: 14.5, end: 16, type: 'tutorial', title: 'Tutorial · Hajra', loc: 'TBA' },
+    { day: 4, start: 14.5, end: 16, type: 'tutorial', title: 'Tutorial · Hajra', loc: '9-1C1, First floor SSE' },
   ],
 };
 
