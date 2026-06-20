@@ -36,10 +36,14 @@ const LECTURES = [
     blurb: 'Reduced row-echelon form, homogeneous systems, and linear combinations', date: '10 June', live: true },
   { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', ref: '§1.4',
     blurb: 'General solution structure, electrical networks, and chemical reactions', date: '11 June', live: true },
-  { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', ref: '§2.2–2.3',
+  { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', ref: '§2.1–2.2',
     blurb: 'Matrix addition, scalar multiplication, and the transpose operation', date: '15 June', live: true },
   { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', ref: '§2.4',
     blurb: 'Finding the inverse of a matrix and its applications', date: '16 June', live: true },
+  { week: 2, n: 7, slug: 'w2/lec7', title: 'Elementary Matrices & Solving Systems', ref: '§2.5',
+    blurb: 'Using elementary matrices to solve systems of equations', date: '17 June', live: true },
+  { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', ref: '§2.7–2.8',
+    blurb: 'LU factorization method and its application to economic input-output models', date: '18 June', live: true },
 ];
 
 // Teaching team.
