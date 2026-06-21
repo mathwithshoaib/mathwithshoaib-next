@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = {
   title: 'Muhammad Shoaib Khan · Shoaib-K · LUMS',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
       <body>
         <div id="sk-progress"><div id="sk-progress-bar" suppressHydrationWarning></div></div>
         {children}
+        <Analytics />
       </body>
     </html>
   );
