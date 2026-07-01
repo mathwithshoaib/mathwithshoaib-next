@@ -20,9 +20,10 @@ const LECTURES = [
   { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', live: true },
   { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', live: true },
   { week: 2, n: 7, slug: 'w2/lec7', title: 'Elementary Matrices & Solving Systems', live: true },
-  { week: 3, n: 8, slug: 'w3/lec8', title: 'LU-Factorization & Input–Output Models', live: true },
+  { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', live: true },
   { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', live: true },
   { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', live: true },
+  { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', live: true },
 ];
 const THIS_SLUG = 'w3/lec9';
 const PREV_HREF  = '/courses/linalg/w3/lec8';
@@ -33,7 +34,7 @@ const LEC = {
   number: 'Lecture 9',
   title: 'Determinants',
   subtitle: 'Cofactor expansion, the property toolkit, triangular and block shortcuts — the single number that decides invertibility',
-  date: '25 June 2026',
+  date: '22 June 2026',
 };
 
 const ANCHORS = [
