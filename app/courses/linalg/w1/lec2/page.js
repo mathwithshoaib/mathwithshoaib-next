@@ -21,6 +21,9 @@ const LECTURES = [
   { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', live: true },
   { week: 2, n: 7, slug: 'w2/lec7', title: 'Elementary Matrices & Solving Systems', live: true },
   { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', live: true },
+  { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', live: true },
+  { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', live: true },
+];
 ];
 const THIS_SLUG = 'w1/lec2';
 const PREV_HREF = '/courses/linalg/w1/lec1';
