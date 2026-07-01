@@ -188,6 +188,9 @@ function Callout({ icon, title, color='amber', children }) {
   );
 }
 
+function SubH({ children }) {
+  return <p style={{ fontFamily:'var(--fh)', fontSize:'1.3rem', color:'var(--lec-ink)', margin:'36px 0 12px', fontWeight:600 }}>{children}</p>;
+}
 
 /* ═══════════════ GRAPH PATH-COUNTING FIGURE ═══════════════ */
 function GraphPathFigure() {
