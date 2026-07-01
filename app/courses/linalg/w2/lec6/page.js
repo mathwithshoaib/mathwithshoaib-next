@@ -24,7 +24,7 @@ const LECTURES = [
   { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', live: true },
   { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', live: true },
 ];
-];
+
 const THIS_SLUG = 'w2/lec6';
 const PREV_HREF  = '/courses/linalg/w2/lec5';
 const NEXT_HREF  = '/courses/linalg/w2/lec7';
