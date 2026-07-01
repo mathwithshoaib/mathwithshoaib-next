@@ -44,6 +44,10 @@ const LECTURES = [
     blurb: 'Using elementary matrices to solve systems of equations', date: '17 June', live: true },
   { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', ref: '§2.7–2.8',
     blurb: 'LU factorization method and its application to economic input-output models', date: '18 June', live: true },
+  { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', ref: '§3.1',
+    blurb: 'Cofactor expansion, properties of determinants, and the adjugate matrix', date: '22 June', live: true },
+  { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', ref: '§3.2',
+    blurb: 'Using determinants to find matrix inverses and solve systems', date: '23 June', live: true },
 ];
 
 // Teaching team.
