@@ -48,6 +48,10 @@ const LECTURES = [
     blurb: 'Cofactor expansion, properties of determinants, and the adjugate matrix', date: '22 June', live: true },
   { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', ref: '§3.2',
     blurb: 'Using determinants to find matrix inverses and solve systems', date: '23 June', live: true },
+  { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', ref: '§3.3',
+    blurb: 'Introduction to eigenvalues, eigenvectors, and their applications', date: '24 June', live: true },
+  { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', ref: '§3.4',
+    blurb: 'Diagonalizing matrices and their applications to dynamical systems', date: '29 June', live: true },
 ];
 
 // Teaching team.
