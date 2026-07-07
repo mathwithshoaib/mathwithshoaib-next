@@ -30,7 +30,8 @@ const LECTURES = [
   { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', ref: '§3.1', date: '22 Jun', live: true },
   { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', ref: '§3.2', date: '23 Jun', live: true },
   { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', ref: '§3.3', date: '24 Jun', live: true },
-  { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', ref: '§3.4', date: '29 Jun', live: true },
+  { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', ref: '§3.3', date: '29 Jun', live: true },
+  { week: 4, n: 13, slug: 'w4/lec13', title: 'Polynomial Interpolation & Linear Recurrences', ref: '§3.2 and §3.4', date: '1 Jul', live: true },
 ];
 
 /* one-line theme per week, shown as the accordion subtitle */
