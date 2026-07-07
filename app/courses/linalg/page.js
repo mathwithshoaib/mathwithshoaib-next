@@ -6,128 +6,94 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
 /* ═════════════════════════════════════════════════════════════════
-   MATH-120 · LINEAR ALGEBRA — COURSE HOME
+   MATH-120 · LINEAR ALGEBRA — COURSE HOME  (redesigned, compact)
    Route: /courses/linalg
 
-   WEEKLY EDITS all live in the DATA BLOCKS below.
-   - Add a lecture     → add one object to LECTURES (it appears in the
-                         body list AND the sidebar automatically).
-   - Make a link live  → change href: null to a URL string.
-   - Update schedule   → edit SCHEDULE.events.
+   ALL weekly edits live in the DATA BLOCKS below.
+   - Add a lecture      → add one object to LECTURES.
+   - Make a link live   → change href:null to a URL string.
+   - CURRENT_WEEK        → which week's accordion opens by default.
    ═════════════════════════════════════════════════════════════════ */
 
-/* ─────────── LECTURES — the main clickable surface ───────────
-   week  : groups the sidebar
-   n     : lecture number
-   slug  : path under /courses/linalg, e.g. 'w1/lec1'
-   title : '' until decided
-   ref   : Nicholson sections, shown as a small tag
-   blurb : one-line description on the course page
-   date  : delivery date
-   live  : true → clickable; false → "coming soon"
-*/
+const CURRENT_WEEK = 4;   // controls which lecture week + resource row is highlighted/open
+
+/* ─────────── LECTURES ─────────── */
 const LECTURES = [
-  { week: 1, n: 1, slug: 'w1/lec1', title: 'The Language of Matrices', ref: '§1.1–1.2',
-    blurb: 'Sequences, matrices, systems of equations, row-echelon form', date: '8 June', live: true },
-  // Template for the next one:
-  { week: 1, n: 2, slug: 'w1/lec2', title: 'Row Operations & Gaussian Elimination', ref: '§1.2', 
-    blurb: 'Elementary row operations and their applications', date: '9 June', live: true },
-  { week: 1, n: 3, slug: 'w1/lec3', title: 'RREF, Homogeneous Systems & Linear Combinations', ref: '§1.3',
-    blurb: 'Reduced row-echelon form, homogeneous systems, and linear combinations', date: '10 June', live: true },
-  { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', ref: '§1.4',
-    blurb: 'General solution structure, electrical networks, and chemical reactions', date: '11 June', live: true },
-  { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', ref: '§2.1–2.2',
-    blurb: 'Matrix addition, scalar multiplication, and the transpose operation', date: '15 June', live: true },
-  { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', ref: '§2.4',
-    blurb: 'Finding the inverse of a matrix and its applications', date: '16 June', live: true },
-  { week: 2, n: 7, slug: 'w2/lec7', title: 'Elementary Matrices & Solving Systems', ref: '§2.5',
-    blurb: 'Using elementary matrices to solve systems of equations', date: '17 June', live: true },
-  { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', ref: '§2.7–2.8',
-    blurb: 'LU factorization method and its application to economic input-output models', date: '18 June', live: true },
-  { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', ref: '§3.1',
-    blurb: 'Cofactor expansion, properties of determinants, and the adjugate matrix', date: '22 June', live: true },
-  { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', ref: '§3.2',
-    blurb: 'Using determinants to find matrix inverses and solve systems', date: '23 June', live: true },
-  { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', ref: '§3.3',
-    blurb: 'Introduction to eigenvalues, eigenvectors, and their applications', date: '24 June', live: true },
-  { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', ref: '§3.4',
-    blurb: 'Diagonalizing matrices and their applications to dynamical systems', date: '29 June', live: true },
+  { week: 1, n: 1, slug: 'w1/lec1', title: 'The Language of Matrices', ref: '§1.1–1.2', date: '8 Jun', live: true },
+  { week: 1, n: 2, slug: 'w1/lec2', title: 'Row Operations & Gaussian Elimination', ref: '§1.2', date: '9 Jun', live: true },
+  { week: 1, n: 3, slug: 'w1/lec3', title: 'RREF, Homogeneous Systems & Linear Combinations', ref: '§1.3', date: '10 Jun', live: true },
+  { week: 1, n: 4, slug: 'w1/lec4', title: 'Solution Structure & Applications', ref: '§1.4', date: '11 Jun', live: true },
+  { week: 2, n: 5, slug: 'w2/lec5', title: 'Matrix Algebra: Addition, Scalar Multiplication & Transpose', ref: '§2.1–2.2', date: '15 Jun', live: true },
+  { week: 2, n: 6, slug: 'w2/lec6', title: 'The Inverse of a Matrix', ref: '§2.4', date: '16 Jun', live: true },
+  { week: 2, n: 7, slug: 'w2/lec7', title: 'Elementary Matrices & Solving Systems', ref: '§2.5', date: '17 Jun', live: true },
+  { week: 2, n: 8, slug: 'w2/lec8', title: 'LU-Factorization & Input–Output Models', ref: '§2.7–2.8', date: '18 Jun', live: true },
+  { week: 3, n: 9, slug: 'w3/lec9', title: 'Determinants: Cofactor Expansion & Properties', ref: '§3.1', date: '22 Jun', live: true },
+  { week: 3, n: 10, slug: 'w3/lec10', title: 'Determinants & Matrix Inverses', ref: '§3.2', date: '23 Jun', live: true },
+  { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', ref: '§3.3', date: '24 Jun', live: true },
+  { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', ref: '§3.4', date: '29 Jun', live: true },
 ];
 
-// Teaching team.
-const TEACHING_TEAM = [
-  { role: 'Instructor', name: 'Imran Anwar', email: 'imran.anwar@lums.edu.pk',
-    office: '9-155A (SSE Building)', hours: '04:00 – 05:00 (Mon – Thu)' },
-  { role: 'Teaching Assistant', name: 'Muhammad Shoaib Khan', email: 'shoaib.khan@lums.edu.pk',
-    office: '9-155 SSE', hours: '01:00 – 02:00 (Mon – Thu)' },
-  { role: 'Teaching Assistant', name: 'Azhar Javed', email: 'azhar.javed@lums.edu.pk',
-    office: '9-155 (SSE Building)', hours: 'TBA' },
-  { role: 'Teaching Assistant', name: 'Aqsa Noreen', email: '22070005@lums.edu.pk',
-    office: '9-155 (SSE Building)', hours: 'TBA' },
-  { role: 'Teaching Assistant', name: 'Hajra Mahmood', email: '28100096@lums.edu.pk',
-    office: 'Math Lobby', hours: 'Mon, Wed, Thu 5-6pm & Fri 4-5pm' },
-  
+/* one-line theme per week, shown as the accordion subtitle */
+const WEEK_THEMES = {
+  1: 'Systems of Linear Equations',
+  2: 'Matrix Algebra & Factorization',
+  3: 'Determinants & Diagonalization',
+  4: 'Vector Space ℝⁿ',
+  5: 'Orthogonality & Polynomials',
+  6: 'Linear Transformations',
+  7: 'Applications',
+};
+
+/* ─────────── RESOURCES — one row per week ───────────
+   Each cell: { href } — null href renders a muted "soon" chip. */
+const RESOURCES = [
+  { week: 1, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 2, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 3, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 4, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 5, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 6, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 7, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
 ];
 
-// Course timeline — static syllabus overview (no links).
-const TIMELINE = [
-  { no: 'Week 01', title: 'Systems of Linear Equations', ref: 'Ch 1',
-    items: [['§1.2', 'Elementary row operations, echelon form & rank'], ['§1.2', 'Gaussian elimination method'], ['§1.3', 'Homogeneous equations'], ['§1.4', 'Electrical networks & chemical reactions']],
-    aim: 'Rank introduced via row-echelon form; applications to network flow.' },
-  { no: 'Week 02', title: 'Matrix Algebra & Factorization', ref: 'Ch 2–3',
-    items: [['§2.2–2.3', 'Transpose, multiplication, inverses'], ['§2.6–2.7', 'LU factorization, input–output economic model']],
-    aim: 'Matrix operations, inverse methods & elementary matrices.' },
-  { no: 'Week 03', title: 'Determinants & Diagonalization', ref: 'Ch 3',
-    items: [['§3.1–3.2', 'Cofactor expansion, properties, adjugate & inverse'], ['§3.3', 'Diagonalization, eigenvalues, linear dynamical systems']],
-    aim: 'First taste of dynamical systems through diagonalization.' },
-  { no: 'Week 04', title: 'Vector Space ℝⁿ', ref: 'Ch 5–6',
-    items: [['§6.1', 'Vector space examples & basic properties'], ['§5.1', 'Subspaces, spanning, independence & dependence'], ['§6.2–6.3', 'Basis & dimension']],
-    aim: 'Theory built in ℝⁿ, then expanded to the abstract setting.' },
-  { no: 'Week 05', title: 'Orthogonality & Polynomials', ref: 'Ch 8',
-    items: [['§8.1', 'Orthogonal & orthonormal bases (Gram–Schmidt)'], ['§8.2', 'Orthogonal diagonalization'], ['§8.9', 'An application to quadratic forms']],
-    aim: 'Projections, complements, and the Gram–Schmidt process.' },
-  { no: 'Week 06', title: 'Linear Transformations', ref: 'Ch 7 & 2',
-    items: [['§7.1', 'Linear transformation examples & properties'], ['§2.5', 'Matrix of a transformation'], ['§7.2', 'Kernel, image & the dimension theorem']],
-    aim: 'Basic theory of linear maps, again grounded in ℝⁿ.' },
-  { no: 'Week 07', title: 'Applications', ref: 'Ch 10 & 8',
-    items: [['§10.2', 'Legendre interpolation polynomial'], ['§8.10', 'Systems of differential equations via eigenvalues']],
-    aim: 'Where basis and eigenvalues earn their keep.' },
-];
-
-const MIDTERM = { after: 3, label: 'Midterm Examination', detail: '03 July · 10:00 AM · Weeks 1–3 · 30%' };
-
-const TUTORIALS = [
-  { week: 1, shoaib: { topic: 'Row Reduction & Echelon Forms', href: null }, hajra: { topic: 'Row Reduction & Echelon Forms', href: null } },
-  { week: 2, shoaib: { topic: 'Matrix Algebra', href: null }, hajra: { topic: 'Matrix Algebra', href: null } },
-  { week: 3, shoaib: { topic: 'Determinants', href: null }, hajra: { topic: 'Determinants', href: null } },
-  { week: 4, shoaib: { topic: 'Vector Spaces & Subspaces', href: null }, hajra: { topic: 'Vector Spaces & Subspaces', href: null } },
-  { week: 5, shoaib: { topic: 'Gram–Schmidt', href: null }, hajra: { topic: 'Gram–Schmidt', href: null } },
-  { week: 6, shoaib: { topic: 'Linear Transformations', href: null }, hajra: { topic: 'Linear Transformations', href: null } },
-  { week: 7, shoaib: { topic: 'Applications', href: null }, hajra: { topic: 'Applications', href: null } },
-];
-
-const PROBLEM_SETS = [
-  { week: 1, title: 'Problem Set 1 — Systems of Equations', href: null },
-  { week: 2, title: 'Problem Set 2 — Matrix Algebra', href: null },
-  { week: 3, title: 'Problem Set 3 — Determinants', href: null },
-  { week: 4, title: 'Problem Set 4 — Vector Spaces', href: null },
-  { week: 5, title: 'Problem Set 5 — Orthogonality', href: null },
-  { week: 6, title: 'Problem Set 6 — Linear Maps', href: null },
-  { week: 7, title: 'Problem Set 7 — Applications', href: null },
-];
-
+/* ─────────── QUIZZES — separate date strip ─────────── */
 const QUIZZES = [
-  { n: 1, date: '15 June', day: 'Mon' }, { n: 2, date: '22 June', day: 'Mon' },
-  { n: 3, date: '29 June', day: 'Mon' }, { n: 4, date: '06 July', day: 'Mon' },
-  { n: 5, date: '13 July', day: 'Mon' }, { n: 6, date: '20 July', day: 'Mon' },
+  { n: 1, date: '15 Jun', href: null, sol: null },
+  { n: 2, date: '22 Jun', href: null, sol: null },
+  { n: 3, date: '29 Jun', href: null, sol: null },
+  { n: 4, date: '06 Jul', href: null, sol: null },
+  { n: 5, date: '13 Jul', href: null, sol: null },
+  { n: 6, date: '20 Jul', href: null, sol: null },
 ];
 
-const MOCK_EXAMS = [
-  { title: 'Mock Midterm', detail: 'Weeks 1–3', href: null },
-  { title: 'Mock Final', detail: 'Comprehensive', href: null },
+/* ─────────── ASSESSMENT ─────────── */
+const WEIGHTS = [['Quizzes · best 5 of 6', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
+const EXAM_DATES = [
+  { label: 'Midterm', detail: '03 Jul · 10:00 AM · Weeks 1–3' },
+  { label: 'Final', detail: '25 Jul · 3:00 PM · all seven weeks' },
 ];
 
-// Weekly schedule. day: 0=Mon … 4=Fri. Times 24h decimal (13.5 = 1:30pm).
+/* ─────────── TEACHING TEAM ─────────── */
+const TEACHING_TEAM = [
+  { role: 'Instructor', name: 'Imran Anwar', email: 'imran.anwar@lums.edu.pk', office: '9-155A SSE', hours: 'Mon–Thu 4:00–5:00' },
+  { role: 'TA', name: 'Muhammad Shoaib Khan', email: 'shoaib.khan@lums.edu.pk', office: '9-155 SSE', hours: 'Mon–Thu 1:00–2:00' },
+  { role: 'TA', name: 'Azhar Javed', email: 'azhar.javed@lums.edu.pk', office: '9-155 SSE', hours: 'TBA' },
+  { role: 'TA', name: 'Aqsa Noreen', email: '22070005@lums.edu.pk', office: '9-155 SSE', hours: 'TBA' },
+  { role: 'TA', name: 'Hajra Mahmood', email: '28100096@lums.edu.pk', office: 'Math Lobby', hours: 'Mon/Wed/Thu 5–6 · Fri 4–5' },
+];
+
+/* ─────────── SYLLABUS (read-once, collapsed) ─────────── */
+const TIMELINE = [
+  { no: 'Week 1', title: 'Systems of Linear Equations', ref: 'Ch 1', items: [['§1.2', 'Row operations, echelon form & rank'], ['§1.2', 'Gaussian elimination'], ['§1.3', 'Homogeneous equations'], ['§1.4', 'Networks & chemical reactions']] },
+  { no: 'Week 2', title: 'Matrix Algebra & Factorization', ref: 'Ch 2–3', items: [['§2.2–2.3', 'Transpose, multiplication, inverses'], ['§2.6–2.7', 'LU factorization, input–output model']] },
+  { no: 'Week 3', title: 'Determinants & Diagonalization', ref: 'Ch 3', items: [['§3.1–3.2', 'Cofactor expansion, adjugate & inverse'], ['§3.3', 'Diagonalization, eigenvalues, dynamical systems']] },
+  { no: 'Week 4', title: 'Vector Space ℝⁿ', ref: 'Ch 5–6', items: [['§6.1', 'Vector space examples & properties'], ['§5.1', 'Subspaces, spanning, independence'], ['§6.2–6.3', 'Basis & dimension']] },
+  { no: 'Week 5', title: 'Orthogonality & Polynomials', ref: 'Ch 8', items: [['§8.1', 'Orthogonal bases (Gram–Schmidt)'], ['§8.2', 'Orthogonal diagonalization'], ['§8.9', 'Quadratic forms']] },
+  { no: 'Week 6', title: 'Linear Transformations', ref: 'Ch 7 & 2', items: [['§7.1', 'Transformation examples & properties'], ['§2.5', 'Matrix of a transformation'], ['§7.2', 'Kernel, image & dimension theorem']] },
+  { no: 'Week 7', title: 'Applications', ref: 'Ch 10 & 8', items: [['§10.2', 'Legendre interpolation'], ['§8.10', 'Differential equations via eigenvalues']] },
+];
+
+/* ─────────── WEEKLY SCHEDULE ─────────── */
 const SCHEDULE = {
   startHour: 11, endHour: 19,
   days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
@@ -136,98 +102,101 @@ const SCHEDULE = {
     { day: 1, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
     { day: 2, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
     { day: 3, start: 14, end: 15.67, type: 'lecture', title: 'Lecture', loc: 'Acad-11' },
-    { day: 0, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
-    { day: 1, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
-    { day: 2, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
-    { day: 3, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · Office Hours', loc: '9-155 SSE' },
+    { day: 0, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · OH', loc: '9-155 SSE' },
+    { day: 1, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · OH', loc: '9-155 SSE' },
+    { day: 2, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · OH', loc: '9-155 SSE' },
+    { day: 3, start: 12.5, end: 13.5, type: 'office', title: 'Shoaib · OH', loc: '9-155 SSE' },
     { day: 0, start: 11, end: 12.5, type: 'tutorial', title: 'Tutorial · Aqsa', loc: 'TBA' },
     { day: 3, start: 16, end: 17, type: 'tutorial', title: 'Tutorial · Azhar', loc: 'TBA' },
-    { day: 0, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 2, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 3, start: 17, end: 18, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 4, start: 16, end: 17, type: 'office', title: 'Hajra · Office Hours', loc: '9-155 SSE' },
-    { day: 4, start: 14.5, end: 16, type: 'tutorial', title: 'Tutorial · Hajra', loc: '9-1C1, First floor SSE' },
+    { day: 0, start: 17, end: 18, type: 'office', title: 'Hajra · OH', loc: '9-155 SSE' },
+    { day: 2, start: 17, end: 18, type: 'office', title: 'Hajra · OH', loc: '9-155 SSE' },
+    { day: 3, start: 17, end: 18, type: 'office', title: 'Hajra · OH', loc: '9-155 SSE' },
+    { day: 4, start: 16, end: 17, type: 'office', title: 'Hajra · OH', loc: '9-155 SSE' },
+    { day: 4, start: 14.5, end: 16, type: 'tutorial', title: 'Tutorial · Hajra', loc: '9-1C1 SSE' },
   ],
 };
 
-/* ─── group lectures by week, for the sidebar ─── */
+/* ─── helpers ─── */
 function lecturesByWeek() {
   const w = {};
   LECTURES.forEach(l => { (w[l.week] = w[l.week] || []).push(l); });
   return Object.keys(w).map(Number).sort((a, b) => a - b).map(week => ({ week, lectures: w[week] }));
 }
+function liveCount() { return LECTURES.filter(l => l.live).length; }
 
-/* ─── presentational helpers ─── */
-function MaybeLink({ link, style }) {
-  const label = link.topic ?? link.title;
-  if (link.href) {
+/* small link-or-soon chip used across resource cells */
+function Chip({ href, label, tone = 'amber' }) {
+  const c = tone === 'teal' ? 'var(--teal)' : tone === 'violet' ? 'var(--violet)' : 'var(--amber)';
+  if (href) {
     return (
-      <a href={link.href} target="_blank" rel="noopener noreferrer"
-        style={{ color: 'var(--amber)', textDecoration: 'none', borderBottom: '1px solid rgba(232,160,32,.35)', ...style }}>
-        {label}
-      </a>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={{
+        display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.72rem',
+        color: c, textDecoration: 'none', border: `1px solid ${c}`, borderRadius: '6px', padding: '3px 10px',
+        background: 'transparent', whiteSpace: 'nowrap',
+      }}>{label} ↗</a>
     );
   }
-  return <span style={{ color: 'var(--text3)', fontStyle: 'italic', ...style }}>{label} <span style={{ fontSize: '.7em', opacity: .7 }}>· soon</span></span>;
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', fontFamily: 'var(--fm)', fontSize: '.72rem',
+      color: 'var(--text3)', border: '1px dashed var(--border2)', borderRadius: '6px', padding: '3px 10px',
+      opacity: .65, whiteSpace: 'nowrap',
+    }}>{label} · soon</span>
+  );
 }
 
 export default function LinAlg() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const weeks = lecturesByWeek();
+  const [openWeek, setOpenWeek] = useState(CURRENT_WEEK);
 
   return (
     <>
-      {/* responsive + mobile rules */}
       <style>{`
-        .la-shell { display: flex; padding-top: calc(var(--nav-h) + 3px + 37px); min-height: 100vh; }
-        .la-sidebar {
-          width: 256px; flex-shrink: 0; position: sticky;
-          top: calc(var(--nav-h) + 3px + 37px); height: calc(100vh - var(--nav-h) - 40px);
-          overflow-y: auto; background: var(--bg2); border-right: 1px solid var(--border);
-          z-index: 510;
-        }
-        .la-backdrop { display: none; }
-        .la-menu-btn { display: none; }
-        .la-main { flex: 1; min-width: 0; background: var(--bg); }
-        .la-body { padding: 40px 52px 56px; }
-        .la-hero { padding: 44px 52px 36px; }
+        .la-wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 72px; }
+        .la-hero { padding: calc(var(--nav-h) + 3px + 37px + 34px) 24px 30px; border-bottom: 1px solid var(--border);
+                   background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); }
+        .la-hero-inner { max-width: 1080px; margin: 0 auto; }
 
-        @media (max-width: 860px) {
-          .la-sidebar {
-            position: fixed; top: 0; left: 0; height: 100vh; width: 270px;
-            transform: translateX(-100%); transition: transform .25s ease;
-            padding-top: calc(var(--nav-h) + 12px);
-          }
-          .la-sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,.4); }
-          .la-backdrop.open {
-            display: block; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 505;
-          }
-          .la-menu-btn {
-            display: inline-flex; align-items: center; gap: 7px;
-            position: fixed; bottom: 20px; left: 20px; z-index: 506;
-            background: var(--amber); color: #1a1a2e; border: none;
-            font-family: var(--fm); font-size: .8rem; font-weight: 600;
-            padding: 11px 16px; border-radius: 30px; cursor: pointer;
-            box-shadow: 0 4px 16px rgba(0,0,0,.3);
-          }
-          .la-shell { padding-top: calc(var(--nav-h) + 3px + 37px); }
-          .la-body { padding: 28px 20px 48px; font-size: .94rem; }
-          .la-hero { padding: 30px 20px 26px; }
-          .la-hero h1 { font-size: clamp(1.6rem, 7vw, 2.2rem) !important; }
-          .la-footer-nav { padding: 20px !important; }
+        /* quick-access strip */
+        .la-quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 26px; }
+        .la-quick a { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px;
+                      border: 1px solid var(--border); background: var(--surface); text-decoration: none;
+                      transition: border-color .15s, transform .15s; }
+        .la-quick a:hover { border-color: var(--amber); transform: translateY(-2px); }
+
+        .la-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .la-week { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 10px;
+                   background: var(--surface); }
+        .la-week.cur { border-color: rgba(232,160,32,.5); }
+        .la-week-btn { width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+                       background: transparent; border: none; cursor: pointer; text-align: left; }
+        .la-week-body { overflow: hidden; transition: max-height .3s ease; }
+        .la-lec-row { display: flex; align-items: center; gap: 14px; padding: 11px 18px 11px 20px;
+                      border-top: 1px solid var(--border); text-decoration: none; transition: background .12s; }
+        .la-lec-row:hover { background: var(--bg2); }
+
+        .la-restable { width: 100%; border-collapse: collapse; }
+        .la-restable th { text-align: left; padding: 10px 14px; font-family: var(--fm); font-size: .64rem;
+                          letter-spacing: .12em; text-transform: uppercase; color: var(--text3); background: var(--bg2); }
+        .la-restable td { padding: 10px 14px; border-top: 1px solid var(--border); }
+
+        @media (max-width: 820px) {
+          .la-quick { grid-template-columns: repeat(2, 1fr); }
+          .la-grid2 { grid-template-columns: 1fr; }
+          .la-hero h1 { font-size: clamp(1.7rem, 7vw, 2.2rem) !important; }
         }
       `}</style>
 
       <Navbar activePage="courses" />
 
-      {/* STICKY SUB-HEADER */}
+      {/* breadcrumb + course switcher */}
       <div style={{ position: 'sticky', top: 'calc(var(--nav-h) + 3px)', zIndex: 500, background: 'var(--bg2)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ padding: '8px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '8px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ color: 'var(--amber)' }}>Home</Link><span>›</span>
           <Link href="/courses" style={{ color: 'var(--amber)' }}>Courses</Link><span>›</span>
           <span style={{ color: 'var(--text2)', fontWeight: 500 }}>Linear Algebra</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px', overflowX: 'auto' }}>
+        <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 24px', overflowX: 'auto' }}>
           {[
             { href: '/courses/precalc', label: 'Pre-Calculus', active: false },
             { href: '/courses/calc1', label: 'Calculus I', active: false },
@@ -242,238 +211,223 @@ export default function LinAlg() {
         </div>
       </div>
 
-      {/* mobile menu button + backdrop */}
-      <button className="la-menu-btn" onClick={() => setMenuOpen(o => !o)}>☰ Contents</button>
-      <div className={`la-backdrop ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)} />
+      {/* HERO */}
+      <div className="la-hero">
+        <div className="la-hero-inner">
+          <span className="eyebrow">MATH-120 · Summer 2026 · SSE Core</span>
+          <h1 style={{ fontSize: 'clamp(2rem,4vw,3rem)', margin: '6px 0 12px' }}>
+            Linear Algebra <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>with Differential Equations</em>
+          </h1>
+          <p style={{ maxWidth: '620px', fontSize: '1rem', color: 'var(--text2)', margin: 0 }}>
+            The grammar of every linear system in mathematics — taught from the <em>why</em>, not just the <em>how</em>.
+            From row reduction to abstract vector spaces, with proofs along the way.
+          </p>
 
-      <div className="la-shell">
-
-        {/* SIDEBAR — lectures grouped by week */}
-        <aside className={`la-sidebar ${menuOpen ? 'open' : ''}`}>
-          <div style={{ padding: '18px 16px 12px', borderBottom: '1px solid var(--border)' }}>
-            <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', letterSpacing: '.2em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '4px' }}>MATH-120 · Linear Algebra</div>
-            <div style={{ fontFamily: 'var(--fh)', fontSize: '.95rem', color: 'var(--text)', lineHeight: 1.3 }}>Lectures</div>
-            <Link href="/courses" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)', marginTop: '8px', textDecoration: 'none' }}>← All Courses</Link>
-          </div>
-
-          <nav style={{ padding: '8px 0 24px' }}>
-            {weeks.map(({ week, lectures }) => (
-              <div key={week}>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', letterSpacing: '.22em', textTransform: 'uppercase', color: 'var(--text3)', padding: '12px 16px 4px', display: 'block' }}>Week {week}</span>
-                {lectures.map(lec => {
-                  const label = lec.title || `Lecture ${lec.n}`;
-                  const body = (
-                    <div style={{ padding: '7px 16px', borderLeft: '3px solid transparent' }}>
-                      <div style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', lineHeight: 1.35, color: lec.live ? 'var(--text2)' : 'var(--text3)', opacity: lec.live ? 1 : .55 }}>
-                        <span style={{ color: 'var(--text3)' }}>Lec {lec.n}</span> · {label}{!lec.live && <span style={{ fontStyle: 'italic' }}> · soon</span>}
-                      </div>
-                      {lec.ref && <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', color: 'var(--text3)', marginTop: '2px' }}>Nicholson {lec.ref}</div>}
-                    </div>
-                  );
-                  return lec.live
-                    ? <Link key={lec.n} href={`/courses/linalg/${lec.slug}`} onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', display: 'block' }}>{body}</Link>
-                    : <div key={lec.n}>{body}</div>;
-                })}
+          {/* meta line */}
+          <div style={{ display: 'flex', gap: '28px', marginTop: '20px', flexWrap: 'wrap' }}>
+            {[['Instructor', 'Imran Anwar'], ['Credits', '3ch · 4 lec/wk'], ['Prereq', 'MATH-101'], ['Text', 'Nicholson · Anton'], ['Notes live', `${liveCount()} of ${LECTURES.length}`]].map(([k, v]) => (
+              <div key={k}>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>{k}</div>
+                <div style={{ fontSize: '.9rem', color: 'var(--text)', marginTop: '3px' }}>{v}</div>
               </div>
             ))}
-          </nav>
-        </aside>
-
-        {/* MAIN */}
-        <main className="la-main">
-
-          {/* HERO */}
-          <div className="la-hero" style={{ background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)', borderBottom: '1px solid var(--border)' }}>
-            <span className="eyebrow">MATH-120 · Summer 2026 · SSE Core</span>
-            <h1 style={{ fontSize: 'clamp(2rem,4vw,3.2rem)', marginBottom: '12px' }}>Linear Algebra <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>with Differential Equations</em></h1>
-            <p style={{ maxWidth: '600px', fontSize: '1.02rem', color: 'var(--text2)' }}>
-              The grammar of every linear system in mathematics, taught from the <em>why</em>, not just the <em>how</em>. From row reduction to abstract vector spaces and differential equations, with proofs along the way.
-            </p>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '16px' }}>
-              <span className="tag tag-amber">Vector Spaces</span>
-              <span className="tag">Eigenvalues</span>
-              <span className="tag">Orthogonality</span>
-              <span className="tag">Linear Maps</span>
-              <span className="tag tag-teal">Differential Equations</span>
-            </div>
-            <div style={{ display: 'flex', gap: '36px', marginTop: '28px', flexWrap: 'wrap' }}>
-              {[['Instructor', 'Imran Anwar'], ['Credits', '3ch · 4 lec / wk'], ['Prerequisite', 'MATH-101 Calculus I'], ['Textbook', 'Nicholson · Anton']].map(([k, v]) => (
-                <div key={k}>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>{k}</div>
-                  <div style={{ fontSize: '.92rem', color: 'var(--text)', marginTop: '4px' }}>{v}</div>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="la-body">
+          {/* QUICK ACCESS — jump links to the four things students use weekly */}
+          <div className="la-quick">
+            {[
+              { href: '#lectures', top: 'Lecture Notes', sub: `${liveCount()} available`, tone: 'var(--amber)' },
+              { href: '#resources', top: 'Practice & Problem Sets', sub: 'by week', tone: 'var(--teal)' },
+              { href: '#quizzes', top: 'Quizzes', sub: '6 · best 5 count', tone: 'var(--violet)' },
+              { href: '#assessment', top: 'Dates & Grading', sub: 'exams · weights', tone: 'var(--amber)' },
+            ].map(q => (
+              <a key={q.href} href={q.href}>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.1em', textTransform: 'uppercase', color: q.tone }}>{q.sub}</span>
+                <span style={{ fontFamily: 'var(--fh)', fontSize: '1.02rem', color: 'var(--text)' }}>{q.top}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
 
-            <div style={{ background: 'var(--amber-lt)', borderLeft: '4px solid var(--amber)', borderRadius: '0 8px 8px 0', padding: '14px 18px', marginBottom: '40px', fontSize: '.92rem', color: 'var(--text2)' }}>
-              <strong style={{ color: 'var(--text)' }}>📢 Note:</strong> This page is updated through the term. Lecture notes, tutorials, problem sets, and exam links go live as each week opens.
-            </div>
+      <div className="la-wrap">
 
-            {/* 01 · LECTURES */}
-            <SectionHeading num="01" title="Lectures" />
-            <p style={{ fontSize: '.88rem', color: 'var(--text3)', marginTop: '-8px', marginBottom: '16px' }}>Lecture notes go live here as each lecture is delivered. Click a lecture to open it.</p>
-            <div style={{ display: 'grid', gap: '10px' }}>
-              {LECTURES.map(lec => {
-                const inner = (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', border: '1px solid var(--border)', borderRadius: 'var(--radius)', background: 'var(--surface)' }}>
-                    <span style={{ fontFamily: 'var(--fm)', fontSize: '.78rem', color: 'var(--amber)', border: '1px solid var(--amber)', borderRadius: '8px', padding: '8px 12px', whiteSpace: 'nowrap', flexShrink: 0 }}>Lec {lec.n}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'var(--fh)', fontSize: '1.1rem', color: 'var(--text)' }}>{lec.title || `Lecture ${lec.n}`}</div>
-                      <div style={{ fontSize: '.82rem', color: 'var(--text3)', marginTop: '2px' }}>{lec.blurb}{lec.ref ? ` · Nicholson ${lec.ref}` : ''}</div>
-                    </div>
-                    <span style={{ fontFamily: 'var(--fm)', fontSize: '.74rem', color: lec.live ? 'var(--teal)' : 'var(--text3)', whiteSpace: 'nowrap' }}>{lec.live ? `${lec.date} · open →` : 'coming soon'}</span>
-                  </div>
-                );
-                return lec.live
-                  ? <Link key={lec.n} href={`/courses/linalg/${lec.slug}`} style={{ textDecoration: 'none' }}>{inner}</Link>
-                  : <div key={lec.n}>{inner}</div>;
-              })}
-            </div>
+        {/* 01 · LECTURE NOTES — accordion by week */}
+        <SectionHeading num="01" title="Lecture Notes" id="lectures"
+          note="Grouped by week. The current week is open by default — tap any week to expand." />
 
-            {/* 02 · COURSE TIMELINE (static overview) */}
-            <SectionHeading num="02" title="Course Timeline" />
-            <details open style={detailsStyle}>
-              <summary style={summaryStyle}>The Seven Weeks (syllabus overview)</summary>
-              <div style={{ marginTop: '14px' }}>
-                {TIMELINE.map((wk, idx) => (
-                  <div key={wk.no}>
-                    <details style={weekStyle}>
-                      <summary style={weekSummaryStyle}>
-                        <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', color: 'var(--amber)', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{wk.no}</span>
-                        <span style={{ fontFamily: 'var(--fh)', fontSize: '1.1rem', color: 'var(--text)', flex: 1 }}>{wk.title}</span>
-                        <span style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--text3)', border: '1px solid var(--border2)', padding: '2px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>{wk.ref}</span>
-                      </summary>
-                      <div style={{ padding: '12px 4px 4px' }}>
-                        <ul style={{ borderTop: '1px solid var(--border)', paddingTop: '12px' }}>
-                          {wk.items.map(([s, t]) => (
-                            <li key={s + t} style={{ display: 'flex', gap: '12px', padding: '5px 0', fontSize: '.9rem', color: 'var(--text2)' }}>
-                              <span style={{ fontFamily: 'var(--fm)', fontSize: '.74rem', color: 'var(--teal)', minWidth: '74px', whiteSpace: 'nowrap' }}>{s}</span>
-                              <span>{t}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div style={{ marginTop: '10px', fontSize: '.84rem', color: 'var(--text3)', fontStyle: 'italic', borderLeft: '2px solid var(--amber)', paddingLeft: '12px' }}>{wk.aim}</div>
-                      </div>
-                    </details>
-                    {MIDTERM.after === idx + 1 && (
-                      <div style={{ background: 'linear-gradient(100deg, var(--amber-lt), transparent)', border: '1px solid rgba(232,160,32,.4)', borderRadius: '10px', padding: '14px 18px', margin: '8px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '14px', flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: 'var(--fh)', fontSize: '1.05rem', color: 'var(--amber)' }}>◆ {MIDTERM.label}</span>
-                        <span style={{ fontFamily: 'var(--fm)', fontSize: '.78rem', color: 'var(--text2)' }}>{MIDTERM.detail}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+        {weeks.map(({ week, lectures }) => {
+          const isOpen = openWeek === week;
+          const isCur = week === CURRENT_WEEK;
+          const liveHere = lectures.filter(l => l.live).length;
+          return (
+            <div key={week} className={`la-week ${isCur ? 'cur' : ''}`}>
+              <button className="la-week-btn" onClick={() => setOpenWeek(isOpen ? -1 : week)} aria-expanded={isOpen}>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.1em', textTransform: 'uppercase', color: isCur ? 'var(--amber)' : 'var(--text3)', border: `1px solid ${isCur ? 'var(--amber)' : 'var(--border2)'}`, borderRadius: '7px', padding: '5px 10px', whiteSpace: 'nowrap' }}>
+                  Week {week}
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: 'block', fontFamily: 'var(--fh)', fontSize: '1.06rem', color: 'var(--text)' }}>{WEEK_THEMES[week]}</span>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>{lectures.length} lectures · {liveHere} live</span>
+                </span>
+                {isCur && <span style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', color: 'var(--amber)', background: 'var(--amber-lt)', border: '1px solid rgba(232,160,32,.4)', borderRadius: '20px', padding: '3px 10px', whiteSpace: 'nowrap' }}>current</span>}
+                <span style={{ color: 'var(--text3)', fontSize: '1.1rem', transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform .25s', flexShrink: 0 }}>›</span>
+              </button>
+
+              <div className="la-week-body" style={{ maxHeight: isOpen ? `${lectures.length * 66 + 8}px` : '0px' }}>
+                {lectures.map(lec => {
+                  const inner = (
+                    <>
+                      <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--amber)', border: '1px solid var(--amber)', borderRadius: '7px', padding: '5px 9px', whiteSpace: 'nowrap', flexShrink: 0 }}>Lec {lec.n}</span>
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'block', fontSize: '.95rem', color: 'var(--text)', lineHeight: 1.3 }}>{lec.title}</span>
+                        <span style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>Nicholson {lec.ref} · {lec.date}</span>
+                      </span>
+                      <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: lec.live ? 'var(--teal)' : 'var(--text3)', whiteSpace: 'nowrap', flexShrink: 0 }}>{lec.live ? 'open →' : 'soon'}</span>
+                    </>
+                  );
+                  return lec.live
+                    ? <Link key={lec.n} href={`/courses/linalg/${lec.slug}`} className="la-lec-row">{inner}</Link>
+                    : <div key={lec.n} className="la-lec-row" style={{ opacity: .55 }}>{inner}</div>;
+                })}
               </div>
-            </details>
-
-            {/* 03 · WEEKLY SCHEDULE */}
-            <SectionHeading num="03" title="Weekly Schedule" />
-            <Schedule />
-
-            {/* 04 · TEACHING TEAM */}
-            <SectionHeading num="04" title="Teaching Team" />
-            <div className="grid-3" style={{ marginBottom: '8px' }}>
-              {TEACHING_TEAM.map(t => (
-                <div key={t.name} className="card card-teal" style={{ padding: '22px 24px' }}>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.16em', textTransform: 'uppercase', color: 'var(--teal)', marginBottom: '8px' }}>{t.role}</div>
-                  <h4 style={{ marginBottom: '12px' }}>{t.name}</h4>
-                  <div style={{ display: 'grid', gap: '6px', fontSize: '.86rem' }}>
-                    <Row label="Email" value={t.email} isEmail />
-                    <Row label="Office" value={t.office} />
-                    <Row label="Office Hours" value={t.hours} />
-                  </div>
-                </div>
-              ))}
             </div>
+          );
+        })}
 
-            {/* 05 · TUTORIALS */}
-            <SectionHeading num="05" title="Tutorials" />
-            <p style={{ fontSize: '.88rem', color: 'var(--text3)', marginTop: '-8px', marginBottom: '16px' }}>Two tutorials each week — one per TA. Click a topic to open its PDF.</p>
-            <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.88rem' }}>
-                <thead>
-                  <tr style={{ background: 'var(--bg2)' }}>
-                    <th style={thStyle}>Week</th><th style={thStyle}>Shoaib</th><th style={thStyle}>Hajra</th>
+        {/* 02 · RESOURCES — practice / solutions / problem sets, one row per week */}
+        <SectionHeading num="02" title="Practice & Problem Sets" id="resources"
+          note="Practice problems, worked solutions, and the weekly problem set — one row per week." />
+        <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+          <table className="la-restable">
+            <thead>
+              <tr>
+                <th style={{ width: '64px' }}>Week</th>
+                <th>Practice Problems</th>
+                <th>Solutions</th>
+                <th>Problem Set</th>
+              </tr>
+            </thead>
+            <tbody>
+              {RESOURCES.map(r => (
+                <tr key={r.week} style={r.week === CURRENT_WEEK ? { background: 'var(--amber-lt)' } : undefined}>
+                  <td style={{ fontFamily: 'var(--fm)', fontSize: '.8rem', color: 'var(--amber)' }}>W{r.week}</td>
+                  <td><Chip href={r.practice.href} label="Practice" tone="teal" /></td>
+                  <td><Chip href={r.solutions.href} label="Solutions" tone="violet" /></td>
+                  <td><Chip href={r.pset.href} label="Problem Set" tone="amber" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* 03 · QUIZZES — separate date strip */}
+        <SectionHeading num="03" title="Quizzes" id="quizzes"
+          note="Six quizzes across the term · best 5 of 6 count. Papers and solutions post after each quiz." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: '10px' }}>
+          {QUIZZES.map(q => (
+            <div key={q.n} style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.74rem', color: 'var(--violet)', border: '1px solid var(--violet)', borderRadius: '50%', width: '28px', height: '28px', display: 'grid', placeItems: 'center', flexShrink: 0 }}>{q.n}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--fh)', fontSize: '.94rem', color: 'var(--text)' }}>Quiz {q.n}</div>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>{q.date} · Mon</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <Chip href={q.href} label="Paper" tone="amber" />
+                <Chip href={q.sol} label="Solution" tone="teal" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 04 · ASSESSMENT — grading + exam dates side by side */}
+        <SectionHeading num="04" title="Dates & Grading" id="assessment" />
+        <div className="la-grid2">
+          <div style={{ border: '1px solid var(--border)', borderRadius: '14px', padding: '22px 24px', background: 'var(--surface)' }}>
+            <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', margin: '0 0 16px' }}>Grade Weighting</h4>
+            {WEIGHTS.map(([label, pct]) => (
+              <div key={label} style={{ marginBottom: '13px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.88rem', marginBottom: '5px' }}>
+                  <span>{label}</span><b style={{ fontFamily: 'var(--fm)', color: 'var(--amber)' }}>{pct}%</b>
+                </div>
+                <div style={{ height: '7px', background: 'rgba(255,255,255,.05)', borderRadius: '50px', overflow: 'hidden' }}>
+                  <span style={{ display: 'block', height: '100%', width: `${pct}%`, borderRadius: '50px', background: 'linear-gradient(90deg, var(--teal), var(--amber))' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ border: '1px solid var(--border)', borderRadius: '14px', padding: '22px 24px', background: 'var(--surface)' }}>
+            <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', margin: '0 0 16px' }}>Exam Dates</h4>
+            {EXAM_DATES.map(e => (
+              <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px dashed var(--border)' }}>
+                <span style={{ fontFamily: 'var(--fh)', fontSize: '1.02rem', color: 'var(--amber)', minWidth: '72px' }}>{e.label}</span>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.8rem', color: 'var(--text2)' }}>{e.detail}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: '12px', fontSize: '.76rem', color: 'var(--text3)', fontStyle: 'italic' }}>One quiz is dropped — best 5 of 6 count.</div>
+          </div>
+        </div>
+
+        {/* 05 · TEACHING TEAM — compact accordion */}
+        <SectionHeading num="05" title="Teaching Team" id="team" />
+        <details style={boxStyle}>
+          <summary style={summaryStyle}>Instructor & 4 TAs — office hours & contact</summary>
+          <div style={{ marginTop: '14px', overflowX: 'auto' }}>
+            <table className="la-restable">
+              <thead>
+                <tr><th style={{ width: '70px' }}>Role</th><th>Name</th><th>Email</th><th>Office</th><th>Hours</th></tr>
+              </thead>
+              <tbody>
+                {TEACHING_TEAM.map(t => (
+                  <tr key={t.name}>
+                    <td style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', color: t.role === 'Instructor' ? 'var(--amber)' : 'var(--teal)' }}>{t.role}</td>
+                    <td style={{ fontSize: '.86rem', color: 'var(--text)' }}>{t.name}</td>
+                    <td><a href={`mailto:${t.email}`} style={{ color: 'var(--amber)', fontSize: '.8rem', wordBreak: 'break-all' }}>{t.email}</a></td>
+                    <td style={{ fontSize: '.82rem', color: 'var(--text2)' }}>{t.office}</td>
+                    <td style={{ fontSize: '.82rem', color: t.hours === 'TBA' ? 'var(--text3)' : 'var(--text2)', fontStyle: t.hours === 'TBA' ? 'italic' : 'normal' }}>{t.hours}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {TUTORIALS.map(t => (
-                    <tr key={t.week} style={{ borderTop: '1px solid var(--border)' }}>
-                      <td style={{ ...tdStyle, fontFamily: 'var(--fm)', color: 'var(--amber)', width: '70px' }}>W{t.week}</td>
-                      <td style={tdStyle}><MaybeLink link={t.shoaib} /></td>
-                      <td style={tdStyle}><MaybeLink link={t.hajra} /></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 06 · PROBLEM SETS */}
-            <SectionHeading num="06" title="Weekly Problem Sets" />
-            <div style={{ display: 'grid', gap: '8px' }}>
-              {PROBLEM_SETS.map(p => (
-                <div key={p.week} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '11px 16px', border: '1px solid var(--border)', borderRadius: '10px', background: 'var(--surface)' }}>
-                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--amber)', border: '1px solid var(--amber)', borderRadius: '50%', width: '30px', height: '30px', display: 'grid', placeItems: 'center', flexShrink: 0 }}>{p.week}</span>
-                  <MaybeLink link={p} style={{ fontSize: '.92rem' }} />
-                </div>
-              ))}
-            </div>
-
-            {/* 07 · ASSESSMENT */}
-            <SectionHeading num="07" title="Assessment" />
-            <div className="grid-2">
-              <div className="card" style={{ padding: '24px 26px' }}>
-                <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '18px' }}>Grade Weighting</h4>
-                {[['Quizzes (best 5 of 6)', 30], ['Midterm', 30], ['Final (comprehensive)', 40]].map(([label, pct]) => (
-                  <div key={label} style={{ marginBottom: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.88rem', marginBottom: '6px' }}>
-                      <span>{label}</span><b style={{ fontFamily: 'var(--fm)', color: 'var(--amber)' }}>{pct}%</b>
-                    </div>
-                    <div style={{ height: '7px', background: 'rgba(255,255,255,.05)', borderRadius: '50px', overflow: 'hidden' }}>
-                      <span style={{ display: 'block', height: '100%', width: `${pct}%`, borderRadius: '50px', background: 'linear-gradient(90deg, var(--teal), var(--amber))' }}></span>
-                    </div>
-                  </div>
                 ))}
-                <div style={{ marginTop: '14px', fontSize: '.78rem', color: 'var(--text3)', fontStyle: 'italic', textAlign: 'center', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>Final · 25 July · 3:00 PM · covers all seven weeks</div>
-              </div>
-              <div className="card" style={{ padding: '24px 26px' }}>
-                <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', marginBottom: '18px' }}>Quiz Calendar</h4>
-                <div style={{ display: 'grid', gap: '8px' }}>
-                  {QUIZZES.map(q => (
-                    <div key={q.n} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '.88rem', padding: '8px 12px', border: '1px solid var(--border)', borderRadius: '10px', background: 'rgba(255,255,255,.02)' }}>
-                      <span style={{ fontFamily: 'var(--fm)', color: 'var(--amber)', fontSize: '.76rem', width: '24px', height: '24px', display: 'grid', placeItems: 'center', border: '1px solid var(--amber)', borderRadius: '50%' }}>{q.n}</span>
-                      <span style={{ color: 'var(--text)' }}>{q.date}</span>
-                      <span style={{ marginLeft: 'auto', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>{q.day}</span>
-                    </div>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        {/* 06 · SYLLABUS — collapsed by default */}
+        <SectionHeading num="06" title="Full Syllabus" id="syllabus" />
+        <details style={boxStyle}>
+          <summary style={summaryStyle}>Seven-week outline (Nicholson sections)</summary>
+          <div style={{ marginTop: '10px' }}>
+            {TIMELINE.map(wk => (
+              <div key={wk.no} style={{ borderTop: '1px solid var(--border)', padding: '12px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', letterSpacing: '.1em', color: 'var(--amber)', textTransform: 'uppercase' }}>{wk.no}</span>
+                  <span style={{ fontFamily: 'var(--fh)', fontSize: '1.05rem', color: 'var(--text)', flex: 1 }}>{wk.title}</span>
+                  <span style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', border: '1px solid var(--border2)', padding: '2px 8px', borderRadius: '6px' }}>{wk.ref}</span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+                  {wk.items.map(([s, t]) => (
+                    <li key={s + t} style={{ display: 'flex', gap: '12px', padding: '3px 0', fontSize: '.86rem', color: 'var(--text2)' }}>
+                      <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--teal)', minWidth: '74px' }}>{s}</span>
+                      <span>{t}</span>
+                    </li>
                   ))}
-                </div>
-                <div style={{ marginTop: '14px', fontSize: '.78rem', color: 'var(--text3)', fontStyle: 'italic', textAlign: 'center', paddingTop: '12px', borderTop: '1px dashed var(--border)' }}>Best 5 of 6 count — one quiz dropped</div>
+                </ul>
               </div>
-            </div>
-
-            {/* 08 · MOCK EXAMS */}
-            <SectionHeading num="08" title="Mock Exams" />
-            <div className="grid-2">
-              {MOCK_EXAMS.map(m => (
-                <div key={m.title} className="card card-amber" style={{ padding: '20px 24px' }}>
-                  <h4 style={{ marginBottom: '4px' }}>{m.title}</h4>
-                  <div style={{ fontSize: '.8rem', color: 'var(--text3)', marginBottom: '12px' }}>{m.detail}</div>
-                  <MaybeLink link={{ title: m.href ? 'Open PDF' : 'Practice paper', href: m.href }} style={{ fontSize: '.88rem' }} />
-                </div>
-              ))}
-            </div>
-
+            ))}
           </div>
+        </details>
 
-          <div className="la-footer-nav" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 52px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
-            <Link href="/courses/calc1" style={navBtn(false)}>← Calculus I</Link>
-            <Link href="/courses" style={navBtn(true)}>All Courses →</Link>
-          </div>
+        {/* 07 · WEEKLY SCHEDULE — moved to the end, as requested */}
+        <SectionHeading num="07" title="Weekly Schedule" id="schedule" />
+        <Schedule />
 
-        </main>
+        {/* footer nav */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '28px 0 0', marginTop: '32px', borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: '12px' }}>
+          <Link href="/courses/calc1" style={navBtn(false)}>← Calculus I</Link>
+          <Link href="/courses" style={navBtn(true)}>All Courses →</Link>
+        </div>
       </div>
 
       <Footer />
@@ -481,25 +435,16 @@ export default function LinAlg() {
   );
 }
 
-/* ─── helpers ─── */
-function SectionHeading({ num, title }) {
+/* ─── presentational helpers ─── */
+function SectionHeading({ num, title, id, note }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px', margin: '40px 0 20px' }}>
-      <span style={{ fontFamily: 'var(--fm)', color: 'var(--amber)', fontSize: '.82rem' }}>{num}</span>
-      <h3 style={{ fontFamily: 'var(--fh)', fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>{title}</h3>
-      <span style={{ flex: 1, height: '1px', background: 'var(--border)' }}></span>
-    </div>
-  );
-}
-
-function Row({ label, value, isEmail }) {
-  const isTBA = value === 'TBA';
-  return (
-    <div style={{ display: 'flex', gap: '10px' }}>
-      <span style={{ color: 'var(--text3)', minWidth: '92px', fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.04em', textTransform: 'uppercase' }}>{label}</span>
-      {isEmail && !isTBA
-        ? <a href={`mailto:${value}`} style={{ color: 'var(--amber)', wordBreak: 'break-all' }}>{value}</a>
-        : <span style={{ color: isTBA ? 'var(--text3)' : 'var(--text)', fontStyle: isTBA ? 'italic' : 'normal' }}>{value}</span>}
+    <div id={id} style={{ scrollMarginTop: 'calc(var(--nav-h) + 80px)', margin: '44px 0 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+        <span style={{ fontFamily: 'var(--fm)', color: 'var(--amber)', fontSize: '.82rem' }}>{num}</span>
+        <h3 style={{ fontFamily: 'var(--fh)', fontSize: '1.5rem', color: 'var(--text)', margin: 0 }}>{title}</h3>
+        <span style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
+      </div>
+      {note && <p style={{ fontSize: '.84rem', color: 'var(--text3)', margin: '8px 0 0', paddingLeft: '28px' }}>{note}</p>}
     </div>
   );
 }
@@ -522,19 +467,18 @@ function Schedule() {
     const h12 = h % 12 === 0 ? 12 : h % 12;
     return `${h12}:${m.toString().padStart(2, '0')}${ap}`;
   };
-
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--surface)' }}>
       <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', padding: '14px 18px', borderBottom: '1px solid var(--border)', fontSize: '.78rem' }}>
         {[['lecture', 'Lecture'], ['tutorial', 'Tutorial'], ['office', 'Office Hours']].map(([k, label]) => (
           <span key={k} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', color: 'var(--text2)' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors[k].bg, border: `1px solid ${colors[k].bd}` }}></span>{label}
+            <span style={{ width: '12px', height: '12px', borderRadius: '3px', background: colors[k].bg, border: `1px solid ${colors[k].bd}` }} />{label}
           </span>
         ))}
       </div>
       <div style={{ overflowX: 'auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: `64px repeat(${days.length}, minmax(110px, 1fr))`, minWidth: '640px' }}>
-          <div style={{ borderBottom: '1px solid var(--border)' }}></div>
+          <div style={{ borderBottom: '1px solid var(--border)' }} />
           {days.map(d => (
             <div key={d} style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text2)', borderBottom: '1px solid var(--border)', borderLeft: '1px solid var(--border)' }}>{d}</div>
           ))}
@@ -546,7 +490,7 @@ function Schedule() {
           {days.map((d, di) => (
             <div key={d} style={{ position: 'relative', height: `${gridH}px`, borderLeft: '1px solid var(--border)' }}>
               {hours.map(h => (
-                <div key={h} style={{ position: 'absolute', top: `${(h - startHour) * 60 * pxPerMin}px`, left: 0, right: 0, borderTop: '1px solid var(--border)', opacity: .5 }}></div>
+                <div key={h} style={{ position: 'absolute', top: `${(h - startHour) * 60 * pxPerMin}px`, left: 0, right: 0, borderTop: '1px solid var(--border)', opacity: .5 }} />
               ))}
               {events.filter(e => e.day === di).map((e, ei) => {
                 const top = (e.start - startHour) * 60 * pxPerMin;
@@ -568,12 +512,8 @@ function Schedule() {
   );
 }
 
-const detailsStyle = { border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px 20px', background: 'var(--surface)' };
-const summaryStyle = { cursor: 'pointer', fontFamily: 'var(--fh)', fontSize: '1.25rem', color: 'var(--text)', listStyle: 'none' };
-const weekStyle = { borderBottom: '1px solid var(--border)', padding: '10px 0' };
-const weekSummaryStyle = { cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '14px', listStyle: 'none' };
-const thStyle = { textAlign: 'left', padding: '11px 16px', fontFamily: 'var(--fm)', fontSize: '.66rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text3)' };
-const tdStyle = { padding: '11px 16px', verticalAlign: 'top' };
+const boxStyle = { border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: '16px 20px', background: 'var(--surface)' };
+const summaryStyle = { cursor: 'pointer', fontFamily: 'var(--fh)', fontSize: '1.1rem', color: 'var(--text)', listStyle: 'none' };
 const navBtn = (primary) => ({
   display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.74rem',
   letterSpacing: '.08em', textTransform: 'uppercase', padding: '8px 18px', borderRadius: '8px', textDecoration: 'none',
