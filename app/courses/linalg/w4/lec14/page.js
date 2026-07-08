@@ -27,6 +27,7 @@ const LECTURES = [
   { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', live: true },
   { week: 4, n: 13, slug: 'w4/lec13', title: 'Polynomial Interpolation & Linear Recurrences', live: true },
   { week: 4, n: 14, slug: 'w4/lec14', title: 'Subspaces & Spanning', live: true },
+  { week: 5, n: 15, slug: 'w5/lec15', title: 'Independence & Dimension', live: true },
 ];
 const THIS_SLUG = 'w4/lec14';
 const PREV_HREF  = '/courses/linalg/w4/lec13';
@@ -500,7 +501,7 @@ export default function Lec14() {
             <p>{String.raw`You already know $\mathbb{R}^n$: the set of all lists of $n$ real numbers, which we call vectors. You can `}<b>add</b>{String.raw` two of them and `}<b>scale</b>{String.raw` one by a number, and the result is again in $\mathbb{R}^n$. From Lecture 1 you also know a `}<b>homogeneous system</b>{String.raw` $A\mathbf{x} = \mathbf{0}$ and its solutions.`}</p>
 
             <Callout icon="🧭" title="Honest framing: what this lecture is (and isn't)" color="teal">
-              {String.raw`Today we study `}<b>subspaces of $\mathbb{R}^n$</b>{String.raw` (Nicholson §5.1). This is a `}<i>preview</i>{String.raw` of a larger idea. Later you will meet the full definition of an abstract "vector space," where the vectors need not be lists of numbers at all — they can be polynomials, functions, or matrices. For now we keep both feet inside the familiar $\mathbb{R}^n$, so every example is concrete. Keep in the back of your mind: the three rules below are the seed of that bigger theory.`}
+              {String.raw`Today we study $\textbf{subspaces of } \mathbb{R}^n$ (Nicholson §5.1). This is a `}<i>preview</i>{String.raw` of a larger idea. Later you will meet the full definition of an abstract "vector space," where the vectors need not be lists of numbers at all — they can be polynomials, functions, or matrices. For now we keep both feet inside the familiar $\mathbb{R}^n$, so every example is concrete. Keep in the back of your mind: the three rules below are the seed of that bigger theory.`}
             </Callout>
 
             {/* ─── §3 SUBSPACE DEFINED ─── */}
@@ -633,7 +634,7 @@ export default function Lec14() {
 
             <p style={{margin:'4px 0'}}>{String.raw`• `}<b>One nonzero vector</b>{String.raw` $\mathbf{v}$: $\operatorname{span}\{\mathbf{v}\} = \{t\mathbf{v}\}$ is a `}<b>line</b>{String.raw` through the origin.`}</p>
             <p style={{margin:'4px 0'}}>{String.raw`• `}<b>Two vectors</b>{String.raw` in different directions: their span is a `}<b>plane</b>{String.raw` through the origin.`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>Three independent vectors</b>{String.raw` in $\mathbb{R}^3$: their span is `}<b>all of $\mathbb{R}^3$</b>{String.raw`.`}</p>
+            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>Three independent vectors</b>{String.raw` in $\mathbb{R}^3$: their span is $\textbf{all of } \mathbb{R}^3$.`}</p>
 
             <p>{String.raw`Watch this happen live — go from zero, to one, to two vectors and see the span grow from a point to a line to a plane:`}</p>
 

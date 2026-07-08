@@ -26,6 +26,8 @@ const LECTURES = [
   { week: 3, n: 11, slug: 'w3/lec11', title: 'Eigenvalues & Eigenvectors', live: true },
   { week: 4, n: 12, slug: 'w4/lec12', title: 'Diagonalization & Dynamical Systems', live: true },
   { week: 4, n: 13, slug: 'w4/lec13', title: 'Polynomial Interpolation & Linear Recurrences', live: true },
+  { week: 4, n: 14, slug: 'w4/lec14', title: 'Subspaces & Spanning', live: true },
+  { week: 5, n: 15, slug: 'w5/lec15', title: 'Independence & Dimension', live: true },
 ];
 
 const THIS_SLUG = 'w2/lec8';
