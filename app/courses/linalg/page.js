@@ -70,8 +70,8 @@ const QUIZZES = [
 /* ─────────── ASSESSMENT ─────────── */
 const WEIGHTS = [['Quizzes · best 5 of 6', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
 const EXAM_DATES = [
-  { label: 'Midterm', detail: '03 Jul · 10:00 AM', 'Mock-Exam': { href: 'https://drive.google.com/file/d/1Goamv7xmAAxLwtzUveWpW9P4po9-PJlM/view?usp=sharing' } },
-  { label: 'Final', detail: '25 Jul · 3:00 PM · all seven weeks' },
+  { label: 'Midterm', detail: '03 Jul · 10:00 AM', mock: 'https://drive.google.com/file/d/1Goamv7xmAAxLwtzUveWpW9P4po9-PJlM/view?usp=sharing' },
+  { label: 'Final', detail: '25 Jul · 3:00 PM · all seven weeks', mock: null },
 ];
 
 /* ─────────── TEACHING TEAM ─────────── */
@@ -361,9 +361,10 @@ export default function LinAlg() {
           <div style={{ border: '1px solid var(--border)', borderRadius: '14px', padding: '22px 24px', background: 'var(--surface)' }}>
             <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', margin: '0 0 16px' }}>Exam Dates</h4>
             {EXAM_DATES.map(e => (
-              <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px dashed var(--border)' }}>
+              <div key={e.label} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px dashed var(--border)', flexWrap: 'wrap' }}>
                 <span style={{ fontFamily: 'var(--fh)', fontSize: '1.02rem', color: 'var(--amber)', minWidth: '72px' }}>{e.label}</span>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.8rem', color: 'var(--text2)' }}>{e.detail}</span>
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.8rem', color: 'var(--text2)', flex: 1 }}>{e.detail}</span>
+                <Chip href={e.mock} label="Mock Exam" tone="violet" />
               </div>
             ))}
             <div style={{ marginTop: '12px', fontSize: '.76rem', color: 'var(--text3)', fontStyle: 'italic' }}>One quiz is dropped — best 5 of 6 count.</div>
