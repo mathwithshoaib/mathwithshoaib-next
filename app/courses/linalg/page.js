@@ -48,7 +48,7 @@ const WEEK_THEMES = {
 /* ─────────── RESOURCES — one row per week ───────────
    Each cell: { href } — null href renders a muted "soon" chip. */
 const RESOURCES = [
-  { week: 1, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 1, practice: { href: null }, solutions: { href: 'https://drive.google.com/file/d/1wwHCSyEYDdOrZGHSHhpRam1ql8BqsUij/view?usp=sharing' }, pset: { href: null } },
   { week: 2, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
   { week: 3, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
   { week: 4, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
@@ -70,7 +70,7 @@ const QUIZZES = [
 /* ─────────── ASSESSMENT ─────────── */
 const WEIGHTS = [['Quizzes · best 5 of 6', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
 const EXAM_DATES = [
-  { label: 'Midterm', detail: '03 Jul · 10:00 AM · Weeks 1–3' },
+  { label: 'Midterm', detail: '03 Jul · 10:00 AM', 'Mock-Exam': { href: 'https://drive.google.com/file/d/1Goamv7xmAAxLwtzUveWpW9P4po9-PJlM/view?usp=sharing' } },
   { label: 'Final', detail: '25 Jul · 3:00 PM · all seven weeks' },
 ];
 
