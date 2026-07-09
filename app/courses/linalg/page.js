@@ -71,7 +71,7 @@ const QUIZZES = [
 const WEIGHTS = [['Quizzes · best 5 of 6', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
 const EXAM_DATES = [
   { label: 'Midterm', detail: '03 Jul · 10:00 AM', sol: 'https://drive.google.com/file/d/18-fQTsHWNE-E2pAxsOfwU0o6w1NetgLF/view?usp=sharing', mock: 'https://drive.google.com/file/d/1Goamv7xmAAxLwtzUveWpW9P4po9-PJlM/view?usp=sharing' },
-  { label: 'Final', detail: '25 Jul · 3:00 PM · all seven weeks', sol: null, mock: null },
+  { label: 'Final', detail: '25 Jul · 3:00 PM', sol: null, mock: null },
 ];
 
 /* ─────────── TEACHING TEAM ─────────── */
