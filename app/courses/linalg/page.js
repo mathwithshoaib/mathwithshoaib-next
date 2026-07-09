@@ -51,7 +51,7 @@ const RESOURCES = [
   { week: 1, practice: { href: null }, solutions: { href: 'https://drive.google.com/file/d/1wwHCSyEYDdOrZGHSHhpRam1ql8BqsUij/view?usp=sharing' }, pset: { href: null } },
   { week: 2, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
   { week: 3, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
-  { week: 4, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
+  { week: 4, practice: { href: 'https://drive.google.com/file/d/1kdPWhV0iA097sUgHLsi5f-6Ewhx7TWPp/view?usp=sharing' }, solutions: { href: 'https://drive.google.com/file/d/1czjBfjPluFs9SVlBiozEC2mEVyXZiAhR/view?usp=sharing' }, pset: { href: null } },
   { week: 5, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
   { week: 6, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
   { week: 7, practice: { href: null }, solutions: { href: null }, pset: { href: null } },
