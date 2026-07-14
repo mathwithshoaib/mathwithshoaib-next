@@ -29,6 +29,7 @@ const LECTURES = [
   { week: 4, n: 14, slug: 'w4/lec14', title: 'Subspaces & Spanning', live: true },
   { week: 5, n: 15, slug: 'w5/lec15', title: 'Independence & Dimension', live: true },
   { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', live: true },
+  { week: 5, n: 17, slug: 'w5/lec17', title: 'Extending a Basis; Row, Column & Null Space', live: true },
 ];
 
 const THIS_SLUG = 'w2/lec7';

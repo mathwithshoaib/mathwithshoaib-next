@@ -35,6 +35,7 @@ const LECTURES = [
   { week: 4, n: 14, slug: 'w4/lec14', title: 'Subspaces and Spanning', ref: '§5.1', date: '2 Jul', live: true },
   { week: 5, n: 15, slug: 'w5/lec15', title: 'Basis & Dimension', ref: '§5.2', date: '6 Jul', live: true },
   { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', ref: '§6.2–6.3', date: '7 Jul', live: true },
+  { week: 5, n: 17, slug: 'w5/lec17', title: 'Extending a Basis; Row, Column & Null Space', ref: '§6.4', date: '8 Jul', live: true },
 ];
 
 /* one-line theme per week, shown as the accordion subtitle */
