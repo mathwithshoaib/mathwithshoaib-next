@@ -27,6 +27,7 @@ const LECTURES = [
   { week: 4, n: 13, slug: 'w4/lec13', title: 'Polynomial Interpolation & Linear Recurrences', live: true },
   { week: 4, n: 14, slug: 'w4/lec14', title: 'Subspaces & Spanning', live: true },
   { week: 5, n: 15, slug: 'w5/lec15', title: 'Independence & Dimension', live: true },
+  { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', live: true },
 ];
 
 const THIS_SLUG = 'w1/lec1';
