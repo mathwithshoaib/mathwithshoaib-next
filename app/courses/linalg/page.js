@@ -61,12 +61,11 @@ const RESOURCES = [
 
 /* ─────────── QUIZZES — separate date strip ─────────── */
 const QUIZZES = [
-  { n: 1, date: '15 Jun', sol: 'https://drive.google.com/file/d/173KCNI7RrnRpouyLGN3zXhQ0FdLdCyNy/view?usp=sharing' },
-  { n: 2, date: '22 Jun', sol: 'https://drive.google.com/file/d/1F1gCKomKeH2GizwUA7y6P8gJcdT34IYP/view?usp=sharing' },
-  { n: 3, date: '29 Jun', sol: 'https://drive.google.com/file/d/19qqXs_iuM_H29f-Ox-r9fr-HbgB5f1wp/view?usp=sharing' },
-  { n: 4, date: '06 Jul', sol: null },
-  { n: 5, date: '13 Jul', sol: null },
-  { n: 6, date: '20 Jul', sol: null },
+  { n: 1,     date: '15 Jun', sol: 'https://drive.google.com/file/d/173KCNI7RrnRpouyLGN3zXhQ0FdLdCyNy/view?usp=sharing' },
+  { n: 2,     date: '22 Jun', sol: 'https://drive.google.com/file/d/1F1gCKomKeH2GizwUA7y6P8gJcdT34IYP/view?usp=sharing' },
+  { n: 3,     date: '29 Jun', sol: 'https://drive.google.com/file/d/19qqXs_iuM_H29f-Ox-r9fr-HbgB5f1wp/view?usp=sharing' },
+  { n: 4 & 5, date: '06 Jul', sol: 'https://drive.google.com/file/d/1VWHLpUnyZgdhU0cHVxlie83B_j-MW0f0/view?usp=sharing' },
+  { n: 6,     date: '20 Jul', sol: null },
 ];
 
 /* ─────────── ASSESSMENT ─────────── */
