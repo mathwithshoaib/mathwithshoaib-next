@@ -322,7 +322,7 @@ export default function Lec16() {
             {/* ─── §1 MOTIVATION ─── */}
             <Sec id="motivation" n="§1">Why Go Abstract?</Sec>
 
-            <p>{String.raw`In lecture, your instructor moved straight from `}<b>subspaces of $\mathbb{R}^n$</b>{String.raw` (Lecture 14) to `}<b>independence, basis, and dimension</b>{String.raw` (Lecture 15) without ever writing down the general definition of a "vector space." That was not an oversight — it was a deliberate choice. $\mathbb{R}^n$ is already a vector space, and every idea in those two lectures can be built with plain coordinates, with nothing lost.`}</p>
+            <p>{String.raw`In lecture, your instructor moved straight from `}<b>{String.raw`subspaces of $\mathbb{R}^n$`}</b>{String.raw` (Lecture 14) to `}<b>independence, basis, and dimension</b>{String.raw` (Lecture 15) without ever writing down the general definition of a "vector space." That was not an oversight — it was a deliberate choice. $\mathbb{R}^n$ is already a vector space, and every idea in those two lectures can be built with plain coordinates, with nothing lost.`}</p>
 
             <Callout icon="📋" title="A note on what was (and wasn't) covered in lecture" color="rose">
               {String.raw`This lecture note starts with the formal definition of a vector space — a step the lecture itself skipped, on purpose. We add it here for a good reason: once you see the `}<i>real</i>{String.raw` definition, you'll realise that matrices, polynomials, and even functions are "vectors" too, obeying exactly the same rules $\mathbb{R}^n$ obeys. Skim the definition if you like — it is short and mostly a checklist — but know that everything from `}<b>§6.2 onward</b>{String.raw` (Nicholson) is genuinely new material, not review.`}
@@ -348,7 +348,7 @@ export default function Lec16() {
             </DefBox>
 
             <Callout icon="🔑" title="What actually matters in practice" color="amber">
-              {String.raw`You will almost never verify all eight axioms by hand. A1–A4 and A6–A8 are usually "obviously true," because addition and scalar multiplication are `}<i>inherited</i>{String.raw` from ordinary arithmetic — adding matrices, adding polynomials, adding functions all reduce to adding real numbers underneath. The only two axioms that can actually `}<b>fail</b>{String.raw` are A1's and A5's closure clauses: `}<i>"$\mathbf{x}+\mathbf{y}$ is again in $V$"</i>{String.raw` and `}<i>"$a\mathbf{x}$ is again in $V$."</i>{String.raw` That is the shortcut we use for every example below: `}<b>check that the set is closed under addition and scalar multiplication</b>{String.raw` — everything else follows for free from ordinary algebra.`}
+              {String.raw`You will almost never verify all eight axioms by hand. A1–A4 and A6–A8 are usually "obviously true," because addition and scalar multiplication are `}<i>inherited</i>{String.raw` from ordinary arithmetic — adding matrices, adding polynomials, adding functions all reduce to adding real numbers underneath. The only two axioms that can actually `}<b>fail</b>{String.raw` are A1's and A5's closure clauses: `}<i>{String.raw`"$\mathbf{x}+\mathbf{y}$ is again in $V$"`}</i>{String.raw` and `}<i>{String.raw`"$a\mathbf{x}$ is again in $V$."`}</i>{String.raw` That is the shortcut we use for every example below: `}<b>check that the set is closed under addition and scalar multiplication</b>{String.raw` — everything else follows for free from ordinary algebra.`}
             </Callout>
 
             {/* ─── §3 VS EXAMPLES ─── */}
@@ -476,7 +476,7 @@ export default function Lec16() {
 
             <p>{String.raw`Just as $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$ span $\mathbb{R}^n$ (Lecture 14, Example 5.1.6), each vector space above has its own natural "starter kit":`}</p>
 
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$M_{mn}$:</b>{String.raw` the $mn$ `}<b>matrix units</b>{String.raw` $E_{ij}$ (a $1$ in row $i$, column $j$, and $0$ elsewhere), for $i=1,\ldots,m$ and $j=1,\ldots,n$. Any matrix $A = \sum_{i,j} a_{ij}E_{ij}$, so these span $M_{mn}$.`}</p>
+            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$M_{mn}$:`}</b>{String.raw` the $mn$ `}<b>matrix units</b>{String.raw` $E_{ij}$ (a $1$ in row $i$, column $j$, and $0$ elsewhere), for $i=1,\ldots,m$ and $j=1,\ldots,n$. Any matrix $A = \sum_{i,j} a_{ij}E_{ij}$, so these span $M_{mn}$.`}</p>
             <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$P_n$:</b>{String.raw` the $n+1$ monomials $\{1, x, x^2, \ldots, x^n\}$. Every $a_0+a_1x+\cdots+a_nx^n$ is literally a linear combination of these.`}</p>
             <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$P$:</b>{String.raw` the `}<i>infinite</i>{String.raw` list $\{1, x, x^2, x^3, \ldots\}$.`}</p>
 
@@ -562,9 +562,9 @@ export default function Lec16() {
 
             <p>{String.raw`Using the standard spanning sets from §10 (each one is also independent — a short check you can carry out the same way as Example 8), the dimensions are:`}</p>
 
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$\dim \mathbb{R}^n = n$</b>{String.raw` (basis $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$).`}</p>
+            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$\dim \mathbb{R}^n = n$`}</b>{String.raw` (basis $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$).`}</p>
             <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$\dim P_n = n+1$</b>{String.raw` (basis $\{1,x,\ldots,x^n\}$ — count carefully: degree `}<i>at most</i>{String.raw` $n$ means $n+1$ monomials, from $x^0$ to $x^n$).`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$\dim M_{mn} = mn$</b>{String.raw` (basis the matrix units $\{E_{ij}\}$, of which there are $mn$).`}</p>
+            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$\dim M_{mn} = mn$`}</b>{String.raw` (basis the matrix units $\{E_{ij}\}$, of which there are $mn$).`}</p>
 
             {/* ─── §15 DIM P = INFINITY ─── */}
             <Sec id="dim-p" n="§15">An Interesting Fact: dim P = ∞</Sec>
