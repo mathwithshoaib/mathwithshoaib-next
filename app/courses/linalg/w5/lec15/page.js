@@ -196,91 +196,221 @@ function SubH({ children }) {
 
 
 
-/* ═══════════════ INDEPENDENCE TESTER (2D) ═══════════════ */
-function IndependenceTester() {
-  const presets = {
-    indep:  { label:'Independent pair', v:[[2,1],[-1,2]] },
-    dep:    { label:'Dependent pair', v:[[2,1],[4,2]] },
-    three:  { label:'Three in ℝ² (always dep.)', v:[[2,1],[-1,2],[1,1]] },
-  };
-  const [key,setKey]=useState('indep');
-  const canvasRef=useRef(null);
-  const vs=presets[key].v;
+/* ═══════════════ INDEPENDENCE TESTER (interactive, ℝ² & ℝ³) ═══════════════ */
+const IT_COLORS = ['#38c9b0','#e8a020','#9b80e8','#e06b6b','#5fb8e0'];
+const IT_DEFAULTS = {
+  2: [['2','1'],['-1','2'],['1','1'],['3','-1'],['-2','-1']],
+  3: [['2','1','0'],['-1','2','1'],['0','1','2'],['2','-1','1'],['1','2','-1']],
+};
 
-  // rank of the 2xN matrix (columns = vectors)
-  function rank2(vectors){
-    // reduce to count independent columns in R^2
-    let cols=vectors.map(c=>[...c]);
-    let r=0, rowsUsed=[];
-    for(let row=0; row<2; row++){
-      let pivotCol=-1;
-      for(let c=0;c<cols.length;c++){
-        if(!rowsUsed.includes(c) && Math.abs(cols[c][row])>1e-9){ pivotCol=c; break; }
-      }
-      if(pivotCol<0) continue;
-      rowsUsed.push(pivotCol); r++;
-      for(let c=0;c<cols.length;c++){
-        if(c===pivotCol) continue;
-        const f=cols[c][row]/cols[pivotCol][row];
-        for(let rr=0;rr<2;rr++) cols[c][rr]-=f*cols[pivotCol][rr];
-      }
+// rank of a `dim`×N matrix (columns = vectors), via elimination
+function rankOfVectors(vectors, dim){
+  let cols = vectors.map(v=>v.slice());
+  let rank = 0, rowsUsed = [];
+  for (let row=0; row<dim; row++){
+    let pivotCol=-1;
+    for (let c=0; c<cols.length; c++){
+      if (!rowsUsed.includes(c) && Math.abs(cols[c][row])>1e-9){ pivotCol=c; break; }
     }
-    return r;
+    if (pivotCol<0) continue;
+    rowsUsed.push(pivotCol); rank++;
+    for (let c=0; c<cols.length; c++){
+      if (c===pivotCol) continue;
+      const f = cols[c][row]/cols[pivotCol][row];
+      for (let r2=0; r2<dim; r2++) cols[c][r2] -= f*cols[pivotCol][r2];
+    }
   }
-  const rank=rank2(vs);
-  const independent = rank===vs.length;
+  return rank;
+}
 
-  useEffect(()=>{
-    const cv=canvasRef.current; if(!cv) return;
-    const ctx=cv.getContext('2d');
-    const W=cv.width,H=cv.height,cx=W/2,cy=H/2,s=30;
-    ctx.clearRect(0,0,W,H); ctx.fillStyle='#12122a'; ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle='rgba(120,130,180,.15)'; ctx.lineWidth=1;
-    for(let i=-8;i<=8;i++){ ctx.beginPath();ctx.moveTo(cx+i*s,0);ctx.lineTo(cx+i*s,H);ctx.stroke();
-      ctx.beginPath();ctx.moveTo(0,cy+i*s);ctx.lineTo(W,cy+i*s);ctx.stroke(); }
-    ctx.strokeStyle='rgba(180,190,230,.5)'; ctx.lineWidth=1.3;
-    ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.stroke();
-    const cols=['#38c9b0','#e8a020','#9b80e8'];
-    vs.forEach((v,i)=>{
-      const x2=cx+v[0]*s,y2=cy-v[1]*s;
-      ctx.strokeStyle=cols[i];ctx.fillStyle=cols[i];ctx.lineWidth=3;
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x2,y2);ctx.stroke();
-      const ang=Math.atan2(y2-cy,x2-cx),ah=9;
-      ctx.beginPath();ctx.moveTo(x2,y2);
-      ctx.lineTo(x2-ah*Math.cos(ang-0.4),y2-ah*Math.sin(ang-0.4));
-      ctx.lineTo(x2-ah*Math.cos(ang+0.4),y2-ah*Math.sin(ang+0.4));
-      ctx.closePath();ctx.fill();
+function IndependenceTester() {
+  const [dim, setDim] = useState(2);              // 2 or 3
+  const [count, setCount] = useState(2);           // 1..5
+  const [vectors, setVectors] = useState([['2','1'],['-1','2']]); // strings, length = count, each of length dim
+  const [rot, setRot] = useState({ yaw: 0.7, pitch: 0.32 });
+  const canvasRef = useRef(null);
+  const dragRef = useRef(null);
+
+  // keep vectors array in sync with dim/count, preserving already-edited values
+  useEffect(() => {
+    setVectors(prev => {
+      const next = [];
+      for (let i=0; i<count; i++){
+        const existing = prev[i];
+        next.push(existing && existing.length===dim ? existing : IT_DEFAULTS[dim][i%5]);
+      }
+      return next;
     });
-  },[key]);
+  }, [dim, count]);
+
+  function setComponent(vi, ci, raw){
+    const clean = raw.replace(/[^0-9.\-]/g, '');
+    setVectors(prev => prev.map((v,i)=> i===vi ? v.map((c,j)=> j===ci ? clean : c) : v));
+  }
+
+  const numericVectors = vectors.map(v => v.map(c => { const n=parseFloat(c); return Number.isFinite(n)?n:0; }));
+  const rank = rankOfVectors(numericVectors, dim);
+  const independent = numericVectors.length>0 && rank===numericVectors.length;
+  const dimLabel = dim===2 ? 'ℝ²' : 'ℝ³';
+
+  // ── draw: flat 2D axes, or a rotatable 3D scene ──
+  useEffect(() => {
+    const cv = canvasRef.current; if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height, cx = W/2, cy = H/2;
+    ctx.clearRect(0,0,W,H); ctx.fillStyle='#12122a'; ctx.fillRect(0,0,W,H);
+
+    if (dim===2){
+      const s=30;
+      ctx.strokeStyle='rgba(120,130,180,.15)'; ctx.lineWidth=1;
+      for(let i=-8;i<=8;i++){ ctx.beginPath();ctx.moveTo(cx+i*s,0);ctx.lineTo(cx+i*s,H);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(0,cy+i*s);ctx.lineTo(W,cy+i*s);ctx.stroke(); }
+      ctx.strokeStyle='rgba(180,190,230,.5)'; ctx.lineWidth=1.3;
+      ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,H);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(W,cy);ctx.stroke();
+      numericVectors.forEach((v,i)=>{
+        const x2=cx+v[0]*s, y2=cy-v[1]*s;
+        ctx.strokeStyle=IT_COLORS[i%5]; ctx.fillStyle=IT_COLORS[i%5]; ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(x2,y2);ctx.stroke();
+        const ang=Math.atan2(y2-cy,x2-cx), ah=9;
+        ctx.beginPath();ctx.moveTo(x2,y2);
+        ctx.lineTo(x2-ah*Math.cos(ang-0.4),y2-ah*Math.sin(ang-0.4));
+        ctx.lineTo(x2-ah*Math.cos(ang+0.4),y2-ah*Math.sin(ang+0.4));
+        ctx.closePath();ctx.fill();
+      });
+      return;
+    }
+
+    // dim === 3 — orthographic projection with yaw/pitch rotation
+    const s=42, { yaw, pitch } = rot;
+    const cosY=Math.cos(yaw), sinY=Math.sin(yaw), cosX=Math.cos(pitch), sinX=Math.sin(pitch);
+    function proj(x,y,z){
+      const x1=x*cosY+z*sinY, z1=-x*sinY+z*cosY, y1=y;
+      const y2=y1*cosX-z1*sinX, z2=y1*sinX+z1*cosX;
+      const depth=1+z2*0.045;
+      return [cx+x1*s/depth, cy-y2*s/depth, z2];
+    }
+    ctx.strokeStyle='rgba(120,130,180,.12)'; ctx.lineWidth=1;
+    for(let i=-3;i<=3;i++){
+      let a=proj(i,0,-3), b=proj(i,0,3); ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+      let c=proj(-3,0,i), d=proj(3,0,i); ctx.beginPath();ctx.moveTo(c[0],c[1]);ctx.lineTo(d[0],d[1]);ctx.stroke();
+    }
+    const O=proj(0,0,0);
+    [[[3.4,0,0],'rgba(224,107,107,.75)','x'],[[0,3.4,0],'rgba(120,220,160,.75)','y'],[[0,0,3.4],'rgba(120,170,230,.75)','z']]
+      .forEach(([p,col,label])=>{
+        const P=proj(...p);
+        ctx.strokeStyle=col; ctx.lineWidth=1.4;
+        ctx.beginPath();ctx.moveTo(O[0],O[1]);ctx.lineTo(P[0],P[1]);ctx.stroke();
+        ctx.fillStyle=col; ctx.font='11px var(--fm)'; ctx.fillText(label,P[0]+4,P[1]);
+      });
+    numericVectors
+      .map((v,i)=>({ v, i, z: proj(...v)[2] }))
+      .sort((a,b)=>a.z-b.z)
+      .forEach(({v,i})=>{
+        const P=proj(...v);
+        ctx.strokeStyle=IT_COLORS[i%5]; ctx.fillStyle=IT_COLORS[i%5]; ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(O[0],O[1]);ctx.lineTo(P[0],P[1]);ctx.stroke();
+        ctx.beginPath();ctx.arc(P[0],P[1],4,0,7);ctx.fill();
+      });
+    ctx.fillStyle='#fff'; ctx.beginPath();ctx.arc(O[0],O[1],3.5,0,7);ctx.fill();
+  }, [dim, vectors, rot]);
+
+  // ── drag-to-rotate (mouse + touch, via Pointer Events) ──
+  function onPointerDown(e){
+    if (dim!==3) return;
+    dragRef.current = { x:e.clientX, y:e.clientY, yaw:rot.yaw, pitch:rot.pitch };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e){
+    if (!dragRef.current) return;
+    const dx=e.clientX-dragRef.current.x, dy=e.clientY-dragRef.current.y;
+    setRot({ yaw: dragRef.current.yaw + dx*0.008, pitch: Math.max(-1.4, Math.min(1.4, dragRef.current.pitch - dy*0.008)) });
+  }
+  function onPointerUp(){ dragRef.current = null; }
+
+  const btnStyle = active => ({
+    fontFamily:'var(--fm)', fontSize:'.72rem', padding:'6px 14px', borderRadius:'20px', cursor:'pointer',
+    border:'1px solid '+(active?'#38c9b0':'rgba(180,190,230,.3)'),
+    background: active?'rgba(56,201,176,.2)':'transparent', color: active?'#8fd9cc':'#aab', fontWeight:600,
+  });
+  const labelStyle = { fontFamily:'var(--fm)', fontSize:'.6rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#7079a0', marginBottom:'6px' };
 
   return (
     <div style={{ background:'#1a1a2e', border:'1px solid rgba(120,130,180,.3)', borderRadius:'16px', padding:'22px 24px', margin:'26px 0', color:'#e8ecff' }}>
-      <div style={{ fontFamily:'var(--fm)', fontSize:'.72rem', letterSpacing:'.16em', textTransform:'uppercase', color:'#8fd9cc', marginBottom:'14px' }}>🎛 Independent or Dependent?</div>
-      <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', marginBottom:'14px' }}>
-        {Object.entries(presets).map(([k,p])=>(
-          <button key={k} onClick={()=>setKey(k)} style={{
-            fontFamily:'var(--fm)', fontSize:'.68rem', padding:'6px 12px', borderRadius:'20px', cursor:'pointer',
-            border:'1px solid '+(key===k?'#38c9b0':'rgba(180,190,230,.3)'),
-            background: key===k?'rgba(56,201,176,.2)':'transparent', color: key===k?'#8fd9cc':'#aab', fontWeight:600,
-          }}>{p.label}</button>
+      <div style={{ fontFamily:'var(--fm)', fontSize:'.72rem', letterSpacing:'.16em', textTransform:'uppercase', color:'#8fd9cc', marginBottom:'16px' }}>🎛 Independent or Dependent? — Enter Your Own Vectors</div>
+
+      {/* space + count controls */}
+      <div style={{ display:'flex', gap:'26px', flexWrap:'wrap', marginBottom:'18px' }}>
+        <div>
+          <div style={labelStyle}>Space</div>
+          <div style={{ display:'flex', gap:'6px' }}>
+            <button onClick={()=>setDim(2)} style={btnStyle(dim===2)}>ℝ²</button>
+            <button onClick={()=>setDim(3)} style={btnStyle(dim===3)}>ℝ³</button>
+          </div>
+        </div>
+        <div>
+          <div style={labelStyle}>Number of vectors</div>
+          <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+            <button onClick={()=>setCount(c=>Math.max(1,c-1))} disabled={count<=1} style={{ ...btnStyle(false), padding:'4px 12px', opacity:count<=1?.4:1 }}>−</button>
+            <span style={{ fontFamily:'var(--fm)', fontSize:'.85rem', minWidth:'14px', textAlign:'center' }}>{count}</span>
+            <button onClick={()=>setCount(c=>Math.min(5,c+1))} disabled={count>=5} style={{ ...btnStyle(false), padding:'4px 12px', opacity:count>=5?.4:1 }}>+</button>
+            <span style={{ fontFamily:'var(--fm)', fontSize:'.62rem', color:'#7079a0' }}>max 5</span>
+          </div>
+        </div>
+      </div>
+
+      {/* vector component inputs */}
+      <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginBottom:'18px' }}>
+        {vectors.map((v,i)=>(
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
+            <span style={{ width:'30px', flexShrink:0, fontFamily:'var(--fm)', fontSize:'.8rem', fontWeight:700, color:IT_COLORS[i%5] }}>v{i+1}</span>
+            {v.map((c,j)=>(
+              <input
+                key={j}
+                value={c}
+                onChange={e=>setComponent(i,j,e.target.value)}
+                inputMode="decimal"
+                placeholder={['x','y','z'][j]}
+                style={{
+                  width:'52px', textAlign:'center', fontFamily:'var(--fm)', fontSize:'.82rem',
+                  background:'#22223e', border:'1px solid rgba(180,190,230,.3)', borderRadius:'7px',
+                  color:'#e8ecff', padding:'6px 4px', outline:'none',
+                }}
+              />
+            ))}
+          </div>
         ))}
       </div>
+
+      {/* canvas + result */}
       <div style={{ display:'flex', gap:'22px', flexWrap:'wrap', alignItems:'flex-start' }}>
-        <canvas ref={canvasRef} width={300} height={300} style={{ borderRadius:'12px', maxWidth:'100%' }}/>
+        <div>
+          <canvas
+            ref={canvasRef} width={320} height={300}
+            onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
+            style={{ borderRadius:'12px', maxWidth:'100%', touchAction:'none', cursor: dim===3 ? 'grab' : 'default' }}
+          />
+          {dim===3 && (
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'6px' }}>
+              <span style={{ fontFamily:'var(--fm)', fontSize:'.62rem', color:'#7079a0' }}>🖱 drag to rotate</span>
+              <button onClick={()=>setRot({ yaw:0.7, pitch:0.32 })} style={{ fontFamily:'var(--fm)', fontSize:'.62rem', color:'#8fd9cc', background:'transparent', border:'none', cursor:'pointer', textDecoration:'underline' }}>reset view</button>
+            </div>
+          )}
+        </div>
         <div style={{ flex:1, minWidth:'220px' }}>
           <div style={{ background:'#22223e', borderRadius:'10px', padding:'12px 14px', borderLeft:`3px solid ${independent?'#38c9b0':'#e06b6b'}` }}>
             <div style={{ fontFamily:'var(--fh)', fontSize:'1.05rem', color:independent?'#8fd9cc':'#f0a0a0', marginBottom:'6px' }}>
               {independent ? '✓ Independent' : '✗ Dependent'}
             </div>
             <div style={{ fontFamily:'var(--fm)', fontSize:'.76rem', color:'#c4cae8', lineHeight:1.7 }}>
-              {key==='indep' && 'The two arrows point in genuinely different directions. Neither is a multiple of the other — the only way to combine them to reach 0 is with both coefficients zero.'}
-              {key==='dep' && 'The second arrow is exactly 2× the first — they lie on one line. So 2·v₁ − v₂ = 0 is a nontrivial vanishing combination. Dependent.'}
-              {key==='three' && 'Three vectors in a 2-dimensional plane can never all be independent — there is not enough room. One is always a combination of the other two.'}
+              {numericVectors.length>dim && `${numericVectors.length} vectors can never be independent in ${dimLabel} — there's only room for ${dim}. `}
+              {independent
+                ? 'The only linear combination that reaches 0 is the trivial one — every coefficient must be zero.'
+                : 'There is a nontrivial combination of these vectors that equals the zero vector — at least one carries no new direction.'}
             </div>
           </div>
           <div style={{ fontFamily:'var(--fm)', fontSize:'.62rem', color:'#7079a0', marginTop:'8px' }}>
-            Vectors span a {rank}-dimensional space ({vs.length} vectors, rank {rank}).
+            rank = {rank} · {numericVectors.length} vector{numericVectors.length===1?'':'s'} · they span a {rank}-dimensional subspace of {dimLabel}.
           </div>
         </div>
       </div>
