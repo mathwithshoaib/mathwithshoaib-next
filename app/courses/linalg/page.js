@@ -65,11 +65,11 @@ const QUIZZES = [
   { n: 2,     date: '22 Jun', sol: 'https://drive.google.com/file/d/1F1gCKomKeH2GizwUA7y6P8gJcdT34IYP/view?usp=sharing' },
   { n: 3,     date: '29 Jun', sol: 'https://drive.google.com/file/d/19qqXs_iuM_H29f-Ox-r9fr-HbgB5f1wp/view?usp=sharing' },
   { n: '4 & 5', date: '06 Jul', sol: 'https://drive.google.com/file/d/1VWHLpUnyZgdhU0cHVxlie83B_j-MW0f0/view?usp=sharing' },
-  { n: 6,     date: '20 Jul', sol: null },
+  { n: '6 & 7', date: '20 Jul', sol: null },
 ];
 
 /* ─────────── ASSESSMENT ─────────── */
-const WEIGHTS = [['Quizzes · best 5 of 6', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
+const WEIGHTS = [['Quizzes · best 5 of 7', 30], ['Midterm', 30], ['Final · comprehensive', 40]];
 const EXAM_DATES = [
   { label: 'Midterm', detail: '03 Jul · 10:00 AM', sol: 'https://drive.google.com/file/d/18-fQTsHWNE-E2pAxsOfwU0o6w1NetgLF/view?usp=sharing', mock: 'https://drive.google.com/file/d/1Goamv7xmAAxLwtzUveWpW9P4po9-PJlM/view?usp=sharing' },
   { label: 'Final', detail: '25 Jul · 3:00 PM', sol: null, mock: null },
@@ -240,7 +240,7 @@ export default function LinAlg() {
             {[
               { href: '#lectures', top: 'Lecture Notes', sub: `${liveCount()} available`, tone: 'var(--amber)' },
               { href: '#resources', top: 'Practice & Problem Sets', sub: 'by week', tone: 'var(--teal)' },
-              { href: '#quizzes', top: 'Quizzes', sub: '6 · best 5 count', tone: 'var(--violet)' },
+              { href: '#quizzes', top: 'Quizzes', sub: '7 · best 5 count', tone: 'var(--violet)' },
               { href: '#assessment', top: 'Dates & Grading', sub: 'exams · weights', tone: 'var(--amber)' },
             ].map(q => (
               <a key={q.href} href={q.href}>
@@ -325,22 +325,30 @@ export default function LinAlg() {
 
         {/* 03 · QUIZZES — separate date strip */}
         <SectionHeading num="03" title="Quizzes" id="quizzes"
-          note="Six quizzes across the term · best 5 of 6 count. Papers and solutions post after each quiz." />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: '10px' }}>
-          {QUIZZES.map(q => (
-            <div key={q.n} style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.74rem', color: 'var(--violet)', border: '1px solid var(--violet)', borderRadius: '50%', width: '28px', height: '28px', display: 'grid', placeItems: 'center', flexShrink: 0 }}>{q.n}</span>
-                <div>
-                  <div style={{ fontFamily: 'var(--fh)', fontSize: '.94rem', color: 'var(--text)' }}>Quiz {q.n}</div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>{q.date} · Mon</div>
+          note="Seven quizzes across the term · best 5 of 7 count. Papers and solutions post after each quiz." />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(155px, 1fr))', gap: '10px' }}>
+          {QUIZZES.map(q => {
+            const wide = String(q.n).length > 1;
+            return (
+              <div key={q.n} style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                  <span style={{
+                    fontFamily: 'var(--fm)', fontSize: '.74rem', color: 'var(--violet)',
+                    border: '1px solid var(--violet)', borderRadius: wide ? '20px' : '50%',
+                    minWidth: '28px', height: '28px', padding: wide ? '0 9px' : '0',
+                    display: 'grid', placeItems: 'center', flexShrink: 0, whiteSpace: 'nowrap',
+                  }}>{q.n}</span>
+                  <div>
+                    <div style={{ fontFamily: 'var(--fh)', fontSize: '.94rem', color: 'var(--text)' }}>Quiz {q.n}</div>
+                    <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: 'var(--text3)' }}>{q.date} · Mon</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <Chip href={q.sol} label="Solution" tone="teal" />
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <Chip href={q.sol} label="Solution" tone="teal" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* 04 · ASSESSMENT — grading + exam dates side by side */}
@@ -369,7 +377,7 @@ export default function LinAlg() {
                 <Chip href={e.mock} label="Mock Exam" tone="violet" />
               </div>
             ))}
-            <div style={{ marginTop: '12px', fontSize: '.76rem', color: 'var(--text3)', fontStyle: 'italic' }}>One quiz is dropped — best 5 of 6 count.</div>
+            <div style={{ marginTop: '12px', fontSize: '.76rem', color: 'var(--text3)', fontStyle: 'italic' }}>Two quizzes are dropped — best 5 of 7 count.</div>
           </div>
         </div>
 
