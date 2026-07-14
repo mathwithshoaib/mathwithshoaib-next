@@ -93,7 +93,11 @@ function Reveal({ label = 'Show solution', children }) {
         color:'#c8860a', background:'rgba(232,160,32,.10)',
         border:'1px solid rgba(232,160,32,.4)', borderRadius:'8px',
         padding:'9px 18px', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'8px', fontWeight:600,
-      }}>
+        transition:'background .15s, transform .1s',
+      }}
+      onMouseEnter={e=>{e.currentTarget.style.background='rgba(232,160,32,.18)';}}
+      onMouseLeave={e=>{e.currentTarget.style.background='rgba(232,160,32,.10)';}}
+      >
         <span style={{ transform:open?'rotate(90deg)':'none', transition:'transform .2s', display:'inline-block' }}>▶</span>
         {open ? 'Hide solution' : label}
       </button>
@@ -195,6 +199,48 @@ function Callout({ icon, title, color='amber', children }) {
 
 function SubH({ children }) {
   return <p style={{ fontFamily:'var(--fh)', fontSize:'1.3rem', color:'var(--lec-ink)', margin:'36px 0 12px', fontWeight:600 }}>{children}</p>;
+}
+
+/* ── New: small presentational helpers used only to restyle existing
+   content into a cleaner, more scannable layout (no new material) ── */
+
+function AxiomGrid({ items }) {
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(230px, 1fr))', gap:'10px', margin:'10px 0 4px' }}>
+      {items.map(({ tag, body }) => (
+        <div key={tag} style={{ display:'flex', gap:'10px', alignItems:'flex-start', background:'rgba(255,255,255,.55)', border:'1px solid rgba(42,157,143,.25)', borderRadius:'10px', padding:'10px 14px' }}>
+          <span style={{ flexShrink:0, fontFamily:'var(--fm)', fontSize:'.68rem', fontWeight:700, color:'#2a9d8f', background:'rgba(56,201,176,.16)', borderRadius:'999px', width:'26px', height:'26px', display:'flex', alignItems:'center', justifyContent:'center' }}>{tag}</span>
+          <span style={{ fontSize:'.96rem', lineHeight:1.6, color:'var(--lec-ink2)' }}>{body}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StepList({ items }) {
+  return (
+    <ol style={{ margin:'10px 0', paddingLeft:'0', listStyle:'none', display:'flex', flexDirection:'column', gap:'10px' }}>
+      {items.map((it, i) => (
+        <li key={i} style={{ display:'flex', gap:'12px', alignItems:'flex-start' }}>
+          <span style={{ flexShrink:0, fontFamily:'var(--fm)', fontSize:'.7rem', fontWeight:700, color:'#c8860a', background:'rgba(232,160,32,.14)', borderRadius:'999px', width:'24px', height:'24px', display:'flex', alignItems:'center', justifyContent:'center', marginTop:'2px' }}>{i+1}</span>
+          <span style={{ fontSize:'1rem', lineHeight:1.75, color:'var(--lec-ink2)' }}>{it}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function BulletList({ items, dense }) {
+  return (
+    <ul style={{ margin: dense ? '6px 0' : '14px 0', paddingLeft:'0', listStyle:'none', display:'flex', flexDirection:'column', gap: dense ? '6px' : '10px' }}>
+      {items.map((it, i) => (
+        <li key={i} style={{ display:'flex', gap:'10px', alignItems:'flex-start' }}>
+          <span style={{ flexShrink:0, color:'#c8860a', fontWeight:700, lineHeight:1.6 }}>•</span>
+          <span style={{ fontSize:'1rem', lineHeight:1.8, color:'var(--lec-ink2)' }}>{it}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /* ═══════════════ PAGE ═══════════════ */
@@ -336,15 +382,17 @@ export default function Lec16() {
             <p>{String.raw`Keep this as a checklist, not something to memorise line by line — you will almost never write out all eight rules by hand.`}</p>
 
             <DefBox term="Vector space (Definition 6.1)" color="teal">
-              <p style={{margin:'0 0 8px'}}>{String.raw`A `}<b>vector space</b>{String.raw` is a nonempty set $V$ together with a rule for `}<b>addition</b>{String.raw` and a rule for `}<b>scalar multiplication</b>{String.raw` (by real numbers), such that for all $\mathbf{x}, \mathbf{y}, \mathbf{z}$ in $V$ and all scalars $a, b$:`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A1.}$ $\mathbf{x}+\mathbf{y}$ is in $V$, and $\mathbf{x}+\mathbf{y}=\mathbf{y}+\mathbf{x}$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A2.}$ $(\mathbf{x}+\mathbf{y})+\mathbf{z}=\mathbf{x}+(\mathbf{y}+\mathbf{z})$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A3.}$ There is a zero vector $\mathbf{0}$ in $V$ with $\mathbf{0}+\mathbf{x}=\mathbf{x}$ for every $\mathbf{x}$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A4.}$ Every $\mathbf{x}$ in $V$ has a negative $-\mathbf{x}$ in $V$ with $-\mathbf{x}+\mathbf{x}=\mathbf{0}$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A5.}$ $a\mathbf{x}$ is in $V$ for every scalar $a$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A6.}$ $a(\mathbf{x}+\mathbf{y})=a\mathbf{x}+a\mathbf{y}$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A7.}$ $(a+b)\mathbf{x}=a\mathbf{x}+b\mathbf{x}$, and $a(b\mathbf{x})=(ab)\mathbf{x}$.`}</p>
-              <p style={{margin:'3px 0'}}>{String.raw`$\textbf{A8.}$ $1\mathbf{x}=\mathbf{x}$.`}</p>
+              <p style={{margin:'0 0 12px'}}>{String.raw`A `}<b>vector space</b>{String.raw` is a nonempty set $V$ together with a rule for `}<b>addition</b>{String.raw` and a rule for `}<b>scalar multiplication</b>{String.raw` (by real numbers), such that for all $\mathbf{x}, \mathbf{y}, \mathbf{z}$ in $V$ and all scalars $a, b$, the following eight rules hold:`}</p>
+              <AxiomGrid items={[
+                { tag:'A1', body: String.raw`$\mathbf{x}+\mathbf{y}$ is in $V$, and $\mathbf{x}+\mathbf{y}=\mathbf{y}+\mathbf{x}$.` },
+                { tag:'A2', body: String.raw`$(\mathbf{x}+\mathbf{y})+\mathbf{z}=\mathbf{x}+(\mathbf{y}+\mathbf{z})$.` },
+                { tag:'A3', body: String.raw`There is a zero vector $\mathbf{0}$ in $V$ with $\mathbf{0}+\mathbf{x}=\mathbf{x}$ for every $\mathbf{x}$.` },
+                { tag:'A4', body: String.raw`Every $\mathbf{x}$ in $V$ has a negative $-\mathbf{x}$ in $V$ with $-\mathbf{x}+\mathbf{x}=\mathbf{0}$.` },
+                { tag:'A5', body: String.raw`$a\mathbf{x}$ is in $V$ for every scalar $a$.` },
+                { tag:'A6', body: String.raw`$a(\mathbf{x}+\mathbf{y})=a\mathbf{x}+a\mathbf{y}$.` },
+                { tag:'A7', body: String.raw`$(a+b)\mathbf{x}=a\mathbf{x}+b\mathbf{x}$, and $a(b\mathbf{x})=(ab)\mathbf{x}$.` },
+                { tag:'A8', body: String.raw`$1\mathbf{x}=\mathbf{x}$.` },
+              ]}/>
             </DefBox>
 
             <Callout icon="🔑" title="What actually matters in practice" color="amber">
@@ -354,7 +402,13 @@ export default function Lec16() {
             {/* ─── §3 VS EXAMPLES ─── */}
             <Sec id="vs-examples" n="§3">Examples of Vector Spaces</Sec>
 
-            <p>{String.raw`For each example, ask three questions in order: `}<b>what is the space?</b>{String.raw` (what are its elements — numbers, matrices, polynomials?) `}<b>what do addition and scalar multiplication mean here?</b>{String.raw` and then `}<b>is it closed?</b>{String.raw` We will not write out all eight axioms each time — just the closure check, as the callout above promised.`}</p>
+            <p>{String.raw`For each example, ask three questions, in order:`}</p>
+            <StepList items={[
+              <span key="q1"><b>What is the space?</b>{String.raw` — what are its elements: numbers, matrices, polynomials?`}</span>,
+              <span key="q2"><b>What do addition and scalar multiplication mean here?</b></span>,
+              <span key="q3"><b>Is it closed?</b></span>,
+            ]}/>
+            <p>{String.raw`We will not write out all eight axioms each time — just the closure check, as the callout above promised.`}</p>
 
             <SubH>{String.raw`1. $M_{mn}$ — all $m \times n$ matrices`}</SubH>
             <p>{String.raw`The space $M_{mn}$ is the set of `}<b>all</b>{String.raw` $m \times n$ matrices with real entries. Its "vectors" are entire matrices. Addition is the usual entrywise matrix addition; scalar multiplication is the usual entrywise scaling — both from Lecture 5.`}</p>
@@ -399,17 +453,25 @@ export default function Lec16() {
             <p>{String.raw`Lectures 14 and 15 built subspaces, spanning, linear combinations, independence, basis, and dimension — entirely inside $\mathbb{R}^n$. Every definition and every theorem from those lectures carries over to `}<b>any</b>{String.raw` vector space $V$, word for word, with "vector in $\mathbb{R}^n$" replaced by "vector in $V$." We will not re-derive the theorems — we already have them — we will just point the same machinery at new kinds of vectors.`}</p>
 
             <Callout icon="🔁" title="The dictionary" color="amber">
-              {String.raw`Subspace axioms S1/S2/S3 → the exact same three rules, now for a subset $U$ of a vector space $V$. Linear combination and span → the exact same formula $a_1\mathbf{v}_1+\cdots+a_k\mathbf{v}_k$, now with the $\mathbf{v}_i$ possibly matrices or polynomials. Independent / dependent → the exact same "only the trivial combination vanishes" test. Basis, dimension → the exact same "independent `}<i>and</i>{String.raw` spanning" and "size of any basis." Nothing new to memorise — just new vectors to plug in.`}
+              <BulletList dense items={[
+                <span key="d1"><b>Subspace axioms S1/S2/S3</b>{String.raw` → the exact same three rules, now for a subset $U$ of a vector space $V$.`}</span>,
+                <span key="d2"><b>Linear combination and span</b>{String.raw` → the exact same formula $a_1\mathbf{v}_1+\cdots+a_k\mathbf{v}_k$, now with the $\mathbf{v}_i$ possibly matrices or polynomials.`}</span>,
+                <span key="d3"><b>Independent / dependent</b>{String.raw` → the exact same "only the trivial combination vanishes" test.`}</span>,
+                <span key="d4"><b>Basis, dimension</b>{String.raw` → the exact same "independent `}<i>and</i>{String.raw` spanning" and "size of any basis."`}</span>,
+              ]}/>
+              <p style={{margin:'10px 0 0'}}>{String.raw`Nothing new to memorise — just new vectors to plug in.`}</p>
             </Callout>
 
             {/* ─── §6 SUBSPACE ─── */}
             <Sec id="subspace" n="§6">§6.2 — Subspaces of a Vector Space</Sec>
 
             <DefBox term="Subspace (Definition 6.2)" color="teal">
-              <p style={{margin:'0 0 8px'}}>{String.raw`A subset $U$ of a vector space $V$ is called a `}<b>subspace</b>{String.raw` of $V$ if $U$ is itself a vector space, using the same addition and scalar multiplication as $V$. In practice, you check three things:`}</p>
-              <p style={{margin:'4px 0'}}>{String.raw`$\textbf{S1.}$ The zero vector $\mathbf{0}$ of $V$ is in $U$.`}</p>
-              <p style={{margin:'4px 0'}}>{String.raw`$\textbf{S2.}$ If $\mathbf{x}, \mathbf{y}$ are in $U$, then $\mathbf{x}+\mathbf{y}$ is in $U$.`}</p>
-              <p style={{margin:'4px 0'}}>{String.raw`$\textbf{S3.}$ If $\mathbf{x}$ is in $U$, then $a\mathbf{x}$ is in $U$ for every scalar $a$.`}</p>
+              <p style={{margin:'0 0 12px'}}>{String.raw`A subset $U$ of a vector space $V$ is called a `}<b>subspace</b>{String.raw` of $V$ if $U$ is itself a vector space, using the same addition and scalar multiplication as $V$. In practice, you check three things:`}</p>
+              <AxiomGrid items={[
+                { tag:'S1', body: String.raw`The zero vector $\mathbf{0}$ of $V$ is in $U$.` },
+                { tag:'S2', body: String.raw`If $\mathbf{x}, \mathbf{y}$ are in $U$, then $\mathbf{x}+\mathbf{y}$ is in $U$.` },
+                { tag:'S3', body: String.raw`If $\mathbf{x}$ is in $U$, then $a\mathbf{x}$ is in $U$ for every scalar $a$.` },
+              ]}/>
             </DefBox>
 
             <p>{String.raw`Compare this with §5.1 of Lecture 14 — it is `}<i>identical</i>{String.raw`, with "$\mathbb{R}^n$" replaced by "$V$." Every subspace check you already know how to do (verify $\mathbf{0} \in U$, then closure) works completely unchanged, even when the vectors are matrices or polynomials.`}</p>
@@ -476,9 +538,11 @@ export default function Lec16() {
 
             <p>{String.raw`Just as $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$ span $\mathbb{R}^n$ (Lecture 14, Example 5.1.6), each vector space above has its own natural "starter kit":`}</p>
 
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$M_{mn}$:`}</b>{String.raw` the $mn$ `}<b>matrix units</b>{String.raw` $E_{ij}$ (a $1$ in row $i$, column $j$, and $0$ elsewhere), for $i=1,\ldots,m$ and $j=1,\ldots,n$. Any matrix $A = \sum_{i,j} a_{ij}E_{ij}$, so these span $M_{mn}$.`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$P_n$:</b>{String.raw` the $n+1$ monomials $\{1, x, x^2, \ldots, x^n\}$. Every $a_0+a_1x+\cdots+a_nx^n$ is literally a linear combination of these.`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$P$:</b>{String.raw` the `}<i>infinite</i>{String.raw` list $\{1, x, x^2, x^3, \ldots\}$.`}</p>
+            <BulletList items={[
+              <span key="s1"><b>{String.raw`$M_{mn}$:`}</b>{String.raw` the $mn$ `}<b>matrix units</b>{String.raw` $E_{ij}$ (a $1$ in row $i$, column $j$, and $0$ elsewhere), for $i=1,\ldots,m$ and $j=1,\ldots,n$. Any matrix $A = \sum_{i,j} a_{ij}E_{ij}$, so these span $M_{mn}$.`}</span>,
+              <span key="s2"><b>$P_n$:</b>{String.raw` the $n+1$ monomials $\{1, x, x^2, \ldots, x^n\}$. Every $a_0+a_1x+\cdots+a_nx^n$ is literally a linear combination of these.`}</span>,
+              <span key="s3"><b>$P$:</b>{String.raw` the `}<i>infinite</i>{String.raw` list $\{1, x, x^2, x^3, \ldots\}$.`}</span>,
+            ]}/>
 
             <Callout icon="⚠️" title="A subtlety with infinite spanning sets" color="rose">
               {String.raw`$P$ needs `}<i>infinitely many</i>{String.raw` spanning vectors — but "linear combination" still only ever means a `}<b>finite</b>{String.raw` sum. Every actual polynomial has some finite degree $n$, so it only ever uses finitely many of $1,x,x^2,\ldots$ (namely $1$ through $x^n$) with nonzero coefficient. An infinite spanning set just means you have an infinite `}<i>menu</i>{String.raw` to choose finitely many ingredients from — you never add infinitely many terms at once.`}
@@ -488,9 +552,11 @@ export default function Lec16() {
             <Sec id="thm" n="§11">Theorem 6.2.2 — Span Is Still the Smallest Subspace</Sec>
 
             <ThmBox title="Theorem 6.2.2">
-              <p style={{margin:'0 0 8px'}}>{String.raw`Let $U = \operatorname{span}\{\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n\}$ in a vector space $V$. Then:`}</p>
-              <p style={{margin:'4px 0'}}>{String.raw`$\textbf{1.}$ $U$ is a subspace of $V$ containing each of $\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n$.`}</p>
-              <p style={{margin:'4px 0'}}>{String.raw`$\textbf{2.}$ $U$ is the `}<b>"smallest"</b>{String.raw` subspace containing these vectors, in the sense that `}<i>any</i>{String.raw` subspace that contains each of $\mathbf{v}_1, \ldots, \mathbf{v}_n$ must contain $U$.`}</p>
+              <p style={{margin:'0 0 10px'}}>{String.raw`Let $U = \operatorname{span}\{\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n\}$ in a vector space $V$. Then:`}</p>
+              <BulletList dense items={[
+                <span key="t1"><b>1.</b>{String.raw` $U$ is a subspace of $V$ containing each of $\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n$.`}</span>,
+                <span key="t2"><b>2.</b>{String.raw` $U$ is the `}<b>"smallest"</b>{String.raw` subspace containing these vectors, in the sense that `}<i>any</i>{String.raw` subspace that contains each of $\mathbf{v}_1, \ldots, \mathbf{v}_n$ must contain $U$.`}</span>,
+              ]}/>
             </ThmBox>
 
             <Callout icon="🧠" title="This is exactly Theorem 5.1.1, one level up" color="teal">
@@ -557,14 +623,16 @@ export default function Lec16() {
             <Sec id="basis-dim" n="§14">Basis and Dimension, Once More</Sec>
 
             <DefBox term="Basis and dimension (quick recall)" color="violet">
-              <p style={{margin:'0 0 8px'}}>{String.raw`A `}<b>basis</b>{String.raw` of a subspace $U$ of $V$ is a set that is both `}<b>independent</b>{String.raw` and `}<b>spans</b>{String.raw` $U$ — no waste, nothing missing. The `}<b>dimension</b>{String.raw` $\dim U$ is the number of vectors in any basis (Lecture 15's Invariance Theorem guarantees this number does not depend on which basis you pick — and that proof did not use anything special about $\mathbb{R}^n$, so it holds here too).`}</p>
+              <p style={{margin:0}}>{String.raw`A `}<b>basis</b>{String.raw` of a subspace $U$ of $V$ is a set that is both `}<b>independent</b>{String.raw` and `}<b>spans</b>{String.raw` $U$ — no waste, nothing missing. The `}<b>dimension</b>{String.raw` $\dim U$ is the number of vectors in any basis (Lecture 15's Invariance Theorem guarantees this number does not depend on which basis you pick — and that proof did not use anything special about $\mathbb{R}^n$, so it holds here too).`}</p>
             </DefBox>
 
             <p>{String.raw`Using the standard spanning sets from §10 (each one is also independent — a short check you can carry out the same way as Example 8), the dimensions are:`}</p>
 
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$\dim \mathbb{R}^n = n$`}</b>{String.raw` (basis $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$).`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>$\dim P_n = n+1$</b>{String.raw` (basis $\{1,x,\ldots,x^n\}$ — count carefully: degree `}<i>at most</i>{String.raw` $n$ means $n+1$ monomials, from $x^0$ to $x^n$).`}</p>
-            <p style={{margin:'4px 0'}}>{String.raw`• `}<b>{String.raw`$\dim M_{mn} = mn$`}</b>{String.raw` (basis the matrix units $\{E_{ij}\}$, of which there are $mn$).`}</p>
+            <BulletList items={[
+              <span key="dim1"><b>{String.raw`$\dim \mathbb{R}^n = n$`}</b>{String.raw` (basis $\{\mathbf{e}_1,\ldots,\mathbf{e}_n\}$).`}</span>,
+              <span key="dim2"><b>$\dim P_n = n+1$</b>{String.raw` (basis $\{1,x,\ldots,x^n\}$ — count carefully: degree `}<i>at most</i>{String.raw` $n$ means $n+1$ monomials, from $x^0$ to $x^n$).`}</span>,
+              <span key="dim3"><b>{String.raw`$\dim M_{mn} = mn$`}</b>{String.raw` (basis the matrix units $\{E_{ij}\}$, of which there are $mn$).`}</span>,
+            ]}/>
 
             {/* ─── §15 DIM P = INFINITY ─── */}
             <Sec id="dim-p" n="§15">An Interesting Fact: dim P = ∞</Sec>
