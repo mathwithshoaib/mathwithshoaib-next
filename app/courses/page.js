@@ -49,7 +49,7 @@ export default function Courses() {
           <div style={{ display: 'flex', gap: '28px', marginTop: '26px', flexWrap: 'wrap' }}>
             {[
               ['3', 'Courses'],
-              ['14+', 'Lectures live'],
+              ['21+', 'Lectures live'],
               ['100%', 'Solver-verified'],
             ].map(([n, l]) => (
               <div key={l}>

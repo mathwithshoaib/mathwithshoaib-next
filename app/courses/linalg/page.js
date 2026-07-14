@@ -15,7 +15,7 @@ import Footer from '../../components/Footer';
    - CURRENT_WEEK        → which week's accordion opens by default.
    ═════════════════════════════════════════════════════════════════ */
 
-const CURRENT_WEEK = 4;   // controls which lecture week + resource row is highlighted/open
+const CURRENT_WEEK = 5;   // controls which lecture week + resource row is highlighted/open
 
 /* ─────────── LECTURES ─────────── */
 const LECTURES = [
@@ -40,9 +40,9 @@ const LECTURES = [
 const WEEK_THEMES = {
   1: 'Systems of Linear Equations',
   2: 'Matrix Algebra & Factorization',
-  3: 'Determinants & Diagonalization',
-  4: 'Vector Space ℝⁿ',
-  5: 'Orthogonality & Polynomials',
+  3: 'Determinants & Eigen-values/vectors',
+  4: 'Diagonalization and Subspaces of ℝⁿ',
+  5: 'Basis, Dimension, and Orthogonality',
   6: 'Linear Transformations',
   7: 'Applications',
 };

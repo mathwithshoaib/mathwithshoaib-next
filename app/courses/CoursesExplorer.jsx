@@ -56,7 +56,7 @@ const COURSES = [
     blurb:
       'Systems of equations, matrix algebra, inverses, elementary matrices, LU-factorization and beyond — with applied Pakistani context and Nobel-winning economic models woven in.',
     topics: ['Matrices', 'Inverses', 'LU-Factorization', 'Elementary Matrices', 'Applications'],
-    stats: { lectures: '8 lectures', status: 'Active' },
+    stats: { lectures: '15 lectures', status: 'Active' },
     live: true,
     keywords:
       'linear algebra matrix inverse determinant row reduction gaussian elimination nicholson LU elementary input output leontief',
