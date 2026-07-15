@@ -36,6 +36,7 @@ const LECTURES = [
   { week: 5, n: 15, slug: 'w5/lec15', title: 'Basis & Dimension', ref: '§5.2', date: '6 Jul', live: true },
   { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', ref: '§6.2–6.3', date: '7 Jul', live: true },
   { week: 5, n: 17, slug: 'w5/lec17', title: 'Extending a Basis; Row, Column & Null Space', ref: '§6.4', date: '8 Jul', live: true },
+  { week: 5, n: 18, slug: 'w5/lec18', title: 'Dot Product, Distance & Gram–Schmidt', ref: '§5.3, §8.1', date: '9 Jul', live: true },
 ];
 
 /* one-line theme per week, shown as the accordion subtitle */

@@ -30,6 +30,7 @@ const LECTURES = [
   { week: 5, n: 15, slug: 'w5/lec15', title: 'Independence & Dimension', live: true },
   { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', live: true },
   { week: 5, n: 17, slug: 'w5/lec17', title: 'Extending a Basis; Row, Column & Null Space', live: true },
+  { week: 5, n: 18, slug: 'w5/lec18', title: 'Dot Product, Distance & Gram–Schmidt', live: true },
 ];
 const THIS_SLUG = 'w3/lec9';
 const PREV_HREF  = '/courses/linalg/w3/lec8';
