@@ -262,6 +262,105 @@ function DistanceFigure() {
   );
 }
 
+/* Interactive SVG figure: drag the angle between two vectors and watch
+   the dot product — and a live right-angle marker — respond. */
+function OrthogonalityLab() {
+  const [angleDeg, setAngleDeg] = useState(60);
+  const [unit, setUnit] = useState(false);
+
+  const magX = unit ? 1 : 3;
+  const magY = unit ? 1 : 2;
+  const rad = (angleDeg * Math.PI) / 180;
+  const dot = magX * magY * Math.cos(rad);
+  const isOrthogonal = angleDeg === 90;
+
+  const originX = 110, originY = 220, s = 34;
+  const pxLenX = unit ? 100 : magX * s;
+  const pxLenY = unit ? 100 : magY * s;
+  const xEnd = [originX + pxLenX, originY];
+  const yEnd = [originX + pxLenY * Math.cos(rad), originY - pxLenY * Math.sin(rad)];
+
+  const arcR = 30;
+  const arcEnd = [originX + arcR * Math.cos(rad), originY - arcR * Math.sin(rad)];
+  const arcLabelPos = [originX + (arcR + 18) * Math.cos(rad / 2), originY - (arcR + 18) * Math.sin(rad / 2)];
+
+  const lineCol = isOrthogonal ? '#2a9d8f' : '#4a4030';
+
+  return (
+    <div style={{ margin:'22px 0', padding:'20px', background: isOrthogonal ? 'rgba(56,201,176,.08)' : 'rgba(255,253,240,.7)', border:`1px solid ${isOrthogonal ? 'rgba(56,201,176,.5)' : 'var(--lec-border)'}`, borderRadius:'14px', transition:'background .2s, border-color .2s' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'10px', marginBottom:'6px' }}>
+        <span style={{ fontFamily:'var(--fm)', fontSize:'.68rem', letterSpacing:'.14em', textTransform:'uppercase', color:'#c8860a' }}>🎛 Drag the angle between x and y</span>
+        {isOrthogonal && (
+          <span style={{ fontFamily:'var(--fm)', fontSize:'.7rem', fontWeight:700, color:'#2a9d8f', background:'rgba(56,201,176,.16)', border:'1px solid rgba(56,201,176,.5)', borderRadius:'20px', padding:'3px 12px' }}>⊥ Orthogonal — dot product is exactly 0</span>
+        )}
+      </div>
+
+      <svg viewBox="0 0 620 260" style={{ width:'100%', height:'auto', maxWidth:'560px', display:'block', margin:'0 auto' }}>
+        <defs>
+          <marker id="orthoArrowX" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#4a4030" />
+          </marker>
+          <marker id="orthoArrowY" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d={`M0,0 L8,4 L0,8 Z`} fill={lineCol} />
+          </marker>
+        </defs>
+
+        {/* angle arc */}
+        <path d={`M ${originX + arcR} ${originY} A ${arcR} ${arcR} 0 0 0 ${arcEnd[0]} ${arcEnd[1]}`} fill="none" stroke="#c8860a" strokeWidth="1.6" />
+        <text x={arcLabelPos[0]} y={arcLabelPos[1]} textAnchor="middle" fontSize="13" fontFamily="var(--fh)" fill="#c8860a">{`θ = ${angleDeg}°`}</text>
+
+        {/* right-angle marker, only when exactly orthogonal (x is horizontal, y vertical) */}
+        {isOrthogonal && (
+          <path d={`M ${originX + 16} ${originY} L ${originX + 16} ${originY - 16} L ${originX} ${originY - 16}`} fill="none" stroke="#2a9d8f" strokeWidth="2" />
+        )}
+
+        {/* x vector */}
+        <line x1={originX} y1={originY} x2={xEnd[0]} y2={xEnd[1]} stroke="#4a4030" strokeWidth="2.4" markerEnd="url(#orthoArrowX)" />
+        <text x={xEnd[0] + 10} y={xEnd[1] + 4} fontSize="15" fontFamily="var(--fh)" fill="#241e14">{`x  (‖x‖=${magX})`}</text>
+
+        {/* y vector */}
+        <line x1={originX} y1={originY} x2={yEnd[0]} y2={yEnd[1]} stroke={lineCol} strokeWidth="2.4" markerEnd="url(#orthoArrowY)" />
+        <text x={yEnd[0] + (yEnd[0] >= originX ? 10 : -10)} y={yEnd[1] - 6} fontSize="15" fontFamily="var(--fh)" fill={lineCol} textAnchor={yEnd[0] >= originX ? 'start' : 'end'}>{`y  (‖y‖=${magY})`}</text>
+
+        <circle cx={originX} cy={originY} r="3" fill="#241e14" />
+        <text x={originX - 16} y={originY + 16} fontSize="12" fontFamily="var(--fm)" fill="#7a6e5e">O</text>
+
+        {/* live formula panel */}
+        <text x="400" y="40" fontSize="14" fontFamily="var(--fm)" fill="#4a4030">{`x · y = ‖x‖ ‖y‖ cos θ`}</text>
+        <text x="400" y="64" fontSize="14" fontFamily="var(--fm)" fill={lineCol} fontWeight={isOrthogonal ? '700' : '400'}>{`      = ${magX} × ${magY} × cos(${angleDeg}°) = ${dot.toFixed(2)}`}</text>
+      </svg>
+
+      <div style={{ display:'flex', flexDirection:'column', gap:'10px', maxWidth:'560px', margin:'14px auto 0' }}>
+        <input
+          type="range" min="0" max="180" step="1" value={angleDeg}
+          onChange={e => setAngleDeg(Number(e.target.value))}
+          style={{ width:'100%', accentColor:'#c8860a' }}
+        />
+        <div style={{ display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:'8px' }}>
+          <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
+            {[30,60,90,120,150].map(a => (
+              <button key={a} onClick={() => setAngleDeg(a)} style={{
+                fontFamily:'var(--fm)', fontSize:'.68rem', padding:'5px 11px', borderRadius:'20px', cursor:'pointer',
+                border:'1px solid '+(angleDeg===a?'#2a9d8f':'var(--lec-border)'),
+                background: angleDeg===a?'rgba(56,201,176,.16)':'transparent', color: angleDeg===a?'#2a9d8f':'#7a6e5e', fontWeight:600,
+              }}>{a}°</button>
+            ))}
+          </div>
+          <button onClick={() => setUnit(u => !u)} style={{
+            fontFamily:'var(--fm)', fontSize:'.68rem', padding:'5px 11px', borderRadius:'20px', cursor:'pointer',
+            border:'1px solid '+(unit?'#9b80e8':'var(--lec-border)'),
+            background: unit?'rgba(155,128,232,.14)':'transparent', color: unit?'#9b80e8':'#7a6e5e', fontWeight:600,
+          }}>{unit ? '✓ normalized to unit length' : 'normalize to unit length'}</button>
+        </div>
+      </div>
+
+      <p style={{ textAlign:'center', fontSize:'.85rem', fontStyle:'italic', color:'var(--lec-ink3)', margin:'14px 0 0' }}>
+        {String.raw`Drag the slider or tap a preset angle. The dot product is positive for acute angles, negative for obtuse ones, and lands on exactly $0$ only at $\theta=90°$ — that instant is orthogonality. Toggle "normalize" to see the same picture with `}<i>unit-length</i>{String.raw` vectors — an `}<i>orthonormal</i>{String.raw` pair, once $\theta=90°$.`}
+      </p>
+    </div>
+  );
+}
+
 /* ═══════════════ PAGE ═══════════════ */
 export default function Lec18() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -549,8 +648,10 @@ export default function Lec18() {
             </DefBox>
 
             <Callout icon="📐" title="The geometric picture" color="amber">
-              {String.raw`In $\mathbb{R}^2$ and $\mathbb{R}^3$, the dot product relates to the angle $\theta$ between two vectors by $\mathbf{x}\cdot\mathbf{y} = \|\mathbf{x}\|\|\mathbf{y}\|\cos\theta$. Orthogonal means $\mathbf{x}\cdot\mathbf{y}=0$, and since $\|\mathbf{x}\|,\|\mathbf{y}\|\neq0$ for nonzero vectors, this forces $\cos\theta=0$ — that is, $\theta=90°$. `}<b>Orthogonal is simply the algebraic word for perpendicular</b>{String.raw`, generalized to a setting with more than three dimensions, where you can no longer draw the angle but can always compute it. An `}<i>orthonormal</i>{String.raw` set takes this one step further: not only is every pair of directions perpendicular, but every vector has also been rescaled to length exactly $1$ — a perfectly calibrated, mutually perpendicular set of measuring sticks.`}
+              {String.raw`In $\mathbb{R}^2$ and $\mathbb{R}^3$, the dot product relates to the angle $\theta$ between two vectors by $\mathbf{x}\cdot\mathbf{y} = \|\mathbf{x}\|\|\mathbf{y}\|\cos\theta$. Orthogonal means $\mathbf{x}\cdot\mathbf{y}=0$, which forces $\cos\theta=0$ — that is, $\theta=90°$. `}<b>Orthogonal is simply the algebraic word for perpendicular</b>{String.raw`, now generalized to any $\mathbb{R}^n$, where you can no longer draw the angle but can always compute it.`}
             </Callout>
+
+            <OrthogonalityLab/>
 
             <Example n="8" title="A quick geometric check in R²">
               <p style={{margin:0}}>{String.raw`$\mathbf{x}=(1,1)$ and $\mathbf{y}=(1,-1)$ satisfy $\mathbf{x}\cdot\mathbf{y}=(1)(1)+(1)(-1)=0$, so they are orthogonal — and indeed, plotting them, $\mathbf{x}$ points along the line $y=x$ and $\mathbf{y}$ along $y=-x$, which meet at a right angle. Note also $\|\mathbf{x}\|=\|\mathbf{y}\|=\sqrt{2}$, so $\{\mathbf{x},\mathbf{y}\}$ is orthogonal but `}<i>not yet</i>{String.raw` orthonormal — dividing each by $\sqrt{2}$ would fix that.`}</p>
