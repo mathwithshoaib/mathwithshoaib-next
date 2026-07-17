@@ -15,7 +15,7 @@ import Footer from '../../components/Footer';
    - CURRENT_WEEK        → which week's accordion opens by default.
    ═════════════════════════════════════════════════════════════════ */
 
-const CURRENT_WEEK = 5;   // controls which lecture week + resource row is highlighted/open
+const CURRENT_WEEK = 6;   // controls which lecture week + resource row is highlighted/open
 
 /* ─────────── LECTURES ─────────── */
 const LECTURES = [
@@ -37,6 +37,8 @@ const LECTURES = [
   { week: 5, n: 16, slug: 'w5/lec16', title: 'Vector Spaces (Abstract)', ref: '§6.2–6.3', date: '7 Jul', live: true },
   { week: 5, n: 17, slug: 'w5/lec17', title: 'Extending a Basis; Row, Column & Null Space', ref: '§6.4', date: '8 Jul', live: true },
   { week: 5, n: 18, slug: 'w5/lec18', title: 'Dot Product, Distance & Gram–Schmidt', ref: '§5.3, §8.1', date: '9 Jul', live: true },
+  { week: 6, n: 19, slug: 'w6/lec19', title: 'Orthogonal Projections, Complements & Symmetric Matrices', ref: '§8.1–8.2', date: '13 Jul', live: true },
+  { week: 6, n: 20, slug: 'w6/lec20', title: 'Introduction to Linear Transformations', ref: '§2.6', date: '14 Jul', live: true },
 ];
 
 /* one-line theme per week, shown as the accordion subtitle */
