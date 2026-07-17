@@ -33,10 +33,11 @@ const LECTURES = [
   { week: 5, n: 18, slug: 'w5/lec18', title: 'Dot Product, Distance & Gram–Schmidt', live: true },
   { week: 6, n: 19, slug: 'w6/lec19', title: 'Orthogonal Projections, Complements & Symmetric Matrices', live: true },
   { week: 6, n: 20, slug: 'w6/lec20', title: 'Introduction to Linear Transformations', live: true },
+  { week: 6, n: 21, slug: 'w6/lec21', title: 'Matrix of a Transformation; Kernel & Range', live: true },
 ];
 const THIS_SLUG = 'w6/lec20';
 const PREV_HREF  = '/courses/linalg/w6/lec19';
-const NEXT_HREF  = '/courses/linalg';
+const NEXT_HREF  = '/courses/linalg/w6/lec21';
 
 const LEC = {
   course: 'MATH-120 · Linear Algebra',
@@ -332,7 +333,7 @@ export default function Lec20() {
                 </span>
               ))}
             </div>
-            <Link href={NEXT_HREF} style={{ display:'flex', alignItems:'center', padding:'0 16px', height:'100%', fontFamily:'var(--fm)', fontSize:'.72rem', color:'var(--lec-ink3)', borderLeft:'1px solid var(--lec-border)', whiteSpace:'nowrap', flexShrink:0, textDecoration:'none' }}>Course Home →</Link>
+            <Link href={NEXT_HREF} style={{ display:'flex', alignItems:'center', padding:'0 16px', height:'100%', fontFamily:'var(--fm)', fontSize:'.72rem', color:'var(--lec-ink3)', borderLeft:'1px solid var(--lec-border)', whiteSpace:'nowrap', flexShrink:0, textDecoration:'none' }}>Lecture 21 →</Link>
           </div>
 
           {/* CONTENT */}
@@ -531,7 +532,7 @@ export default function Lec20() {
           {/* FOOTER NAV */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'22px 48px', borderTop:'1px solid var(--lec-border)', background:'var(--lec-paper)', flexWrap:'wrap', gap:'12px' }}>
             <Link href={PREV_HREF} style={{ fontFamily:'var(--fm)', fontSize:'.74rem', letterSpacing:'.08em', textTransform:'uppercase', color:'var(--lec-accent)', textDecoration:'none' }}>← Lecture 19</Link>
-            <Link href={NEXT_HREF} style={{ fontFamily:'var(--fm)', fontSize:'.74rem', letterSpacing:'.08em', textTransform:'uppercase', color:'var(--lec-accent)', textDecoration:'none' }}>Course Home →</Link>
+            <Link href={NEXT_HREF} style={{ fontFamily:'var(--fm)', fontSize:'.74rem', letterSpacing:'.08em', textTransform:'uppercase', color:'var(--lec-accent)', textDecoration:'none' }}>Lecture 21 →</Link>
           </div>
         </main>
       </div>

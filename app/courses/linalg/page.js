@@ -39,6 +39,7 @@ const LECTURES = [
   { week: 5, n: 18, slug: 'w5/lec18', title: 'Dot Product, Distance & Gram–Schmidt', ref: '§5.3, §8.1', date: '9 Jul', live: true },
   { week: 6, n: 19, slug: 'w6/lec19', title: 'Orthogonal Projections, Complements & Symmetric Matrices', ref: '§8.1–8.2', date: '13 Jul', live: true },
   { week: 6, n: 20, slug: 'w6/lec20', title: 'Introduction to Linear Transformations', ref: '§2.6', date: '14 Jul', live: true },
+  { week: 6, n: 21, slug: 'w6/lec21', title: 'Matrix of a Transformation; Kernel & Range', ref: '§2.6–7.2', date: '15 Jul', live: true },
 ];
 
 /* one-line theme per week, shown as the accordion subtitle */
