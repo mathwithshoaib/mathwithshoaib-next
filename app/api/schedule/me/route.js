@@ -16,8 +16,8 @@ export async function GET() {
 
     let ta = null;
     if (taSession) {
-      const rows = await sbSelect('tas', `id=eq.${taSession.taId}&select=id,name`);
-      if (rows?.[0]) ta = rows[0];
+      const rows = await sbSelect('tas', `id=eq.${taSession.taId}&select=id,name,office_hours_only,oh_cap_hours`);
+      if (rows?.[0]) ta = { id: rows[0].id, name: rows[0].name, officeHoursOnly: rows[0].office_hours_only, ohCapHours: Number(rows[0].oh_cap_hours) };
     }
 
     return Response.json({ admin: isAdmin, ta });

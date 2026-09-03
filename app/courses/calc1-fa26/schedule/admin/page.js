@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../../components/Navbar';
 import Footer from '../../../../components/Footer';
-import { DAY_LABELS, CATEGORY_LABELS } from '../../../../../lib/scheduleConfig';
+import { DAY_LABELS, CATEGORY_LABELS, TA_OH_WEEKLY_CAP_HOURS } from '../../../../../lib/scheduleConfig';
 
 /* ═════════════════════════════════════════════════════════════════
    ADMIN PANEL — /courses/calc1-fa26/schedule/admin
@@ -150,6 +150,7 @@ export default function ScheduleAdmin() {
             <TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} />
             <TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} />
             <TasSection tas={data.tas} onChanged={fetchState} flash={flash} />
+            <TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} />
           </>
         )}
       </div>
@@ -525,16 +526,23 @@ function TutorialVenuesSection({ slots, venues, onChanged, flash }) {
 /* ─── TA roster ─── */
 function TasSection({ tas, onChanged, flash }) {
   const [name, setName] = useState('');
+  const [officeHoursOnly, setOfficeHoursOnly] = useState(false);
+  const [ohCapHours, setOhCapHours] = useState(String(TA_OH_WEEKLY_CAP_HOURS));
   const [busy, setBusy] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
+  const [capEdits, setCapEdits] = useState({}); // { [taId]: draft string while typing }
+  const [savingCapId, setSavingCapId] = useState(null);
   const [passcodeBanner, setPasscodeBanner] = useState(null); // { name, passcode }
 
   const add = async (e) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const res = await api('/api/schedule/admin/tas', { method: 'POST', body: { name } });
+      const res = await api('/api/schedule/admin/tas', { method: 'POST', body: { name, officeHoursOnly, ohCapHours: Number(ohCapHours) } });
       setPasscodeBanner({ name: res.name, passcode: res.passcode });
       setName('');
+      setOfficeHoursOnly(false);
+      setOhCapHours(String(TA_OH_WEEKLY_CAP_HOURS));
       onChanged();
     } catch (err) { flash(err.message); } finally { setBusy(false); }
   };
@@ -543,6 +551,26 @@ function TasSection({ tas, onChanged, flash }) {
       const res = await api(`/api/schedule/admin/tas/${id}/reset-passcode`, { method: 'POST' });
       setPasscodeBanner({ name: taName, passcode: res.passcode });
     } catch (err) { flash(err.message); }
+  };
+  const toggleDuty = async (t) => {
+    setTogglingId(t.id);
+    try {
+      await api(`/api/schedule/admin/tas/${t.id}`, { method: 'PATCH', body: { officeHoursOnly: !t.officeHoursOnly } });
+      flash(!t.officeHoursOnly ? `${t.name} is now office-hours only.` : `${t.name} is now eligible for a tutorial slot again.`, 'ok');
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setTogglingId(null); }
+  };
+  const saveCap = async (t) => {
+    const draft = capEdits[t.id];
+    const cap = Number(draft);
+    if (!Number.isFinite(cap) || cap < 0) { flash('Weekly OH cap must be a number ≥ 0.'); return; }
+    setSavingCapId(t.id);
+    try {
+      await api(`/api/schedule/admin/tas/${t.id}`, { method: 'PATCH', body: { ohCapHours: cap } });
+      flash(`${t.name}'s weekly office-hours cap is now ${cap}h.`, 'ok');
+      setCapEdits((c) => { const n = { ...c }; delete n[t.id]; return n; });
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setSavingCapId(null); }
   };
   const remove = async (id) => {
     try {
@@ -554,7 +582,12 @@ function TasSection({ tas, onChanged, flash }) {
 
   return (
     <section className="card" style={{ marginBottom: '20px' }}>
-      <h3 style={{ fontSize: '1.05rem', marginBottom: '10px' }}>TA roster</h3>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>TA roster</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        Each TA has two independent settings: whether they can hold a tutorial seat at all, and their own weekly office-hours cap (in hours).
+        E.g. for a half TA you can pick either "office hours only, 4h/week" (check the box, cap 4) or "1 tutorial + 1h office hours" (leave unchecked, cap 1) — your call, per TA.
+        The tutorial restriction is checked server-side too, not just hidden in the UI.
+      </p>
 
       {passcodeBanner && (
         <div style={{ marginBottom: '14px', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--amber)', background: 'var(--amber-lt)' }}>
@@ -567,27 +600,164 @@ function TasSection({ tas, onChanged, flash }) {
       )}
 
       <div style={{ overflowX: 'auto', marginBottom: '14px' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '360px' }}>
-          <thead><tr><th style={th}>Name</th><th style={th} /></tr></thead>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '620px' }}>
+          <thead><tr><th style={th}>Name</th><th style={th}>Tutorial eligible?</th><th style={th}>Weekly OH cap (hrs)</th><th style={th} /></tr></thead>
           <tbody>
-            {tas.map((t) => (
-              <tr key={t.id}>
-                <td style={td}>{t.name}</td>
-                <td style={td}>
-                  <button onClick={() => resetPasscode(t.id, t.name)} style={smallBtn('var(--amber)')}>reset passcode</button>
-                  <button onClick={() => remove(t.id)} style={smallBtn('var(--rose)')}>remove (TA left)</button>
-                </td>
-              </tr>
-            ))}
-            {tas.length === 0 && <tr><td style={td} colSpan={2}>None yet.</td></tr>}
+            {tas.map((t) => {
+              const draft = capEdits[t.id] ?? String(t.ohCapHours);
+              const dirty = capEdits[t.id] !== undefined && Number(capEdits[t.id]) !== t.ohCapHours;
+              return (
+                <tr key={t.id}>
+                  <td style={td}>{t.name}</td>
+                  <td style={td}>
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.76rem', color: t.officeHoursOnly ? 'var(--amber)' : 'var(--text2)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={!t.officeHoursOnly}
+                        disabled={togglingId === t.id}
+                        onChange={() => toggleDuty(t)}
+                      />
+                      {t.officeHoursOnly ? 'Office hours only' : 'Yes'}
+                    </label>
+                  </td>
+                  <td style={td}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <input
+                        type="number" step="0.5" min="0"
+                        value={draft}
+                        onChange={(e) => setCapEdits((c) => ({ ...c, [t.id]: e.target.value }))}
+                        style={{ ...inputStyle, width: '64px' }}
+                      />
+                      {dirty && (
+                        <button onClick={() => saveCap(t)} disabled={savingCapId === t.id} style={smallBtn('var(--teal)')}>save</button>
+                      )}
+                    </div>
+                  </td>
+                  <td style={td}>
+                    <button onClick={() => resetPasscode(t.id, t.name)} style={smallBtn('var(--amber)')}>reset passcode</button>
+                    <button onClick={() => remove(t.id)} style={smallBtn('var(--rose)')}>remove (TA left)</button>
+                  </td>
+                </tr>
+              );
+            })}
+            {tas.length === 0 && <tr><td style={td} colSpan={4}>None yet.</td></tr>}
           </tbody>
         </table>
       </div>
 
-      <form onSubmit={add} style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+      <form onSubmit={add} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} style={{ ...inputStyle, width: '200px' }} required /></Field>
+        <Field label="Weekly OH cap (hrs)"><input type="number" step="0.5" min="0" value={ohCapHours} onChange={(e) => setOhCapHours(e.target.value)} style={{ ...inputStyle, width: '80px' }} /></Field>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={officeHoursOnly} onChange={(e) => setOfficeHoursOnly(e.target.checked)} />
+          Office hours only (no tutorial duty)
+        </label>
         <button className="btn" type="submit" disabled={busy || !name} style={{ padding: '7px 16px', fontSize: '.75rem' }}>Add TA</button>
       </form>
+    </section>
+  );
+}
+
+/* ─── TA assignments overview — who has picked what, at a glance, plus a
+   downloadable CSV (opens in Excel) of the same table for record-keeping. ─── */
+function mergeOhByDay(ohs) {
+  // ohs: this TA's rows for one day, e.g. [{hour:14},{hour:14.5},{hour:15},{hour:15.5}]
+  const sorted = [...ohs].sort((a, b) => a.hour - b.hour);
+  const runs = [];
+  let run = null;
+  for (const o of sorted) {
+    if (run && Math.abs(o.hour - run.end) < 1e-6) {
+      run.end = o.hour + 0.5;
+    } else {
+      if (run) runs.push(run);
+      run = { start: o.hour, end: o.hour + 0.5 };
+    }
+  }
+  if (run) runs.push(run);
+  return runs;
+}
+
+function buildTaAssignments(tas, tutorialSlots, taOfficeHours) {
+  return tas.map((t) => {
+    const slot = tutorialSlots.find((s) => s.seats.some((seat) => seat?.taId === t.id));
+    const mine = taOfficeHours.filter((o) => o.taId === t.id);
+    const byDay = new Map();
+    for (const o of mine) {
+      if (!byDay.has(o.day)) byDay.set(o.day, []);
+      byDay.get(o.day).push(o);
+    }
+    const ranges = [];
+    for (const [day, ohs] of byDay) {
+      for (const r of mergeOhByDay(ohs)) ranges.push({ day, ...r });
+    }
+    ranges.sort((a, b) => a.day - b.day || a.start - b.start);
+    return { ta: t, slot, ranges, totalHours: mine.length * 0.5 };
+  });
+}
+
+function csvEscape(v) {
+  const s = String(v ?? '');
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function TaAssignmentsSection({ tas, tutorialSlots, taOfficeHours }) {
+  const assignments = buildTaAssignments(tas, tutorialSlots, taOfficeHours);
+  const withSlot = assignments.filter((a) => a.slot).length;
+  const withOh = assignments.filter((a) => a.ranges.length > 0).length;
+
+  const rangeLabel = (r) => `${DAY_LABELS[r.day]} ${fmtHour(r.start)}–${fmtHour(r.end)}`;
+  const slotLabel = (a) => (a.slot ? `${DAY_LABELS[a.slot.day]} ${fmtHour(a.slot.start)}–${fmtHour(a.slot.end)}${a.slot.location ? ' · ' + a.slot.location : ''}` : a.ta.officeHoursOnly ? 'n/a (office hours only)' : 'None yet');
+
+  const downloadCsv = () => {
+    const rows = [['Name', 'Tutorial Eligible?', 'Weekly OH Cap (hrs)', 'Tutorial Slot', 'Office Hours', 'OH Hours Booked']];
+    for (const a of assignments) {
+      rows.push([
+        a.ta.name,
+        a.ta.officeHoursOnly ? 'No (office hours only)' : 'Yes',
+        String(a.ta.ohCapHours),
+        slotLabel(a),
+        a.ranges.length ? a.ranges.map(rangeLabel).join('; ') : 'None yet',
+        `${a.totalHours} / ${a.ta.ohCapHours}`,
+      ]);
+    }
+    const csv = rows.map((r) => r.map(csvEscape).join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `math101-fa26-ta-assignments-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>TA assignments overview</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        {withSlot} of {tas.length} TAs hold a tutorial slot · {withOh} of {tas.length} have booked at least some office hours.
+      </p>
+      <div style={{ overflowX: 'auto', marginBottom: '12px' }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '640px' }}>
+          <thead><tr><th style={th}>Name</th><th style={th}>Tutorial eligible?</th><th style={th}>Tutorial slot</th><th style={th}>Office hours</th><th style={th}>Booked / cap (hrs)</th></tr></thead>
+          <tbody>
+            {assignments.map((a) => (
+              <tr key={a.ta.id}>
+                <td style={td}>{a.ta.name}</td>
+                <td style={{ ...td, color: a.ta.officeHoursOnly ? 'var(--amber)' : 'var(--text2)' }}>{a.ta.officeHoursOnly ? 'No — OH only' : 'Yes'}</td>
+                <td style={{ ...td, color: a.slot ? 'var(--text)' : 'var(--text3)' }}>{slotLabel(a)}</td>
+                <td style={{ ...td, color: a.ranges.length ? 'var(--text)' : 'var(--text3)' }}>{a.ranges.length ? a.ranges.map(rangeLabel).join(', ') : 'None yet'}</td>
+                <td style={{ ...td, fontFamily: 'var(--fm)' }}>{a.totalHours} / {a.ta.ohCapHours}</td>
+              </tr>
+            ))}
+            {assignments.length === 0 && <tr><td style={td} colSpan={5}>No TAs yet.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <button className="btn btn-outline" onClick={downloadCsv} disabled={assignments.length === 0} style={{ padding: '7px 16px', fontSize: '.75rem' }}>
+        ⬇ Download as CSV (opens in Excel)
+      </button>
     </section>
   );
 }

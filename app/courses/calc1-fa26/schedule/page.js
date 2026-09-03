@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
-import { DAY_LABELS, TA_OH_WINDOW, TA_OH_SLOT_MINUTES } from '../../../../lib/scheduleConfig';
+import { DAY_LABELS, TA_OH_WINDOW, TA_OH_SLOT_MINUTES, TA_OH_WEEKLY_CAP_HOURS } from '../../../../lib/scheduleConfig';
 
 /* ═════════════════════════════════════════════════════════════════
    MATH-101 · CALCULUS I (Non-SSE) FA26 — LIVE WEEKLY SCHEDULE
@@ -111,6 +111,24 @@ function mergeTaOfficeHours(dayOhs) {
   return merged;
 }
 
+// Groups one TA's own office-hour rows into readable day+range runs across
+// the whole week (e.g. "Mon 2pm-4pm, Fri 1:30pm-3:30pm") for the "Your
+// schedule" summary card — reuses mergeTaOfficeHours per day so the runs
+// match exactly what's shown on the grid itself.
+function myScheduleRuns(taOfficeHours, taId) {
+  const mine = taOfficeHours.filter((o) => o.taId === taId);
+  const byDay = new Map();
+  for (const o of mine) {
+    if (!byDay.has(o.day)) byDay.set(o.day, []);
+    byDay.get(o.day).push(o);
+  }
+  const runs = [];
+  for (const [day, ohs] of byDay) {
+    for (const m of mergeTaOfficeHours(ohs)) runs.push({ day, start: m.start, end: m.end });
+  }
+  return runs.sort((a, b) => a.day - b.day || a.start - b.start);
+}
+
 // Assign each of a day's items a lane (0/1) and mark whether it overlaps a
 // neighbor, so overlapping items render side-by-side (cap of 2 keeps this simple).
 function layoutDay(items) {
@@ -184,7 +202,7 @@ export default function CalcFA26Schedule() {
     setLoginBusy(true); setLoginError('');
     try {
       const json = await api('/api/schedule/ta/login', { method: 'POST', body: { passcode } });
-      setMe((m) => ({ ...m, ta: { id: json.taId, name: json.name } }));
+      setMe((m) => ({ ...m, ta: { id: json.taId, name: json.name, officeHoursOnly: json.officeHoursOnly } }));
       setPasscode('');
       fetchState();
     } catch (err) {
@@ -270,7 +288,9 @@ export default function CalcFA26Schedule() {
   const gridH = (endHour - startHour) * 60 * PX_PER_MIN;
   const myTaId = me.ta?.id;
   const myHourCount = myTaId ? taOfficeHours.filter((o) => o.taId === myTaId).length * (TA_OH_SLOT_MINUTES / 60) : 0;
+  const myCap = me.ta?.ohCapHours ?? TA_OH_WEEKLY_CAP_HOURS;
   const myHeldSlot = myTaId ? tutorialSlots.find((s) => s.seats.some((seat) => seat?.taId === myTaId)) : null;
+  const myOhRuns = myTaId ? myScheduleRuns(taOfficeHours, myTaId) : [];
   const ohSlots = [];
   for (let t = TA_OH_WINDOW.start; t < TA_OH_WINDOW.end; t += TA_OH_SLOT_MINUTES / 60) ohSlots.push(t);
 
@@ -430,8 +450,8 @@ export default function CalcFA26Schedule() {
             ) : (
               <>
                 <span style={{ fontFamily: 'var(--fh)', fontSize: '1.05rem', color: 'var(--text)' }}>Signed in as {me.ta.name}</span>
-                <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: myHourCount >= 4 ? 'var(--amber)' : 'var(--text3)', border: '1px solid var(--border2)', borderRadius: '20px', padding: '3px 12px' }}>
-                  {myHourCount} of 4 office hours booked
+                <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: myHourCount >= myCap ? 'var(--amber)' : 'var(--text3)', border: '1px solid var(--border2)', borderRadius: '20px', padding: '3px 12px' }}>
+                  {myHourCount} of {myCap} office hours booked
                 </span>
                 <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>
                   {myHeldSlot ? `Holding tutorial slot: ${DAY_LABELS[myHeldSlot.day]} ${fmtHour(myHeldSlot.start)}` : 'No tutorial slot yet'}
@@ -452,6 +472,27 @@ export default function CalcFA26Schedule() {
             </button>
           </div>
         </div>
+
+        {/* "Your schedule" — once signed in, the TA's own booked slot/hours are
+            pulled out into a plain summary, since once everyone's picked
+            something the grid itself gets crowded and hard to scan for your own. */}
+        {me.ta && (
+          <div className="no-print sched-panel" style={{ margin: '0 0 14px', border: '1px solid var(--amber)', background: 'rgba(232,160,32,.08)' }}>
+            <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--amber)', margin: '0 0 8px' }}>
+              📌 Your schedule
+            </h4>
+            <div style={{ fontSize: '.85rem', color: 'var(--text)', marginBottom: '4px' }}>
+              <b>Tutorial slot:</b>{' '}
+              {myHeldSlot
+                ? `${DAY_LABELS[myHeldSlot.day]} ${fmtHour(myHeldSlot.start)}–${fmtHour(myHeldSlot.end)}${myHeldSlot.location ? ` · ${myHeldSlot.location}` : ''}`
+                : me.ta.officeHoursOnly ? 'Not assigned — you\'re office hours only' : 'None yet — pick an open seat below'}
+            </div>
+            <div style={{ fontSize: '.85rem', color: 'var(--text)' }}>
+              <b>Office hours:</b>{' '}
+              {myOhRuns.length ? myOhRuns.map((r) => `${DAY_LABELS[r.day]} ${fmtHour(r.start)}–${fmtHour(r.end)}`).join(', ') : 'None booked yet'}
+            </div>
+          </div>
+        )}
 
         {actionMsg && (
           <div className="no-print" style={{ marginBottom: '14px', padding: '9px 14px', borderRadius: '8px', fontSize: '.82rem', fontFamily: 'var(--fm)',
@@ -510,11 +551,18 @@ export default function CalcFA26Schedule() {
                       const key = `${item.kind}-${item.id}`;
 
                       let body;
+                      // Highlight the signed-in TA's own tutorial seat / office-hour
+                      // block so it's easy to spot once the grid fills up with
+                      // everyone else's bookings too.
+                      const isMine = item.kind === 'tutorial'
+                        ? item.seats.some((s) => s?.taId === myTaId)
+                        : item.kind === 'ta_oh' ? item.taId === myTaId : false;
+
                       if (item.kind === 'fixed') {
                         body = (
                           <>
-                            <div style={{ fontSize: '.72rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>{item.title}</div>
-                            {item.person && <div style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', color: 'var(--text2)', marginTop: '2px' }}>{item.person}</div>}
+                            <div title={item.title} style={{ fontSize: '.72rem', fontWeight: 600, color: 'var(--text)', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>
+                            {item.person && <div title={item.person} style={{ fontFamily: 'var(--fm)', fontSize: '.6rem', color: 'var(--text2)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.person}</div>}
                             <div style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', color: 'var(--text3)' }}>{fmtHour(item.start)}–{fmtHour(item.end)}{item.location ? ` · ${item.location}` : ''}</div>
                           </>
                         );
@@ -525,15 +573,15 @@ export default function CalcFA26Schedule() {
                             <div style={{ fontSize: '.7rem', fontWeight: 600, color: 'var(--text)' }}>Tutorial</div>
                             <div style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', color: 'var(--text3)', marginBottom: '3px' }}>{fmtHour(item.start)}–{fmtHour(item.end)}{item.location ? ` · ${item.location}` : ''}</div>
                             {item.seats.map((seat, i) => (
-                              <div key={i} style={{ fontSize: '.62rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px' }}>
+                              <div key={i} style={{ fontSize: '.62rem', color: 'var(--text2)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '1px', minWidth: 0 }}>
                                 {seat ? (
                                   <>
-                                    <span>{seat.taName}</span>
+                                    <span title={seat.taName} style={{ flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seat.taName}</span>
                                     {myTaId === seat.taId && (
-                                      <button onClick={leaveSeat} className="sched-cell-btn" style={{ borderColor: 'var(--rose)', color: 'var(--rose)' }}>leave</button>
+                                      <button onClick={leaveSeat} className="sched-cell-btn" style={{ flex: '0 0 auto', borderColor: 'var(--rose)', color: 'var(--rose)' }}>leave</button>
                                     )}
                                   </>
-                                ) : myTaId && !iHoldOther ? (
+                                ) : myTaId && !iHoldOther && !me.ta?.officeHoursOnly ? (
                                   <button onClick={() => bookSeat(item.id)} className="sched-cell-btn" style={{ borderColor: 'var(--teal)', color: 'var(--teal)' }}>pick seat</button>
                                 ) : (
                                   <span style={{ opacity: .5 }}>open</span>
@@ -545,7 +593,7 @@ export default function CalcFA26Schedule() {
                       } else {
                         body = (
                           <>
-                            <div style={{ fontSize: '.68rem', fontWeight: 600, color: 'var(--text)' }}>{item.taName}</div>
+                            <div title={item.taName} style={{ fontSize: '.68rem', fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.taName}</div>
                             <div style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', color: 'var(--text3)' }}>{fmtHour(item.start)}–{fmtHour(item.end)} OH</div>
                             {myTaId === item.taId && (
                               <button onClick={() => removeHours(item.ids)} className="sched-cell-btn" style={{ marginTop: '3px', borderColor: 'var(--rose)', color: 'var(--rose)' }}>remove</button>
@@ -555,7 +603,15 @@ export default function CalcFA26Schedule() {
                       }
 
                       return (
-                        <div key={key} style={{ position: 'absolute', top: `${top}px`, height: `${hgt}px`, left, width, background: c.bg, borderLeft: `3px solid ${c.bd}`, borderRadius: '5px', padding: '4px 6px', overflow: 'hidden' }}>
+                        <div
+                          key={key}
+                          style={{
+                            position: 'absolute', top: `${top}px`, height: `${hgt}px`, left, width,
+                            background: c.bg, borderLeft: `3px solid ${c.bd}`, borderRadius: '5px', padding: '4px 6px', overflow: 'hidden',
+                            boxShadow: isMine ? '0 0 0 2px var(--amber)' : 'none',
+                            zIndex: isMine ? 2 : 1,
+                          }}
+                        >
                           {body}
                         </div>
                       );
@@ -571,7 +627,7 @@ export default function CalcFA26Schedule() {
         {me.ta && (
           <div className="no-print sched-panel">
             <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.7rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--text3)', margin: '0 0 12px' }}>
-              Book your office hours — any pattern, up to 4 hours/week, 30-min blocks, {fmtHour(TA_OH_WINDOW.start)}–{fmtHour(TA_OH_WINDOW.end)}
+              Book your office hours — any pattern, up to {myCap} hours/week, 30-min blocks, {fmtHour(TA_OH_WINDOW.start)}–{fmtHour(TA_OH_WINDOW.end)}
             </h4>
             <div className="sched-oh-scroll" style={{ overflowX: 'auto' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '520px' }}>
@@ -590,11 +646,11 @@ export default function CalcFA26Schedule() {
                       {DAY_LABELS.map((_, di) => {
                         const mine = taOfficeHours.find((o) => o.day === di && o.hour === h && o.taId === myTaId);
                         const full = !mine && wouldExceedCap(di, h, h + 0.5, fixedEvents, tutorialSlots, taOfficeHours);
-                        const atCap = myHourCount >= 4 && !mine;
+                        const atCap = myHourCount >= myCap && !mine;
                         let label = 'book', disabled = false, tone = 'var(--teal)';
                         if (mine) { label = '✕ yours'; tone = 'var(--rose)'; }
                         else if (full) { label = 'full'; disabled = true; tone = 'var(--text3)'; }
-                        else if (atCap) { label = '4/4 used'; disabled = true; tone = 'var(--text3)'; }
+                        else if (atCap) { label = `${myCap}/${myCap} used`; disabled = true; tone = 'var(--text3)'; }
                         return (
                           <td key={di} style={{ padding: '2px', textAlign: 'center' }}>
                             <button

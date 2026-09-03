@@ -21,7 +21,7 @@ export async function GET() {
         `${courseFilter}&select=*,tutorial_bookings(seat_no,ta_id,tas(name))&order=day_of_week.asc,start_hour.asc`
       ),
       sbSelect('ta_office_hours', `${courseFilter}&select=id,ta_id,day_of_week,hour,tas(name)`),
-      sbSelect('tas', `${courseFilter}&select=id,name&order=name.asc`),
+      sbSelect('tas', `${courseFilter}&select=id,name,office_hours_only,oh_cap_hours&order=name.asc`),
       sbSelect(
         'tutorial_slot_venues',
         `select=id,slot_id,class_date,has_session,venue,notes,tutorial_slots!inner(course_code)` +
@@ -65,7 +65,7 @@ export async function GET() {
         day: o.day_of_week,
         hour: o.hour,
       })),
-      tas: tas.map((t) => ({ id: t.id, name: t.name })),
+      tas: tas.map((t) => ({ id: t.id, name: t.name, officeHoursOnly: t.office_hours_only, ohCapHours: num(t.oh_cap_hours) })),
       instructors: staff.filter((s) => s.role === 'instructor').map((s) => ({ id: s.id, name: s.name, email: s.email, office: s.office })),
       tfs: staff.filter((s) => s.role === 'tf').map((s) => ({ id: s.id, name: s.name, email: s.email, office: s.office })),
       tutorialVenues: tutorialVenues.map((v) => ({

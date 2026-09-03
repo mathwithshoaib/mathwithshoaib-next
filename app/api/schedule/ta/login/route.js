@@ -17,7 +17,7 @@ export async function POST(req) {
 
     const tas = await sbSelect(
       'tas',
-      `course_code=eq.${COURSE_CODE}&select=id,name,passcode_hash,passcode_salt`
+      `course_code=eq.${COURSE_CODE}&select=id,name,passcode_hash,passcode_salt,office_hours_only,oh_cap_hours`
     );
 
     const match = tas.find((t) => verifyPasscode(passcode, t.passcode_hash, t.passcode_salt));
@@ -27,7 +27,7 @@ export async function POST(req) {
 
     const cookieStore = await cookies();
     cookieStore.set(TA_COOKIE, signTaSession(match.id, COURSE_CODE), taCookieOptions());
-    return Response.json({ ok: true, taId: match.id, name: match.name });
+    return Response.json({ ok: true, taId: match.id, name: match.name, officeHoursOnly: match.office_hours_only, ohCapHours: Number(match.oh_cap_hours) });
   } catch (err) {
     console.error('ta login error:', err);
     return Response.json({ error: 'Server error.' }, { status: 500 });

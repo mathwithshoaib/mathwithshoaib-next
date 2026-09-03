@@ -7,7 +7,7 @@
 import { cookies } from 'next/headers';
 import { readAdminSession, generatePasscode, hashPasscode } from '../../../../../lib/scheduleAuth';
 import { sbInsert } from '../../../../../lib/supabaseAdmin';
-import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
+import { COURSE_CODE, TA_OH_WEEKLY_CAP_HOURS } from '../../../../../lib/scheduleConfig';
 
 export async function POST(req) {
   const cookieStore = await cookies();
@@ -16,9 +16,13 @@ export async function POST(req) {
   }
 
   try {
-    const { name } = await req.json();
+    const { name, officeHoursOnly, ohCapHours } = await req.json();
     if (!name || typeof name !== 'string' || !name.trim()) {
       return Response.json({ error: 'Name is required.' }, { status: 400 });
+    }
+    const cap = Number(ohCapHours);
+    if (ohCapHours !== undefined && (!Number.isFinite(cap) || cap < 0)) {
+      return Response.json({ error: 'Weekly OH cap must be a number ≥ 0.' }, { status: 400 });
     }
 
     const passcode = generatePasscode();
@@ -29,9 +33,11 @@ export async function POST(req) {
       name: name.trim(),
       passcode_hash: hash,
       passcode_salt: salt,
+      office_hours_only: !!officeHoursOnly,
+      oh_cap_hours: Number.isFinite(cap) ? cap : TA_OH_WEEKLY_CAP_HOURS,
     });
 
-    return Response.json({ ok: true, id: row.id, name: row.name, passcode });
+    return Response.json({ ok: true, id: row.id, name: row.name, officeHoursOnly: row.office_hours_only, ohCapHours: Number(row.oh_cap_hours), passcode });
   } catch (err) {
     console.error('admin/tas POST error:', err);
     return Response.json({ error: 'Server error.' }, { status: 500 });
