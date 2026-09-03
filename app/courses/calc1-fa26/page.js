@@ -240,7 +240,6 @@ export default function Calc1Fa26() {
           </div>
 
           <ul style={{ fontSize: '.82rem', color: 'var(--text3)', margin: 0, paddingLeft: '18px', lineHeight: 1.7 }}>
-            <li>The best 5 of 6 quizzes count toward your grade (N&minus;1 policy) — no excuses accepted for a missed one.</li>
             <li>Grading is relative.</li>
             <li>No grade-change requests are entertained once grades are finalized.</li>
           </ul>
