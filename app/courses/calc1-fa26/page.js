@@ -90,8 +90,8 @@ const GRADING = [
 ];
 
 const EXAMS = [
-  { label: 'Midterm I', duration: '120 minutes', date: 'TBA', spec: 'No notes · No books · No AI' },
-  { label: 'Midterm II', duration: '120 minutes', date: 'TBA', spec: 'No notes · No books · No AI' },
+  { label: 'Midterm I', duration: '120 minutes', date: 'Oct 3, 2026', tentative: true, spec: 'No notes · No books · No AI' },
+  { label: 'Midterm II', duration: '120 minutes', date: 'Nov 7, 2026', tentative: true, spec: 'No notes · No books · No AI' },
   { label: 'Final Exam', duration: '3 hours', date: 'TBA', spec: 'No notes · No books · No AI' },
 ];
 
@@ -222,7 +222,9 @@ export default function Calc1Fa26() {
               <div key={e.label} className="card" style={{ padding: '16px 18px' }}>
                 <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--amber)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '4px' }}>{e.label}</div>
                 <div style={{ fontSize: '.92rem', color: 'var(--text)' }}>{e.duration}</div>
-                <div style={{ fontSize: '.76rem', color: 'var(--text3)', marginTop: '2px' }}>Date: {e.date}</div>
+                <div style={{ fontSize: '.76rem', color: 'var(--text3)', marginTop: '2px' }}>
+                  Date: {e.date}{e.tentative && <span style={{ color: 'var(--amber)', opacity: .8 }}> (tentative)</span>}
+                </div>
                 <div style={{ fontSize: '.72rem', color: 'var(--text3)', marginTop: '6px' }}>{e.spec}</div>
               </div>
             ))}
