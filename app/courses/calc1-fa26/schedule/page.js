@@ -81,6 +81,36 @@ function wouldExceedCap(day, start, end, fixedEvents, tutorialSlots, taOfficeHou
   return false;
 }
 
+// A TA can hold several consecutive 30-min office-hour blocks (e.g. 2pm,
+// 2:30pm, 3pm, 3:30pm — a 2hr run). Rendered separately those stack up as
+// 4 skinny slivers on top of each other; merge each TA's back-to-back rows
+// on a given day into one grid item spanning the full run instead, same as
+// a single 2-hour booking would look. Cap-checking (wouldExceedCap, above)
+// is untouched — it still reasons per 30-min row, only the display merges.
+function mergeTaOfficeHours(dayOhs) {
+  const byTa = new Map();
+  for (const o of dayOhs) {
+    if (!byTa.has(o.taId)) byTa.set(o.taId, []);
+    byTa.get(o.taId).push(o);
+  }
+  const merged = [];
+  for (const ohs of byTa.values()) {
+    const sorted = [...ohs].sort((a, b) => a.hour - b.hour);
+    let run = null;
+    for (const o of sorted) {
+      if (run && Math.abs(o.hour - run.end) < 1e-6) {
+        run.end = o.hour + 0.5;
+        run.ids.push(o.id);
+      } else {
+        if (run) merged.push(run);
+        run = { ...o, start: o.hour, end: o.hour + 0.5, kind: 'ta_oh', ids: [o.id] };
+      }
+    }
+    if (run) merged.push(run);
+  }
+  return merged;
+}
+
 // Assign each of a day's items a lane (0/1) and mark whether it overlaps a
 // neighbor, so overlapping items render side-by-side (cap of 2 keeps this simple).
 function layoutDay(items) {
@@ -182,6 +212,17 @@ export default function CalcFA26Schedule() {
   const removeHour = async (id) => {
     try {
       await api('/api/schedule/ta/office-hours', { method: 'DELETE', body: { id } });
+      flash('Removed.', 'ok');
+      fetchState();
+    } catch (err) {
+      flash(err.message);
+      fetchState();
+    }
+  };
+  // Frees a whole run of merged consecutive blocks (see mergeTaOfficeHours) at once.
+  const removeHours = async (ids) => {
+    try {
+      await Promise.all(ids.map((id) => api('/api/schedule/ta/office-hours', { method: 'DELETE', body: { id } })));
       flash('Removed.', 'ok');
       fetchState();
     } catch (err) {
@@ -452,7 +493,7 @@ export default function CalcFA26Schedule() {
                 const items = [
                   ...fixedEvents.filter((e) => e.day === di).map((e) => ({ ...e, kind: 'fixed' })),
                   ...tutorialSlots.filter((s) => s.day === di).map((s) => ({ ...s, kind: 'tutorial' })),
-                  ...taOfficeHours.filter((o) => o.day === di).map((o) => ({ ...o, start: o.hour, end: o.hour + 0.5, kind: 'ta_oh' })),
+                  ...mergeTaOfficeHours(taOfficeHours.filter((o) => o.day === di)),
                 ];
                 const laid = layoutDay(items);
                 return (
@@ -507,7 +548,7 @@ export default function CalcFA26Schedule() {
                             <div style={{ fontSize: '.68rem', fontWeight: 600, color: 'var(--text)' }}>{item.taName}</div>
                             <div style={{ fontFamily: 'var(--fm)', fontSize: '.58rem', color: 'var(--text3)' }}>{fmtHour(item.start)}–{fmtHour(item.end)} OH</div>
                             {myTaId === item.taId && (
-                              <button onClick={() => removeHour(item.id)} className="sched-cell-btn" style={{ marginTop: '3px', borderColor: 'var(--rose)', color: 'var(--rose)' }}>remove</button>
+                              <button onClick={() => removeHours(item.ids)} className="sched-cell-btn" style={{ marginTop: '3px', borderColor: 'var(--rose)', color: 'var(--rose)' }}>remove</button>
                             )}
                           </>
                         );
