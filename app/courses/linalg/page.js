@@ -202,13 +202,14 @@ export default function LinAlg() {
         <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '8px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', borderBottom: '1px solid var(--border)' }}>
           <Link href="/" style={{ color: 'var(--amber)' }}>Home</Link><span>›</span>
           <Link href="/courses" style={{ color: 'var(--amber)' }}>Courses</Link><span>›</span>
-          <span style={{ color: 'var(--text2)', fontWeight: 500 }}>Linear Algebra</span>
+          <span style={{ color: 'var(--text2)', fontWeight: 500 }}>Linear Algebra · Summer 2026</span>
         </div>
         <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 24px', overflowX: 'auto' }}>
           {[
             { href: '/courses/precalc', label: 'Pre-Calculus', active: false },
-            { href: '/courses/calc1', label: 'Calculus I', active: false },
-            { href: '/courses/linalg', label: 'Linear Algebra', active: true },
+            { href: '/courses/calc1', label: 'Calculus I · Fall 2025', active: false },
+            { href: '/courses/calc1-fa26', label: 'Calculus I · Non-SSE · FA26', active: false },
+            { href: '/courses/linalg', label: 'Linear Algebra · Su26', active: true },
           ].map(({ href, label, active }) => (
             <Link key={href} href={href} style={{
               fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.06em', textTransform: 'uppercase',

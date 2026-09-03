@@ -406,10 +406,10 @@ export default function Calc1() {
         <div style={{ padding:'8px 24px', display:'flex', alignItems:'center', gap:'8px', fontFamily:'var(--fm)', fontSize:'.72rem', color:'var(--text3)', borderBottom:'1px solid var(--border)' }}>
           <Link href="/" style={{ color:'var(--amber)', textDecoration:'none' }}>Home</Link><span>›</span>
           <Link href="/courses" style={{ color:'var(--amber)', textDecoration:'none' }}>Courses</Link><span>›</span>
-          <span style={{ color:'var(--text2)', fontWeight:500 }}>Calculus I</span>
+          <span style={{ color:'var(--text2)', fontWeight:500 }}>Calculus I · Fall 2025</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', padding:'0 24px', overflowX:'auto' }}>
-          {[{href:'/courses/precalc',label:'Pre-Calculus'},{href:'/courses/calc1',label:'Calculus I',active:true},{href:'/courses/linalg',label:'Linear Algebra I'}].map(({href,label,active})=>(
+          {[{href:'/courses/precalc',label:'Pre-Calculus'},{href:'/courses/calc1',label:'Calculus I · Fall 2025',active:true},{href:'/courses/calc1-fa26',label:'Calculus I · Non-SSE · FA26'},{href:'/courses/linalg',label:'Linear Algebra · Su26'}].map(({href,label,active})=>(
             <Link key={href} href={href} style={{ fontFamily:'var(--fm)', fontSize:'.72rem', letterSpacing:'.06em', textTransform:'uppercase', color:active?'var(--amber)':'var(--text3)', padding:'9px 18px', borderBottom:active?'2px solid var(--amber)':'2px solid transparent', whiteSpace:'nowrap', textDecoration:'none' }}>{label}</Link>
           ))}
         </div>
@@ -469,11 +469,14 @@ export default function Calc1() {
 
           {/* HERO */}
           <div style={{ padding:'44px 40px 36px', background:'linear-gradient(135deg,var(--bg) 0%,var(--bg2) 100%)', borderBottom:'1px solid var(--border)' }}>
-            <span className="eyebrow">MATH-101 · Undergraduate I · LUMS</span>
+            <span className="eyebrow">MATH-101 · Undergraduate I · Fall 2025 · LUMS</span>
             <h1 style={{ fontSize:'clamp(2rem,4vw,3rem)', marginBottom:'12px' }}>Calculus I</h1>
             <p style={{ maxWidth:'560px', color:'var(--text2)', fontSize:'1.02rem' }}>
               The language in which physics, economics, and engineering are written. Taught in two parallel tracks — rigorously from first principles, and through the lens of business and economic application.
             </p>
+            <Link href="/courses/calc1-fa26" style={{ display:'inline-flex', alignItems:'center', gap:'6px', fontFamily:'var(--fm)', fontSize:'.76rem', color:'var(--teal)', border:'1px solid rgba(56,201,176,.35)', background:'rgba(56,201,176,.08)', borderRadius:'8px', padding:'7px 14px', marginTop:'6px', textDecoration:'none' }}>
+              Looking for Fall 2026 (Non-SSE)? →
+            </Link>
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', margin:'16px 0' }}>
               <span className="tag tag-teal">Limits</span><span className="tag tag-teal">Derivatives</span>
               <span className="tag tag-teal">Integration</span><span className="tag">Differential Equations</span>

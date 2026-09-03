@@ -34,7 +34,7 @@ const COURSES = [
     title: 'Calculus I',
     code: 'MATH-101',
     level: 2,
-    levelLabel: 'Undergraduate I',
+    levelLabel: 'Undergraduate I · Fall 2025',
     order: 2,
     accent: 'teal',
     blurb:
@@ -42,15 +42,33 @@ const COURSES = [
     topics: ['Limits', 'Derivatives', 'Integration', 'Applications', 'Diff. Equations'],
     stats: { lectures: '6 sections', status: 'Active' },
     live: true,
+    activeUntil: '2025-12-20', // Fall 2025 term — already over
     keywords:
-      'calculus derivative integral limit optimization stewart hoffmann business applied related rates',
+      'calculus derivative integral limit optimization stewart hoffmann business applied related rates fall 2025',
+  },
+  {
+    slug: 'calc1-fa26',
+    title: 'Calculus I · Non-SSE',
+    code: 'MATH-101',
+    level: 2,
+    levelLabel: 'Undergraduate I · Fall 2026',
+    order: 2.5,
+    accent: 'teal',
+    blurb:
+      'A separate Non-SSE section for Fall 2026 — live weekly schedule with lectures, office hours, recitations, and self-service TA tutorial/office-hour booking.',
+    topics: ['Limits', 'Derivatives', 'Integration', 'Applications'],
+    stats: { lectures: 'New', status: 'Active' },
+    live: true,
+    activeUntil: '2026-12-31', // Fall 2026 term — the one actually running right now
+    keywords:
+      'calculus non-sse fall 2026 schedule tutorial recitation office hours',
   },
   {
     slug: 'linalg',
     title: 'Linear Algebra',
     code: 'MATH-120',
     level: 3,
-    levelLabel: 'Undergraduate',
+    levelLabel: 'Undergraduate · Summer 2026',
     order: 3,
     accent: 'violet',
     blurb:
@@ -58,10 +76,19 @@ const COURSES = [
     topics: ['Matrices', 'Inverses', 'LU-Factorization', 'Elementary Matrices', 'Applications'],
     stats: { lectures: '15 lectures', status: 'Active' },
     live: true,
+    activeUntil: '2026-08-15', // Summer 2026 term — already over
     keywords:
-      'linear algebra matrix inverse determinant row reduction gaussian elimination nicholson LU elementary input output leontief',
+      'linear algebra matrix inverse determinant row reduction gaussian elimination nicholson LU elementary input output leontief summer 2026',
   },
 ];
+
+// "Active" means the badge shows only while that specific term is actually
+// running (as of today), not just "the page has content" — a finished term
+// still has content but shouldn't read as currently active.
+function isActiveNow(c) {
+  if (!c.live || !c.activeUntil) return false;
+  return new Date() <= new Date(`${c.activeUntil}T23:59:59`);
+}
 
 const ACCENTS = {
   amber:  { c: 'var(--amber)',  bg: 'var(--amber-lt)',           bd: 'rgba(232,160,32,.4)' },
@@ -94,7 +121,7 @@ export default function CoursesExplorer() {
       'level-asc': (a, b) => a.level - b.level,
       'level-desc': (a, b) => b.level - a.level,
       az: (a, b) => a.title.localeCompare(b.title),
-      active: (a, b) => Number(b.live) - Number(a.live) || a.order - b.order,
+      active: (a, b) => Number(isActiveNow(b)) - Number(isActiveNow(a)) || Number(b.live) - Number(a.live) || a.order - b.order,
     }[sort];
     return [...list].sort(by);
   }, [query, sort]);
@@ -184,7 +211,7 @@ export default function CoursesExplorer() {
         .cx-tile .cx-tile-body { padding:24px; display:flex; flex-direction:column; flex:1; }
         .cx-tile .cx-code {
           font-family:var(--fm); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase;
-          margin-bottom:10px;
+          margin-bottom:10px; padding-right:78px;
         }
         .cx-tile h3 { font-size:1.5rem; margin:0 0 10px; line-height:1.1; }
         .cx-tile .cx-blurb { color:var(--text2); font-size:.9rem; line-height:1.6; margin:0 0 16px; flex:1; }
@@ -338,7 +365,11 @@ export default function CoursesExplorer() {
             return (
               <article className="cx-tile" key={c.slug}>
                 <div className="cx-stripe" style={{ background: a.c }} />
-                <span className={`cx-badge ${c.live ? 'live' : 'soon'}`}>{c.live ? '● Active' : 'Soon'}</span>
+                {!c.live ? (
+                  <span className="cx-badge soon">Soon</span>
+                ) : isActiveNow(c) ? (
+                  <span className="cx-badge live">● Active</span>
+                ) : null}
                 <div className="cx-tile-body">
                   <div className="cx-code" style={{ color: a.c }}>{c.code} · {c.levelLabel}</div>
                   <h3>{c.title}</h3>
@@ -386,9 +417,11 @@ export default function CoursesExplorer() {
                     {c.topics.slice(0, 3).map((t) => <span className="cx-chip" key={t}>{t}</span>)}
                   </div>
                   <span className="cx-stat"><b>{c.stats.lectures}</b></span>
-                  <span className={`cx-badge ${c.live ? 'live' : 'soon'}`} style={{ position: 'static' }}>
-                    {c.live ? '● Active' : 'Soon'}
-                  </span>
+                  {!c.live ? (
+                    <span className="cx-badge soon" style={{ position: 'static' }}>Soon</span>
+                  ) : isActiveNow(c) ? (
+                    <span className="cx-badge live" style={{ position: 'static' }}>● Active</span>
+                  ) : null}
                   <span style={{ color: a.c, fontSize: '1.1rem' }}>→</span>
                 </div>
               </div>

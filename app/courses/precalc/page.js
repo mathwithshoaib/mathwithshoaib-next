@@ -22,8 +22,9 @@ export default function PreCalc() {
         <div style={{display:'flex',alignItems:'center',padding:'0 24px',overflowX:'auto'}}>
           {[
             {href:'/courses/precalc', label:'Pre-Calculus', active:true},
-            {href:'/courses/calc1', label:'Calculus I', active:false},
-            {href:'/courses/linalg', label:'Linear Algebra I', active:false},
+            {href:'/courses/calc1', label:'Calculus I · Fall 2025', active:false},
+            {href:'/courses/calc1-fa26', label:'Calculus I · Non-SSE · FA26', active:false},
+            {href:'/courses/linalg', label:'Linear Algebra · Su26', active:false},
           ].map(({href,label,active}) => (
             <Link key={href} href={href} style={{
               fontFamily:'var(--fm)', fontSize:'.72rem', letterSpacing:'.06em',

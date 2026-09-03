@@ -30,6 +30,13 @@ async function api(path, opts) {
   return json;
 }
 
+function fmtHour(t) {
+  const h = Math.floor(t), m = Math.round((t - h) * 60);
+  const ap = h >= 12 ? 'pm' : 'am';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return m === 0 ? `${h12}${ap}` : `${h12}:${String(m).padStart(2, '0')}${ap}`;
+}
+
 const inputStyle = { padding: '7px 10px', borderRadius: '7px', border: '1px solid var(--border2)', background: 'var(--bg2)', color: 'var(--text)', fontFamily: 'var(--fm)', fontSize: '.8rem' };
 const th = { fontFamily: 'var(--fm)', fontSize: '.62rem', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--text3)', textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid var(--border)' };
 const td = { fontSize: '.82rem', color: 'var(--text)', padding: '7px 8px', borderBottom: '1px solid var(--border)' };
@@ -94,13 +101,25 @@ export default function ScheduleAdmin() {
 
   return (
     <>
+      {/* Mobile-only (desktop untouched): iOS Safari auto-zooms on any input
+          under 16px font when tapped, and the two-column team roster is too
+          cramped on a phone screen. */}
+      <style>{`
+        @media (max-width: 820px) {
+          .card input, .card select { font-size: 16px !important; }
+          .tt-cols { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <Navbar activePage="courses" />
       <div style={{ maxWidth: '980px', margin: '0 auto', padding: 'calc(var(--nav-h) + 3px + 32px) 24px 72px' }}>
         <span className="eyebrow">MATH 101 · Calculus I (Non-SSE) · FA26</span>
         <h1 style={{ fontSize: 'clamp(1.6rem,4vw,2.2rem)', margin: '6px 0 10px' }}>Schedule — Admin</h1>
-        <div style={{ marginBottom: '20px' }}>
+        <div style={{ marginBottom: '20px', display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
           <Link href="/courses/calc1-fa26/schedule" style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', textDecoration: 'underline' }}>
             ← Back to public schedule
+          </Link>
+          <Link href="/courses/calc1-fa26" style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', textDecoration: 'underline' }}>
+            Course home →
           </Link>
         </div>
 
@@ -126,8 +145,10 @@ export default function ScheduleAdmin() {
           <>
             <button onClick={logout} style={{ ...smallBtn('var(--text3)'), marginBottom: '24px' }}>Sign out of admin</button>
             <SettingsSection settings={data.settings} onSaved={fetchState} flash={flash} />
-            <FixedEventsSection events={data.fixedEvents} onChanged={fetchState} flash={flash} />
+            <TeachingTeamSection instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
+            <FixedEventsSection events={data.fixedEvents} instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
             <TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} />
+            <TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} />
             <TasSection tas={data.tas} onChanged={fetchState} flash={flash} />
           </>
         )}
@@ -166,16 +187,99 @@ function SettingsSection({ settings, onSaved, flash }) {
   );
 }
 
-/* ─── Lectures / Instructor OH / Recitations ─── */
-function FixedEventsSection({ events, onChanged, flash }) {
-  const blank = { category: 'lecture', day: 0, start: 9, end: 10, title: '', person: '', location: '' };
+/* ─── Teaching Team roster (instructors + TFs) ───
+   Single source of truth for the course page's Teaching Team section AND
+   the "Person" dropdown in the fixed-events form below — add someone here
+   once, pick them everywhere else. */
+function TeachingTeamSection({ instructors, tfs, onChanged, flash }) {
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Teaching team</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '14px' }}>
+        Shown on the course page, and offered as the "Person" choices when adding a lecture / office-hour / recitation entry below.
+      </p>
+      <div className="tt-cols" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <StaffList role="instructor" label="Instructors" list={instructors} onChanged={onChanged} flash={flash} />
+        <StaffList role="tf" label="TFs" list={tfs} onChanged={onChanged} flash={flash} />
+      </div>
+    </section>
+  );
+}
+
+function StaffList({ role, label, list, onChanged, flash }) {
+  const blank = { name: '', email: '', office: '' };
   const [form, setForm] = useState(blank);
   const [editingId, setEditingId] = useState(null);
   const [busy, setBusy] = useState(false);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const startEdit = (e) => { setEditingId(e.id); setForm({ category: e.category, day: e.day, start: e.start, end: e.end, title: e.title, person: e.person || '', location: e.location || '' }); };
+  const startEdit = (p) => { setEditingId(p.id); setForm({ name: p.name, email: p.email || '', office: p.office || '' }); };
   const cancelEdit = () => { setEditingId(null); setForm(blank); };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      if (editingId) await api(`/api/schedule/admin/staff/${editingId}`, { method: 'PATCH', body: form });
+      else await api('/api/schedule/admin/staff', { method: 'POST', body: { role, ...form } });
+      flash(editingId ? 'Updated.' : 'Added.', 'ok');
+      cancelEdit();
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setBusy(false); }
+  };
+  const remove = async (id) => {
+    try { await api(`/api/schedule/admin/staff/${id}`, { method: 'DELETE' }); flash('Removed.', 'ok'); onChanged(); }
+    catch (err) { flash(err.message); }
+  };
+
+  return (
+    <div>
+      <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text3)', margin: '0 0 8px' }}>{label}</h4>
+      <div style={{ marginBottom: '10px' }}>
+        {list.map((p) => (
+          <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '.82rem' }}>
+            <span style={{ flex: 1, color: 'var(--text)' }}>{p.name}{p.office ? <span style={{ color: 'var(--text3)' }}> · {p.office}</span> : null}</span>
+            <button onClick={() => startEdit(p)} style={smallBtn('var(--amber)')}>edit</button>
+            <button onClick={() => remove(p.id)} style={smallBtn('var(--rose)')}>delete</button>
+          </div>
+        ))}
+        {list.length === 0 && <div style={{ fontSize: '.8rem', color: 'var(--text3)', padding: '6px 0' }}>None yet.</div>}
+      </div>
+      <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <input value={form.name} onChange={(e) => set('name', e.target.value)} placeholder="Name" style={inputStyle} required />
+        <input value={form.email} onChange={(e) => set('email', e.target.value)} placeholder="Email (optional)" style={inputStyle} />
+        <input value={form.office} onChange={(e) => set('office', e.target.value)} placeholder="Office (optional)" style={inputStyle} />
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button className="btn" type="submit" disabled={busy || !form.name} style={{ padding: '6px 14px', fontSize: '.72rem' }}>{editingId ? 'Save' : 'Add'}</button>
+          {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ─── Lectures / Instructor OH / Recitations ─── */
+function FixedEventsSection({ events, instructors, tfs, onChanged, flash }) {
+  const blank = { category: 'lecture', day: 0, start: 9, end: 10, title: '', person: '', location: '' };
+  const [form, setForm] = useState(blank);
+  const [editingId, setEditingId] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [customPerson, setCustomPerson] = useState(false);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  // "Person" is picked from the Teaching Team roster below (so a lecture and
+  // an office-hour entry for the same instructor always say the same thing)
+  // unless there's no match, e.g. a one-off guest — then "custom" reveals a
+  // plain text box instead.
+  const roster = form.category === 'recitation' ? tfs : instructors;
+
+  const startEdit = (e) => {
+    setEditingId(e.id);
+    setForm({ category: e.category, day: e.day, start: e.start, end: e.end, title: e.title, person: e.person || '', location: e.location || '' });
+    const r = e.category === 'recitation' ? tfs : instructors;
+    setCustomPerson(!!e.person && !r.some((p) => p.name === e.person));
+  };
+  const cancelEdit = () => { setEditingId(null); setForm(blank); setCustomPerson(false); };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -227,7 +331,19 @@ function FixedEventsSection({ events, onChanged, flash }) {
         <Field label="Start"><input type="number" step="0.25" value={form.start} onChange={(e) => set('start', e.target.value)} style={{ ...inputStyle, width: '72px' }} /></Field>
         <Field label="End"><input type="number" step="0.25" value={form.end} onChange={(e) => set('end', e.target.value)} style={{ ...inputStyle, width: '72px' }} /></Field>
         <Field label="Title"><input value={form.title} onChange={(e) => set('title', e.target.value)} style={{ ...inputStyle, width: '150px' }} required /></Field>
-        <Field label="Person"><input value={form.person} onChange={(e) => set('person', e.target.value)} style={{ ...inputStyle, width: '130px' }} /></Field>
+        <Field label={`Person${form.category === 'recitation' ? ' (TF)' : ''}`}>
+          {customPerson ? (
+            <input value={form.person} onChange={(e) => set('person', e.target.value)} style={{ ...inputStyle, width: '150px' }} placeholder="Type a name" />
+          ) : (
+            <select value={form.person} onChange={(e) => set('person', e.target.value)} style={{ ...inputStyle, width: '150px' }}>
+              <option value="">— none —</option>
+              {roster.map((p) => <option key={p.id} value={p.name}>{p.name}</option>)}
+            </select>
+          )}
+          <button type="button" onClick={() => { setCustomPerson((c) => !c); set('person', ''); }} style={{ ...smallBtn('var(--text3)'), marginTop: '4px', marginRight: 0 }}>
+            {customPerson ? 'pick from roster' : 'type custom name'}
+          </button>
+        </Field>
         <Field label="Location"><input value={form.location} onChange={(e) => set('location', e.target.value)} style={{ ...inputStyle, width: '110px' }} /></Field>
         <button className="btn" type="submit" disabled={busy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{editingId ? 'Save' : 'Add'}</button>
         {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
@@ -307,6 +423,100 @@ function TutorialSlotsSection({ slots, onChanged, flash }) {
         <Field label="Location"><input value={form.location} onChange={(e) => set('location', e.target.value)} style={{ ...inputStyle, width: '130px' }} /></Field>
         <button className="btn" type="submit" disabled={busy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{editingId ? 'Save' : 'Add'}</button>
         {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
+      </form>
+    </section>
+  );
+}
+
+/* ─── Per-date tutorial venues (semester booking sheet) ─── */
+function TutorialVenuesSection({ slots, venues, onChanged, flash }) {
+  const blank = { date: '', slotId: slots[0]?.id ?? '', hasSession: true, venue: '', notes: '' };
+  const [form, setForm] = useState(blank);
+  const [busy, setBusy] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const slotLabel = (slotId) => {
+    const s = slots.find((x) => x.id === slotId);
+    return s ? `${DAY_LABELS[s.day]} ${fmtHour(s.start)}–${fmtHour(s.end)}` : `#${slotId}`;
+  };
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const sorted = [...venues].sort((a, b) => a.date.localeCompare(b.date));
+  const visible = showAll ? sorted : sorted.filter((v) => v.date >= todayStr).slice(0, 20);
+
+  const startEdit = (v) => setForm({ date: v.date, slotId: v.slotId, hasSession: v.hasSession, venue: v.venue || '', notes: v.notes || '' });
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await api('/api/schedule/admin/tutorial-venues', {
+        method: 'POST',
+        body: { date: form.date, slotId: Number(form.slotId), hasSession: form.hasSession, venue: form.venue, notes: form.notes },
+      });
+      flash('Saved.', 'ok');
+      setForm(blank);
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setBusy(false); }
+  };
+
+  const remove = async (id) => {
+    try { await api(`/api/schedule/admin/tutorial-venues/${id}`, { method: 'DELETE' }); flash('Removed.', 'ok'); onChanged(); }
+    catch (err) { flash(err.message); }
+  };
+
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Tutorial venues by date</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        The room actually booked for each specific date — this is what the "today's venue" card on the public page reads from.
+        Recurring day/time above stays the same; only the room (and whether a session happens at all) varies date to date.
+      </p>
+
+      <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '340px', marginBottom: '14px', border: '1px solid var(--border)', borderRadius: '8px' }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '620px' }}>
+          <thead style={{ position: 'sticky', top: 0, background: 'var(--bg2)' }}>
+            <tr><th style={th}>Date</th><th style={th}>Slot</th><th style={th}>Session?</th><th style={th}>Venue</th><th style={th}>Notes</th><th style={th} /></tr>
+          </thead>
+          <tbody>
+            {visible.map((v) => (
+              <tr key={v.id}>
+                <td style={td}>{v.date}</td>
+                <td style={td}>{slotLabel(v.slotId)}</td>
+                <td style={td}>{v.hasSession ? 'Yes' : <span style={{ color: 'var(--rose)' }}>No session</span>}</td>
+                <td style={td}>{v.venue || '—'}</td>
+                <td style={{ ...td, maxWidth: '220px', fontSize: '.72rem', color: 'var(--text3)' }}>{v.notes}</td>
+                <td style={td}>
+                  <button onClick={() => startEdit(v)} style={smallBtn('var(--amber)')}>edit</button>
+                  <button onClick={() => remove(v.id)} style={smallBtn('var(--rose)')}>delete</button>
+                </td>
+              </tr>
+            ))}
+            {visible.length === 0 && <tr><td style={td} colSpan={6}>{showAll ? 'None yet.' : 'No upcoming dates — try "show all".'}</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <button type="button" onClick={() => setShowAll((s) => !s)} style={{ ...smallBtn('var(--text3)'), marginBottom: '14px' }}>
+        {showAll ? 'Show upcoming only' : `Show all (${venues.length})`}
+      </button>
+
+      <form onSubmit={submit} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <Field label="Date"><input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} style={inputStyle} required /></Field>
+        <Field label="Slot">
+          <select value={form.slotId} onChange={(e) => set('slotId', e.target.value)} style={inputStyle}>
+            {slots.map((s) => <option key={s.id} value={s.id}>{slotLabel(s.id)}</option>)}
+          </select>
+        </Field>
+        <Field label="Session happens?">
+          <select value={form.hasSession ? '1' : '0'} onChange={(e) => set('hasSession', e.target.value === '1')} style={inputStyle}>
+            <option value="1">Yes</option>
+            <option value="0">No session</option>
+          </select>
+        </Field>
+        <Field label="Venue"><input value={form.venue} onChange={(e) => set('venue', e.target.value)} style={{ ...inputStyle, width: '150px' }} disabled={!form.hasSession} /></Field>
+        <Field label="Notes"><input value={form.notes} onChange={(e) => set('notes', e.target.value)} style={{ ...inputStyle, width: '200px' }} /></Field>
+        <button className="btn" type="submit" disabled={busy || !form.date} style={{ padding: '7px 16px', fontSize: '.75rem' }}>Save</button>
       </form>
     </section>
   );

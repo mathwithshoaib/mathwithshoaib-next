@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const courseFilter = `course_code=eq.${COURSE_CODE}`;
 
-    const [settingsRows, fixedEvents, tutorialSlots, taOfficeHours, tas] = await Promise.all([
+    const [settingsRows, fixedEvents, tutorialSlots, taOfficeHours, tas, tutorialVenues, staff] = await Promise.all([
       sbSelect('schedule_settings', `${courseFilter}&select=start_hour,end_hour`),
       sbSelect('fixed_events', `${courseFilter}&select=*&order=day_of_week.asc,start_hour.asc`),
       sbSelect(
@@ -22,6 +22,12 @@ export async function GET() {
       ),
       sbSelect('ta_office_hours', `${courseFilter}&select=id,ta_id,day_of_week,hour,tas(name)`),
       sbSelect('tas', `${courseFilter}&select=id,name&order=name.asc`),
+      sbSelect(
+        'tutorial_slot_venues',
+        `select=id,slot_id,class_date,has_session,venue,notes,tutorial_slots!inner(course_code)` +
+          `&tutorial_slots.course_code=eq.${COURSE_CODE}&order=class_date.asc`
+      ),
+      sbSelect('course_staff', `${courseFilter}&select=id,role,name,email,office&order=name.asc`),
     ]);
 
     const settings = settingsRows?.[0]
@@ -60,6 +66,16 @@ export async function GET() {
         hour: o.hour,
       })),
       tas: tas.map((t) => ({ id: t.id, name: t.name })),
+      instructors: staff.filter((s) => s.role === 'instructor').map((s) => ({ id: s.id, name: s.name, email: s.email, office: s.office })),
+      tfs: staff.filter((s) => s.role === 'tf').map((s) => ({ id: s.id, name: s.name, email: s.email, office: s.office })),
+      tutorialVenues: tutorialVenues.map((v) => ({
+        id: v.id,
+        slotId: v.slot_id,
+        date: v.class_date,
+        hasSession: v.has_session,
+        venue: v.venue,
+        notes: v.notes,
+      })),
     });
   } catch (err) {
     console.error('schedule/state error:', err);

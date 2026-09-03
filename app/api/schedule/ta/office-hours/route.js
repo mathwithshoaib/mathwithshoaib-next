@@ -1,5 +1,5 @@
 // app/api/schedule/ta/office-hours/route.js
-// POST { day, hour } -> book a 1-hour office-hour block (own session only).
+// POST { day, hour } -> book a 30-minute office-hour block (own session only).
 // DELETE { id }      -> remove one you booked (freeing it for rebooking).
 //
 // Both re-check availability/ownership at the moment of write — never trust
@@ -8,7 +8,7 @@
 import { cookies } from 'next/headers';
 import { readTaSession } from '../../../../../lib/scheduleAuth';
 import { sbRpc, sbDelete } from '../../../../../lib/supabaseAdmin';
-import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
+import { COURSE_CODE, TA_OH_WINDOW } from '../../../../../lib/scheduleConfig';
 import { rpcErrorMessage } from '../../../../../lib/scheduleValidate';
 
 export async function POST(req) {
@@ -19,8 +19,9 @@ export async function POST(req) {
   try {
     const { day, hour } = await req.json();
     const d = Number(day), h = Number(hour);
-    if (!Number.isInteger(d) || d < 0 || d > 4 || !Number.isInteger(h)) {
-      return Response.json({ error: 'Invalid day/hour.' }, { status: 400 });
+    const halfHourAligned = Number.isFinite(h) && h * 2 === Math.floor(h * 2);
+    if (!Number.isInteger(d) || d < 0 || d > 4 || !halfHourAligned || h < TA_OH_WINDOW.start || h >= TA_OH_WINDOW.end) {
+      return Response.json({ error: `Office hours can only be booked in 30-minute blocks between ${TA_OH_WINDOW.start}am and 7pm.` }, { status: 400 });
     }
 
     const [result] = await sbRpc('book_ta_office_hour', {
