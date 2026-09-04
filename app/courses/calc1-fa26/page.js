@@ -51,10 +51,22 @@ const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 // matching instructor. Fill in a URL as each instructor sends their notes;
 // `null` shows as "Coming soon" instead of a dead link.
 const LECTURE_NOTES = {
-  'Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
-  'Adnan Khan': Array(WEEK_COUNT).fill(null),
-  'Omar Malik': Array(WEEK_COUNT).fill(null),
+  'Dr. Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
+  'Dr. Adnan Khan': Array(WEEK_COUNT).fill(null),
+  'Dr. Omer Khawar Malik': Array(WEEK_COUNT).fill(null),
 };
+
+// Looks a roster name up in LECTURE_NOTES tolerantly — exact match first,
+// then falling back to a title-stripped/case-insensitive comparison, so a
+// name that's edited slightly in the admin panel later (title added/removed,
+// different capitalization) doesn't silently break the link the way an
+// exact-string mismatch just did.
+function lectureNotesFor(name) {
+  if (LECTURE_NOTES[name]) return LECTURE_NOTES[name];
+  const norm = (s) => (s || '').replace(/^(dr|prof|mr|mrs|ms)\.?\s+/i, '').trim().toLowerCase();
+  const key = Object.keys(LECTURE_NOTES).find((k) => norm(k) === norm(name));
+  return key ? LECTURE_NOTES[key] : Array(WEEK_COUNT).fill(null);
+}
 
 // All 3 recitation sections use the same slides/notes each week (not
 // per-TF), so this is one row per week rather than one per section.
@@ -308,7 +320,7 @@ export default function Calc1Fa26() {
                         <tr key={w}>
                           <td style={{ whiteSpace: 'nowrap', color: 'var(--text2)' }}>Week {w}</td>
                           {instructors.map((p) => {
-                            const href = (LECTURE_NOTES[p.name] || [])[w - 1];
+                            const href = lectureNotesFor(p.name)[w - 1];
                             return (
                               <td key={p.id}>
                                 {href
