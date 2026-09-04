@@ -52,20 +52,54 @@ const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 // `null` shows as "Coming soon" instead of a dead link.
 const LECTURE_NOTES = {
   'Dr. Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
-  'Dr. Adnan Khan': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lecture1.pdf' : v)),
   'Dr. Omer Khawar Malik': Array(WEEK_COUNT).fill(null),
 };
 
-// Looks a roster name up in LECTURE_NOTES tolerantly — exact match first,
-// then falling back to a title-stripped/case-insensitive comparison, so a
-// name that's edited slightly in the admin panel later (title added/removed,
-// different capitalization) doesn't silently break the link the way an
-// exact-string mismatch just did.
+// Strips a leading title (Dr./Prof./Mr./...) and lowercases, so a roster
+// name that's edited slightly later (title added/removed, capitalization)
+// still matches — an exact-string mismatch is what broke this once already.
+function normName(s) {
+  return (s || '').replace(/^(dr|prof|mr|mrs|ms)\.?\s+/i, '').trim().toLowerCase();
+}
+
+// Looks a roster name up in LECTURE_NOTES tolerantly (see normName above).
 function lectureNotesFor(name) {
   if (LECTURE_NOTES[name]) return LECTURE_NOTES[name];
-  const norm = (s) => (s || '').replace(/^(dr|prof|mr|mrs|ms)\.?\s+/i, '').trim().toLowerCase();
-  const key = Object.keys(LECTURE_NOTES).find((k) => norm(k) === norm(name));
+  const key = Object.keys(LECTURE_NOTES).find((k) => normName(k) === normName(name));
   return key ? LECTURE_NOTES[key] : Array(WEEK_COUNT).fill(null);
+}
+
+// Dr. Adnan Khan posts 2 separate lecture-note links per week (Lec-1 &
+// Lec-2 for week 1, Lec-3 & Lec-4 for week 2, ...) instead of one combined
+// file per week like the other instructors — flat, 1 entry per lecture:
+// index 2*(week-1) is that week's first lecture, +1 is the second.
+const ADNAN_KHAN_NAME = 'Dr. Adnan Khan';
+const ADNAN_LECTURE_LINKS = Array(WEEK_COUNT * 2).fill(null);
+ADNAN_LECTURE_LINKS[0] = 'https://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lecture1.pdf';
+
+// One lecture-notes table cell. Adnan Khan's column shows 2 small labeled
+// links (Lec-N / Lec-N+1) instead of the single "View" link everyone else
+// gets, since he posts per-lecture rather than per-week.
+function LectureNoteCell({ person, week }) {
+  const linkStyle = { color: 'var(--teal)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' };
+  if (normName(person.name) === normName(ADNAN_KHAN_NAME)) {
+    return (
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {[0, 1].map((j) => {
+          const idx = (week - 1) * 2 + j;
+          const href = ADNAN_LECTURE_LINKS[idx];
+          const label = `Lec-${idx + 1}`;
+          return href
+            ? <Link key={j} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{label} →</Link>
+            : <span key={j} className="c26-soon">{label}</span>;
+        })}
+      </div>
+    );
+  }
+  const href = lectureNotesFor(person.name)[week - 1];
+  return href
+    ? <Link href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>View →</Link>
+    : <span className="c26-soon">Coming soon</span>;
 }
 
 // All 3 recitation sections use the same slides/notes each week (not
@@ -319,16 +353,9 @@ export default function Calc1Fa26() {
                       {WEEKS.map((w) => (
                         <tr key={w}>
                           <td style={{ whiteSpace: 'nowrap', color: 'var(--text2)' }}>Week {w}</td>
-                          {instructors.map((p) => {
-                            const href = lectureNotesFor(p.name)[w - 1];
-                            return (
-                              <td key={p.id}>
-                                {href
-                                  ? <Link href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' }}>View →</Link>
-                                  : <span className="c26-soon">Coming soon</span>}
-                              </td>
-                            );
-                          })}
+                          {instructors.map((p) => (
+                            <td key={p.id}><LectureNoteCell person={p} week={w} /></td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>
