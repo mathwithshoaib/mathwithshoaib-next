@@ -59,7 +59,7 @@ const LECTURE_NOTES = {
 // All 3 recitation sections use the same slides/notes each week (not
 // per-TF), so this is one row per week rather than one per section.
 const RECITATIONS = [
-  { slides: 'https://canva.link/fa26-w1-cal-1-racitation-shoaib', notes: null },
+  { slides: 'https://canva.link/fa26-w1-cal-1-racitation-shoaib', notes: 'https://drive.google.com/file/d/1I53YOLf9ivn13hK4_u4XhNTMXJEtuPYn/view?usp=sharing' },
   ...Array.from({ length: WEEK_COUNT - 1 }, () => ({ slides: null, notes: null })),
 ];
 
