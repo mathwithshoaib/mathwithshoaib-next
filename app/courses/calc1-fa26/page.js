@@ -52,7 +52,7 @@ const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 // `null` shows as "Coming soon" instead of a dead link.
 const LECTURE_NOTES = {
   'Dr. Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
-  'Dr. Adnan Khan': Array(WEEK_COUNT).fill(null),
+  'Dr. Adnan Khan': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lecture1.pdf' : v)),
   'Dr. Omer Khawar Malik': Array(WEEK_COUNT).fill(null),
 };
 
