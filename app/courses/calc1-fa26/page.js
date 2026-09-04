@@ -157,16 +157,19 @@ export default function Calc1Fa26() {
   const instructors = roster?.instructors || [];
   const tfs = roster?.tfs || [];
   const tas = roster?.tas || [];
-  const taHalf = Math.ceil(tas.length / 2);
-  const taColA = tas.slice(0, taHalf);
-  const taColB = tas.slice(taHalf);
 
   return (
     <>
       <style>{`
         .c26-wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
         .c26-section { margin-bottom: 48px; }
-        .c26-team-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .c26-team-cols { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; align-items: start; }
+        .c26-ta-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+        .c26-ta-split > div:first-child { border-right: 1px solid var(--border); }
+        @media (max-width: 560px) {
+          .c26-ta-split { grid-template-columns: 1fr; }
+          .c26-ta-split > div:first-child { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px; }
+        }
         .c26-team-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
         .c26-team-row:last-child { border-bottom: none; }
         .c26-clo-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -324,8 +327,7 @@ export default function Calc1Fa26() {
                 <TeamColumn title="Instructors" accent="var(--amber)" people={instructors} details />
                 <TeamColumn title="TFs" accent="var(--rose)" people={tfs} details />
               </div>
-              <TeamColumn title="TAs" accent="var(--teal)" people={taColA} details totalCount={tas.length} />
-              <TeamColumn title="TAs" accent="var(--teal)" people={taColB} details startIndex={taColA.length} hideHeader />
+              <TeamSplitCard title="TAs" accent="var(--teal)" people={tas} details />
             </div>
           )}
           <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginTop: '12px' }}>
@@ -486,42 +488,71 @@ export default function Calc1Fa26() {
   );
 }
 
-// One compact numbered column of the Teaching Team section. `details` shows
-// a small office/email line under each name; `startIndex` offsets the
-// numbering (used to split the TA list across two side-by-side columns
-// while numbering continues 1..N across both); `totalCount` overrides the
-// "· N" badge shown next to the title (needed when `people` is only half
-// the list); `hideHeader` drops the title row entirely, for a column that's
-// a visual continuation of the one before it. A TA's `dutyTag` (e.g. "Full
-// TA" / "Half TA" / "Volunteer TA", set in the admin panel) shows in
-// parentheses after their name when present.
-function TeamColumn({ title, accent, people, details, startIndex = 0, totalCount, hideHeader }) {
+// One numbered row: index, name (+ dutyTag in parens if set, e.g. "Sameer
+// Altaf (Volunteer TA)"), and — when `details` is set — an office/email
+// line underneath. Shared by TeamColumn (single-column card) and
+// TeamSplitCard (one card, two internal columns) so both stay in sync.
+function TeamRow({ person: p, index, details }) {
+  return (
+    <div className="c26-team-row">
+      <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', flexShrink: 0, width: '20px' }}>{index + 1}.</span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '.86rem', color: 'var(--text)' }}>
+          {p.name}
+          {p.dutyTag && <span style={{ fontSize: '.74rem', color: 'var(--text3)', fontWeight: 400 }}> ({p.dutyTag})</span>}
+        </div>
+        {details && (p.office || p.email) && (
+          <div style={{ fontSize: '.68rem', color: 'var(--text3)', marginTop: '2px' }}>
+            {[p.office, p.email].filter(Boolean).join(' · ')}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// One compact numbered column of the Teaching Team section — used for
+// Instructors and TFs, which are short enough to need only one list.
+function TeamColumn({ title, accent, people, details }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)', borderTop: `3px solid ${accent}` }}>
-      {!hideHeader && (
-        <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: accent, margin: '0 0 8px' }}>
-          {title} {(totalCount ?? people.length) > 0 && <span style={{ color: 'var(--text3)' }}>· {totalCount ?? people.length}</span>}
-        </h4>
-      )}
+      <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: accent, margin: '0 0 8px' }}>
+        {title} {people.length > 0 && <span style={{ color: 'var(--text3)' }}>· {people.length}</span>}
+      </h4>
       {people.length === 0 ? (
         <div style={{ fontSize: '.8rem', color: 'var(--text3)', padding: '6px 0' }}>None yet.</div>
       ) : (
-        people.map((p, i) => (
-          <div key={p.id} className="c26-team-row">
-            <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', flexShrink: 0, width: '20px' }}>{startIndex + i + 1}.</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '.86rem', color: 'var(--text)' }}>
-                {p.name}
-                {p.dutyTag && <span style={{ fontSize: '.74rem', color: 'var(--text3)', fontWeight: 400 }}> ({p.dutyTag})</span>}
-              </div>
-              {details && (p.office || p.email) && (
-                <div style={{ fontSize: '.68rem', color: 'var(--text3)', marginTop: '2px' }}>
-                  {[p.office, p.email].filter(Boolean).join(' · ')}
-                </div>
-              )}
-            </div>
+        people.map((p, i) => <TeamRow key={p.id} person={p} index={i} details={details} />)
+      )}
+    </div>
+  );
+}
+
+// One card, one heading, names split into 2 internal columns divided by a
+// vertical rule — used for the TA list, which is long enough that a single
+// column would run much taller than the Instructors/TFs column next to it.
+// Numbering continues left-to-right (1..half in the left column, half+1..N
+// in the right), not interleaved.
+function TeamSplitCard({ title, accent, people, details }) {
+  const half = Math.ceil(people.length / 2);
+  const colA = people.slice(0, half);
+  const colB = people.slice(half);
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)', borderTop: `3px solid ${accent}` }}>
+      <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: accent, margin: '0 0 8px' }}>
+        {title} {people.length > 0 && <span style={{ color: 'var(--text3)' }}>· {people.length}</span>}
+      </h4>
+      {people.length === 0 ? (
+        <div style={{ fontSize: '.8rem', color: 'var(--text3)', padding: '6px 0' }}>None yet.</div>
+      ) : (
+        <div className="c26-ta-split">
+          <div style={{ paddingRight: '4px' }}>
+            {colA.map((p, i) => <TeamRow key={p.id} person={p} index={i} details={details} />)}
           </div>
-        ))
+          <div style={{ paddingLeft: '4px' }}>
+            {colB.map((p, i) => <TeamRow key={p.id} person={p} index={half + i} details={details} />)}
+          </div>
+        </div>
       )}
     </div>
   );
