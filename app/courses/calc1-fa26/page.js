@@ -51,7 +51,7 @@ const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 // matching instructor. Fill in a URL as each instructor sends their notes;
 // `null` shows as "Coming soon" instead of a dead link.
 const LECTURE_NOTES = {
-  'Imran Anwar': Array(WEEK_COUNT).fill(null),
+  'Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
   'Adnan Khan': Array(WEEK_COUNT).fill(null),
   'Omar Malik': Array(WEEK_COUNT).fill(null),
 };
