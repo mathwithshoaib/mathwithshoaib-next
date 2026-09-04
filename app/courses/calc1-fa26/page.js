@@ -84,13 +84,13 @@ function LectureNoteCell({ person, week }) {
   const linkStyle = { color: 'var(--teal)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' };
   if (normName(person.name) === normName(ADNAN_KHAN_NAME)) {
     return (
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
         {[0, 1].map((j) => {
           const idx = (week - 1) * 2 + j;
           const href = ADNAN_LECTURE_LINKS[idx];
           const label = `Lec-${idx + 1}`;
           return href
-            ? <Link key={j} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{label} →</Link>
+            ? <Link key={j} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{label}</Link>
             : <span key={j} className="c26-soon">{label}</span>;
         })}
       </div>
@@ -98,7 +98,7 @@ function LectureNoteCell({ person, week }) {
   }
   const href = lectureNotesFor(person.name)[week - 1];
   return href
-    ? <Link href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>View →</Link>
+    ? <Link href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>View</Link>
     : <span className="c26-soon">Coming soon</span>;
 }
 
@@ -177,6 +177,7 @@ export default function Calc1Fa26() {
                         color: var(--text3); padding: 6px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
         .c26-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
         .c26-table tbody tr:last-child td { border-bottom: none; }
+        .c26-table-center th, .c26-table-center td { text-align: center; }
         .c26-soon { font-family: var(--fm); font-size: .67rem; color: var(--text3); opacity: .5; }
         .c26-mid-row td { background: linear-gradient(90deg, rgba(232,160,32,.16), rgba(224,107,107,.16));
                           font-family: var(--fh); font-size: .92rem; font-weight: 600; text-align: center; color: var(--text); }
@@ -342,7 +343,7 @@ export default function Calc1Fa26() {
                 <p style={{ color: 'var(--text3)', fontSize: '.85rem' }}>No instructors on the roster yet.</p>
               ) : (
                 <div className="c26-table-scroll">
-                  <table className="c26-table">
+                  <table className="c26-table c26-table-center">
                     <thead>
                       <tr>
                         <th>Week</th>
@@ -368,7 +369,7 @@ export default function Calc1Fa26() {
               <h4 style={{ fontSize: '1rem', marginBottom: '2px' }}>Recitation resources</h4>
               <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px' }}>Same slides/notes for all 3 sections.</p>
               <div className="c26-table-scroll">
-                <table className="c26-table">
+                <table className="c26-table c26-table-center">
                   <thead><tr><th>Week</th><th>Slides</th><th>Notes</th></tr></thead>
                   <tbody>
                     {WEEKS.map((w) => {
