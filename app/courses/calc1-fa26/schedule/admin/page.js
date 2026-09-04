@@ -524,23 +524,33 @@ function TutorialVenuesSection({ slots, venues, onChanged, flash }) {
 }
 
 /* ─── TA roster ─── */
+const DUTY_TAG_SUGGESTIONS = ['Full TA', 'Half TA', 'Volunteer TA'];
+
 function TasSection({ tas, onChanged, flash }) {
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [dutyTag, setDutyTag] = useState('');
   const [officeHoursOnly, setOfficeHoursOnly] = useState(false);
   const [ohCapHours, setOhCapHours] = useState(String(TA_OH_WEEKLY_CAP_HOURS));
   const [busy, setBusy] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
   const [capEdits, setCapEdits] = useState({}); // { [taId]: draft string while typing }
   const [savingCapId, setSavingCapId] = useState(null);
+  const [emailEdits, setEmailEdits] = useState({});
+  const [savingEmailId, setSavingEmailId] = useState(null);
+  const [tagEdits, setTagEdits] = useState({});
+  const [savingTagId, setSavingTagId] = useState(null);
   const [passcodeBanner, setPasscodeBanner] = useState(null); // { name, passcode }
 
   const add = async (e) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const res = await api('/api/schedule/admin/tas', { method: 'POST', body: { name, officeHoursOnly, ohCapHours: Number(ohCapHours) } });
+      const res = await api('/api/schedule/admin/tas', { method: 'POST', body: { name, officeHoursOnly, ohCapHours: Number(ohCapHours), email, dutyTag } });
       setPasscodeBanner({ name: res.name, passcode: res.passcode });
       setName('');
+      setEmail('');
+      setDutyTag('');
       setOfficeHoursOnly(false);
       setOhCapHours(String(TA_OH_WEEKLY_CAP_HOURS));
       onChanged();
@@ -572,6 +582,26 @@ function TasSection({ tas, onChanged, flash }) {
       onChanged();
     } catch (err) { flash(err.message); } finally { setSavingCapId(null); }
   };
+  const saveEmail = async (t) => {
+    const draft = (emailEdits[t.id] ?? '').trim();
+    setSavingEmailId(t.id);
+    try {
+      await api(`/api/schedule/admin/tas/${t.id}`, { method: 'PATCH', body: { email: draft || null } });
+      flash(`${t.name}'s email updated.`, 'ok');
+      setEmailEdits((c) => { const n = { ...c }; delete n[t.id]; return n; });
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setSavingEmailId(null); }
+  };
+  const saveTag = async (t) => {
+    const draft = (tagEdits[t.id] ?? '').trim();
+    setSavingTagId(t.id);
+    try {
+      await api(`/api/schedule/admin/tas/${t.id}`, { method: 'PATCH', body: { dutyTag: draft || null } });
+      flash(`${t.name}'s tag updated.`, 'ok');
+      setTagEdits((c) => { const n = { ...c }; delete n[t.id]; return n; });
+      onChanged();
+    } catch (err) { flash(err.message); } finally { setSavingTagId(null); }
+  };
   const remove = async (id) => {
     try {
       await api(`/api/schedule/admin/tas/${id}`, { method: 'DELETE' });
@@ -599,16 +629,52 @@ function TasSection({ tas, onChanged, flash }) {
         </div>
       )}
 
+      <datalist id="duty-tag-suggestions">
+        {DUTY_TAG_SUGGESTIONS.map((s) => <option key={s} value={s} />)}
+      </datalist>
+
       <div style={{ overflowX: 'auto', marginBottom: '14px' }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '620px' }}>
-          <thead><tr><th style={th}>Name</th><th style={th}>Tutorial eligible?</th><th style={th}>Weekly OH cap (hrs)</th><th style={th} /></tr></thead>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '860px' }}>
+          <thead><tr><th style={th}>Name</th><th style={th}>Tag</th><th style={th}>Email</th><th style={th}>Tutorial eligible?</th><th style={th}>Weekly OH cap (hrs)</th><th style={th} /></tr></thead>
           <tbody>
             {tas.map((t) => {
               const draft = capEdits[t.id] ?? String(t.ohCapHours);
               const dirty = capEdits[t.id] !== undefined && Number(capEdits[t.id]) !== t.ohCapHours;
+              const emailDraft = emailEdits[t.id] ?? (t.email || '');
+              const emailDirty = emailEdits[t.id] !== undefined && emailEdits[t.id].trim() !== (t.email || '');
+              const tagDraft = tagEdits[t.id] ?? (t.dutyTag || '');
+              const tagDirty = tagEdits[t.id] !== undefined && tagEdits[t.id].trim() !== (t.dutyTag || '');
               return (
                 <tr key={t.id}>
                   <td style={td}>{t.name}</td>
+                  <td style={td}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <input
+                        list="duty-tag-suggestions"
+                        placeholder="e.g. Volunteer TA"
+                        value={tagDraft}
+                        onChange={(e) => setTagEdits((c) => ({ ...c, [t.id]: e.target.value }))}
+                        style={{ ...inputStyle, width: '120px' }}
+                      />
+                      {tagDirty && (
+                        <button onClick={() => saveTag(t)} disabled={savingTagId === t.id} style={smallBtn('var(--teal)')}>save</button>
+                      )}
+                    </div>
+                  </td>
+                  <td style={td}>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      <input
+                        type="email"
+                        placeholder="name@lums.edu.pk"
+                        value={emailDraft}
+                        onChange={(e) => setEmailEdits((c) => ({ ...c, [t.id]: e.target.value }))}
+                        style={{ ...inputStyle, width: '150px' }}
+                      />
+                      {emailDirty && (
+                        <button onClick={() => saveEmail(t)} disabled={savingEmailId === t.id} style={smallBtn('var(--teal)')}>save</button>
+                      )}
+                    </div>
+                  </td>
                   <td style={td}>
                     <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.76rem', color: t.officeHoursOnly ? 'var(--amber)' : 'var(--text2)', cursor: 'pointer' }}>
                       <input
@@ -640,13 +706,15 @@ function TasSection({ tas, onChanged, flash }) {
                 </tr>
               );
             })}
-            {tas.length === 0 && <tr><td style={td} colSpan={4}>None yet.</td></tr>}
+            {tas.length === 0 && <tr><td style={td} colSpan={6}>None yet.</td></tr>}
           </tbody>
         </table>
       </div>
 
       <form onSubmit={add} style={{ display: 'flex', gap: '10px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-        <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} style={{ ...inputStyle, width: '200px' }} required /></Field>
+        <Field label="Name"><input value={name} onChange={(e) => setName(e.target.value)} style={{ ...inputStyle, width: '180px' }} required /></Field>
+        <Field label="Tag (optional)"><input list="duty-tag-suggestions" placeholder="e.g. Volunteer TA" value={dutyTag} onChange={(e) => setDutyTag(e.target.value)} style={{ ...inputStyle, width: '130px' }} /></Field>
+        <Field label="Email (optional)"><input type="email" placeholder="name@lums.edu.pk" value={email} onChange={(e) => setEmail(e.target.value)} style={{ ...inputStyle, width: '160px' }} /></Field>
         <Field label="Weekly OH cap (hrs)"><input type="number" step="0.5" min="0" value={ohCapHours} onChange={(e) => setOhCapHours(e.target.value)} style={{ ...inputStyle, width: '80px' }} /></Field>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
           <input type="checkbox" checked={officeHoursOnly} onChange={(e) => setOfficeHoursOnly(e.target.checked)} />

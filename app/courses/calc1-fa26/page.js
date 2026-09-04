@@ -157,6 +157,9 @@ export default function Calc1Fa26() {
   const instructors = roster?.instructors || [];
   const tfs = roster?.tfs || [];
   const tas = roster?.tas || [];
+  const taHalf = Math.ceil(tas.length / 2);
+  const taColA = tas.slice(0, taHalf);
+  const taColB = tas.slice(taHalf);
 
   return (
     <>
@@ -317,9 +320,12 @@ export default function Calc1Fa26() {
             <p style={{ color: 'var(--text3)', fontSize: '.9rem' }}>Team roster not added yet — add instructors/TFs/TAs via the schedule admin panel.</p>
           ) : (
             <div className="c26-team-cols">
-              <TeamColumn title="Instructors" accent="var(--amber)" people={instructors} details />
-              <TeamColumn title="TFs" accent="var(--rose)" people={tfs} details />
-              <TeamColumn title="TAs" accent="var(--teal)" people={tas} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <TeamColumn title="Instructors" accent="var(--amber)" people={instructors} details />
+                <TeamColumn title="TFs" accent="var(--rose)" people={tfs} details />
+              </div>
+              <TeamColumn title="TAs" accent="var(--teal)" people={taColA} details totalCount={tas.length} />
+              <TeamColumn title="TAs" accent="var(--teal)" people={taColB} details startIndex={taColA.length} hideHeader />
             </div>
           )}
           <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginTop: '12px' }}>
@@ -481,23 +487,33 @@ export default function Calc1Fa26() {
 }
 
 // One compact numbered column of the Teaching Team section. `details` shows
-// a small office/email line under each name (instructors/TFs); TAs just
-// get the name — a title says which column is which, so per-row labels
-// would be redundant.
-function TeamColumn({ title, accent, people, details }) {
+// a small office/email line under each name; `startIndex` offsets the
+// numbering (used to split the TA list across two side-by-side columns
+// while numbering continues 1..N across both); `totalCount` overrides the
+// "· N" badge shown next to the title (needed when `people` is only half
+// the list); `hideHeader` drops the title row entirely, for a column that's
+// a visual continuation of the one before it. A TA's `dutyTag` (e.g. "Full
+// TA" / "Half TA" / "Volunteer TA", set in the admin panel) shows in
+// parentheses after their name when present.
+function TeamColumn({ title, accent, people, details, startIndex = 0, totalCount, hideHeader }) {
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: '12px', padding: '14px 16px', background: 'var(--surface)', borderTop: `3px solid ${accent}` }}>
-      <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: accent, margin: '0 0 8px' }}>
-        {title} {people.length > 0 && <span style={{ color: 'var(--text3)' }}>· {people.length}</span>}
-      </h4>
+      {!hideHeader && (
+        <h4 style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', letterSpacing: '.1em', textTransform: 'uppercase', color: accent, margin: '0 0 8px' }}>
+          {title} {(totalCount ?? people.length) > 0 && <span style={{ color: 'var(--text3)' }}>· {totalCount ?? people.length}</span>}
+        </h4>
+      )}
       {people.length === 0 ? (
         <div style={{ fontSize: '.8rem', color: 'var(--text3)', padding: '6px 0' }}>None yet.</div>
       ) : (
         people.map((p, i) => (
           <div key={p.id} className="c26-team-row">
-            <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', flexShrink: 0, width: '16px' }}>{i + 1}.</span>
+            <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', flexShrink: 0, width: '20px' }}>{startIndex + i + 1}.</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '.86rem', color: 'var(--text)' }}>{p.name}</div>
+              <div style={{ fontSize: '.86rem', color: 'var(--text)' }}>
+                {p.name}
+                {p.dutyTag && <span style={{ fontSize: '.74rem', color: 'var(--text3)', fontWeight: 400 }}> ({p.dutyTag})</span>}
+              </div>
               {details && (p.office || p.email) && (
                 <div style={{ fontSize: '.68rem', color: 'var(--text3)', marginTop: '2px' }}>
                   {[p.office, p.email].filter(Boolean).join(' · ')}

@@ -16,7 +16,7 @@ export async function POST(req) {
   }
 
   try {
-    const { name, officeHoursOnly, ohCapHours } = await req.json();
+    const { name, officeHoursOnly, ohCapHours, email, dutyTag } = await req.json();
     if (!name || typeof name !== 'string' || !name.trim()) {
       return Response.json({ error: 'Name is required.' }, { status: 400 });
     }
@@ -35,9 +35,14 @@ export async function POST(req) {
       passcode_salt: salt,
       office_hours_only: !!officeHoursOnly,
       oh_cap_hours: Number.isFinite(cap) ? cap : TA_OH_WEEKLY_CAP_HOURS,
+      email: email && typeof email === 'string' && email.trim() ? email.trim() : null,
+      duty_tag: dutyTag && typeof dutyTag === 'string' && dutyTag.trim() ? dutyTag.trim() : null,
     });
 
-    return Response.json({ ok: true, id: row.id, name: row.name, officeHoursOnly: row.office_hours_only, ohCapHours: Number(row.oh_cap_hours), passcode });
+    return Response.json({
+      ok: true, id: row.id, name: row.name, officeHoursOnly: row.office_hours_only,
+      ohCapHours: Number(row.oh_cap_hours), email: row.email, dutyTag: row.duty_tag, passcode,
+    });
   } catch (err) {
     console.error('admin/tas POST error:', err);
     return Response.json({ error: 'Server error.' }, { status: 500 });
