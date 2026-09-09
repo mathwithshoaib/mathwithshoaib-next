@@ -48,7 +48,11 @@ const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 // cover the full term beyond the 14 syllabus weeks). Add { href, addedOn }
 // as each set goes up; an empty { href: null } tile just stays greyed out.
 const PROBLEM_SET_COUNT = 16;
-const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map(() => ({ href: null, addedOn: null }));
+const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => (
+  i === 0
+    ? { href: 'https://drive.google.com/file/d/1E3VlkDSu2A8isMdux8XA5ixZvlR3KRLD/view?usp=sharing', addedOn: '2026-09-08' }
+    : { href: null, addedOn: null }
+));
 
 function fmtShortDate(iso) {
   if (!iso) return '';
