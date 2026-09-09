@@ -66,7 +66,11 @@ function fmtShortDate(iso) {
 // matching instructor. Fill in a URL as each instructor sends their notes;
 // `null` shows as "Coming soon" instead of a dead link.
 const LECTURE_NOTES = {
-  'Dr. Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => (i === 0 ? 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing' : v)),
+  'Dr. Imran Anwar': Array(WEEK_COUNT).fill(null).map((v, i) => {
+    if (i === 0) return 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing';
+    if (i === 1) return 'https://drive.google.com/file/d/1nbI9EJ6UcZNzIIHUTBASVL1Cc_jxHNa-/view?usp=sharing';
+    return v;
+  }),
   'Dr. Omer Khawar Malik': Array(WEEK_COUNT).fill(null),
 };
 
@@ -91,6 +95,9 @@ function lectureNotesFor(name) {
 const ADNAN_KHAN_NAME = 'Dr. Adnan Khan';
 const ADNAN_LECTURE_LINKS = Array(WEEK_COUNT * 2).fill(null);
 ADNAN_LECTURE_LINKS[0] = 'https://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lecture1.pdf';
+ADNAN_LECTURE_LINKS[1] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec2WkBk.pdf';
+ADNAN_LECTURE_LINKS[2] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec3WkBk.pdf';
+ADNAN_LECTURE_LINKS[3] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec4WkBk.pdf';
 
 // One lecture-notes table cell. Adnan Khan's column shows 2 small labeled
 // links (Lec-N / Lec-N+1) instead of the single "View" link everyone else
