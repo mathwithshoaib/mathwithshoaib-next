@@ -212,11 +212,15 @@ export default function Calc1Fa26() {
         .c26-quickfacts { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
         .c26-ps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .c26-ps-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-                       padding: 16px 10px; border: 1px solid var(--border); border-radius: 9px; text-align: center; }
+                       padding: 16px 10px; border: 1px solid var(--border); border-radius: 9px; text-align: center;
+                       transition: transform .15s ease, box-shadow .15s ease; }
         .c26-ps-week { font-family: var(--fh); font-size: .96rem; }
         .c26-ps-date { font-family: var(--fm); font-size: .6rem; color: var(--text3); opacity: .8; }
-        .c26-ps-cell-live { border-color: rgba(155,128,232,.4); background: rgba(155,128,232,.07); }
-        .c26-ps-cell-live:hover { background: rgba(155,128,232,.14); }
+        .c26-ps-cell-live { border-color: transparent; background: linear-gradient(135deg, #a78bfa, #7c5fd6);
+                            box-shadow: 0 4px 16px rgba(124,95,214,.4); }
+        .c26-ps-cell-live .c26-ps-week { color: #fff; font-weight: 700; }
+        .c26-ps-cell-live .c26-ps-date { color: rgba(255,255,255,.8); opacity: 1; }
+        .c26-ps-cell-live:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(124,95,214,.55); }
         @media (max-width: 640px) { .c26-ps-grid { grid-template-columns: repeat(2, 1fr); } }
         .c26-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         @media (max-width: 900px) { .c26-resources-cols { grid-template-columns: 1fr; } }
@@ -450,7 +454,7 @@ export default function Calc1Fa26() {
                 const cellStyle = { textDecoration: 'none', cursor: ps.href ? 'pointer' : 'default' };
                 const inner = (
                   <>
-                    <span className="c26-ps-week" style={{ color: ps.href ? 'var(--violet)' : 'var(--text3)', opacity: ps.href ? 1 : .45 }}>
+                    <span className="c26-ps-week" style={ps.href ? undefined : { color: 'var(--text3)', opacity: .45 }}>
                       Week {week}
                     </span>
                     {ps.href && ps.addedOn && <span className="c26-ps-date">Added {fmtShortDate(ps.addedOn)}</span>}
