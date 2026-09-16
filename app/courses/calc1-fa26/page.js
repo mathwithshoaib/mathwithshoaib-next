@@ -44,20 +44,17 @@ const SWITCHER = [
 const WEEK_COUNT = 14;
 const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 
-// Weekly problem sets — a plain in-page grid, one tile per week (16, to
-// cover the full term beyond the 14 syllabus weeks). Add { href, addedOn }
-// as each set goes up; an empty { href: null } tile just stays greyed out.
+// Weekly problem sets — lives as its own column in the Lecture Notes table
+// (see ProblemSetCell below), one row per week, 16 total to cover the full
+// term beyond the 14 syllabus weeks. Add { href, solutionHref } as each set
+// (and later its solution) goes up; an empty entry just stays greyed out.
 const PROBLEM_SET_COUNT = 16;
+const PROBLEM_SET_WEEKS = Array.from({ length: PROBLEM_SET_COUNT }, (_, i) => i + 1);
 const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => {
-  if (i === 0) return { href: 'https://drive.google.com/file/d/1E3VlkDSu2A8isMdux8XA5ixZvlR3KRLD/view?usp=sharing', addedOn: '2026-09-08' };
-  if (i === 1) return { href: 'https://drive.google.com/file/d/1qgu2XqNboGUSsrQ6keDTPfhlHNlJIu6q/view?usp=sharing', addedOn: '2026-09-14' };
-  return { href: null, addedOn: null };
+  if (i === 0) return { href: 'https://drive.google.com/file/d/1E3VlkDSu2A8isMdux8XA5ixZvlR3KRLD/view?usp=sharing', solutionHref: null };
+  if (i === 1) return { href: 'https://drive.google.com/file/d/1qgu2XqNboGUSsrQ6keDTPfhlHNlJIu6q/view?usp=sharing', solutionHref: null };
+  return { href: null, solutionHref: null };
 });
-
-function fmtShortDate(iso) {
-  if (!iso) return '';
-  return new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-}
 
 // One lecture-notes link per instructor per week. Keyed by the exact name
 // as entered in the schedule admin's Teaching Team roster, so this table's
@@ -122,6 +119,30 @@ function LectureNoteCell({ person, week }) {
   return href
     ? <Link href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>View</Link>
     : <span className="c26-soon">Coming soon</span>;
+}
+
+// Instructors listed here are hidden from the Lecture Notes table (matched
+// tolerantly via normName) — Dr. Omer Khawar Malik isn't sharing notes, so
+// his column is replaced by the Weekly Problem Sets column below instead
+// of sitting empty.
+const HIDDEN_LECTURE_NOTE_INSTRUCTORS = ['Dr. Omer Khawar Malik'];
+
+// The "Weekly Problem Sets" column in that same table — same 2-small-links
+// layout as Adnan Khan's column, but PS-N (the set) and Sol (its solution)
+// for that single week, instead of 2 different lectures.
+function ProblemSetCell({ week }) {
+  const linkStyle = { color: 'var(--violet)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' };
+  const ps = PROBLEM_SETS[week - 1] || {};
+  return (
+    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+      {ps.href
+        ? <Link href={ps.href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{`PS-${week}`}</Link>
+        : <span className="c26-soon">{`PS-${week}`}</span>}
+      {ps.solutionHref
+        ? <Link href={ps.solutionHref} target="_blank" rel="noopener noreferrer" style={linkStyle}>Sol</Link>
+        : <span className="c26-soon">Sol</span>}
+    </div>
+  );
 }
 
 // All 3 recitation sections use the same slides/notes each week (not
@@ -209,18 +230,6 @@ export default function Calc1Fa26() {
         .c26-mid-row td { background: linear-gradient(90deg, rgba(232,160,32,.16), rgba(224,107,107,.16));
                           font-family: var(--fh); font-size: .92rem; font-weight: 600; text-align: center; color: var(--text); }
         .c26-quickfacts { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
-        .c26-ps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .c26-ps-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-                       padding: 16px 10px; border: 1px solid var(--border); border-radius: 9px; text-align: center;
-                       transition: transform .15s ease, box-shadow .15s ease; }
-        .c26-ps-week { font-family: var(--fh); font-size: .96rem; }
-        .c26-ps-date { font-family: var(--fm); font-size: .6rem; color: var(--text3); opacity: .8; }
-        .c26-ps-cell-live { border-color: transparent; background: linear-gradient(135deg, #a78bfa, #7c5fd6);
-                            box-shadow: 0 4px 16px rgba(124,95,214,.4); }
-        .c26-ps-cell-live .c26-ps-week { color: #fff; font-weight: 700; }
-        .c26-ps-cell-live .c26-ps-date { color: rgba(255,255,255,.8); opacity: 1; }
-        .c26-ps-cell-live:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(124,95,214,.55); }
-        @media (max-width: 640px) { .c26-ps-grid { grid-template-columns: repeat(2, 1fr); } }
         .c26-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         @media (max-width: 900px) { .c26-resources-cols { grid-template-columns: 1fr; } }
         @media (max-width: 720px) { .c26-team-cols, .c26-clo-cols { grid-template-columns: 1fr; } }
@@ -368,16 +377,16 @@ export default function Calc1Fa26() {
           </p>
         </div>
 
-        {/* RESOURCES — lecture notes (per instructor) + recitation slides/notes (shared across sections) */}
+        {/* RESOURCES — lecture notes + problem sets (per instructor / by week) + recitation slides/notes (shared across sections) */}
         <div className="c26-section">
           <h3 style={{ fontSize: '1.3rem', marginBottom: '4px' }}>Resources</h3>
           <p style={{ fontSize: '.82rem', color: 'var(--text3)', marginBottom: '16px' }}>
-            Lecture notes are posted per instructor, week by week. Recitation slides &amp; notes are shared across all 3 sections that week.
+            Lecture notes are posted per instructor, week by week, alongside the weekly problem set and its solution. Recitation slides &amp; notes are shared across all 3 sections that week.
           </p>
           <div className="c26-resources-cols">
             <div className="card" style={{ padding: '20px 22px' }}>
-              <h4 style={{ fontSize: '1rem', marginBottom: '2px' }}>Lecture notes</h4>
-              <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px' }}>Provided by each instructor.</p>
+              <h4 style={{ fontSize: '1rem', marginBottom: '2px' }}>Lecture notes &amp; problem sets</h4>
+              <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px' }}>Notes provided by each instructor; problem sets go up week by week.</p>
               {!roster ? (
                 <p style={{ color: 'var(--text3)', fontSize: '.85rem' }}>Loading…</p>
               ) : instructors.length === 0 ? (
@@ -388,16 +397,22 @@ export default function Calc1Fa26() {
                     <thead>
                       <tr>
                         <th>Week</th>
-                        {instructors.map((p) => <th key={p.id}>{p.name}</th>)}
+                        {instructors
+                          .filter((p) => !HIDDEN_LECTURE_NOTE_INSTRUCTORS.some((n) => normName(n) === normName(p.name)))
+                          .map((p) => <th key={p.id}>{p.name}</th>)}
+                        <th>Weekly Problem Sets</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {WEEKS.map((w) => (
+                      {PROBLEM_SET_WEEKS.map((w) => (
                         <tr key={w}>
                           <td style={{ whiteSpace: 'nowrap', color: 'var(--text2)' }}>Week {w}</td>
-                          {instructors.map((p) => (
-                            <td key={p.id}><LectureNoteCell person={p} week={w} /></td>
-                          ))}
+                          {instructors
+                            .filter((p) => !HIDDEN_LECTURE_NOTE_INSTRUCTORS.some((n) => normName(n) === normName(p.name)))
+                            .map((p) => (
+                              <td key={p.id}><LectureNoteCell person={p} week={w} /></td>
+                            ))}
+                          <td><ProblemSetCell week={w} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -434,37 +449,6 @@ export default function Calc1Fa26() {
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* WEEKLY PROBLEM SETS — inline grid, no separate page. Greyed tile =
-            nothing posted yet; once PROBLEM_SETS[i].href is filled in, that
-            week's tile turns violet/live and shows the date it was added. */}
-        <div className="c26-section">
-          <h3 style={{ fontSize: '1.3rem', marginBottom: '4px' }}>Weekly problem sets</h3>
-          <p style={{ fontSize: '.82rem', color: 'var(--text3)', marginBottom: '16px' }}>
-            One set per week, posted as the term goes on — a tile lights up here the moment its link goes live.
-          </p>
-          <div className="card" style={{ padding: '20px 22px' }}>
-            <div className="c26-ps-grid">
-              {PROBLEM_SETS.map((ps, i) => {
-                const week = i + 1;
-                const cellStyle = { textDecoration: 'none', cursor: ps.href ? 'pointer' : 'default' };
-                const inner = (
-                  <>
-                    <span className="c26-ps-week" style={ps.href ? undefined : { color: 'var(--text3)', opacity: .45 }}>
-                      Week {week}
-                    </span>
-                    {ps.href && ps.addedOn && <span className="c26-ps-date">Added {fmtShortDate(ps.addedOn)}</span>}
-                  </>
-                );
-                return ps.href ? (
-                  <Link key={week} href={ps.href} target="_blank" rel="noopener noreferrer" className="c26-ps-cell c26-ps-cell-live" style={cellStyle}>{inner}</Link>
-                ) : (
-                  <div key={week} className="c26-ps-cell" style={cellStyle}>{inner}</div>
-                );
-              })}
             </div>
           </div>
         </div>
