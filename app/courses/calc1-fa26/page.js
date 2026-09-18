@@ -150,6 +150,7 @@ function ProblemSetCell({ week }) {
 const RECITATIONS = Array.from({ length: WEEK_COUNT }, () => ({ slides: null, notes: null }));
 RECITATIONS[0] = { slides: 'https://canva.link/fa26-w1-cal-1-racitation-shoaib', notes: 'https://drive.google.com/file/d/1I53YOLf9ivn13hK4_u4XhNTMXJEtuPYn/view?usp=sharing' };
 RECITATIONS[1] = { slides: 'https://canva.link/fa26-w2-cal-1-recitation', notes: null };
+RECITATIONS[2] = { slides: 'https://canva.link/fa26-w3-cal-1-recitation', notes: null };
 
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
