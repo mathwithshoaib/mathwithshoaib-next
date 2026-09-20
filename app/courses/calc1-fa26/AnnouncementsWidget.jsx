@@ -57,14 +57,18 @@ function urgencyOf(a) {
   return a.type;
 }
 
+// Shows seconds once under an hour so it visibly ticks while the popup is
+// open (the widget re-renders every second while open, every 60s while
+// closed — see the interval effect below).
 function fmtCountdown(deadline) {
   const ms = new Date(deadline).getTime() - Date.now();
   const past = ms <= 0;
-  const absMins = Math.floor(Math.abs(ms) / 60000);
-  const d = Math.floor(absMins / 1440);
-  const h = Math.floor((absMins % 1440) / 60);
-  const m = absMins % 60;
-  const span = d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m`;
+  const absSecs = Math.floor(Math.abs(ms) / 1000);
+  const d = Math.floor(absSecs / 86400);
+  const h = Math.floor((absSecs % 86400) / 3600);
+  const m = Math.floor((absSecs % 3600) / 60);
+  const s = absSecs % 60;
+  const span = d > 0 ? `${d}d ${h}h` : h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`;
   return past ? `Due ${span} ago` : `${span} left`;
 }
 
@@ -80,29 +84,31 @@ const TYPE_STYLE = {
 };
 const ARCHIVE_STYLE = { accent: 'var(--text3)', bg: 'var(--bg2)', label: 'Past' };
 
+// Compact 2-3 line layout: a header line (type badge, title, category tag,
+// New badge, pin — pin pushed flush right instead of leaving a gap), an
+// optional message line, and a footer line combining the countdown and
+// posted-at so short announcements don't leave a wall of empty space.
 function AnnouncementCard({ a, isNew, archived }) {
   const urgency = archived ? null : urgencyOf(a);
   const style = archived ? ARCHIVE_STYLE : (TYPE_STYLE[urgency] || TYPE_STYLE.info);
   return (
     <div className="c26-announce-card" style={{ borderLeftColor: style.accent, background: style.bg, opacity: archived ? 0.75 : 1 }}>
-      <div className="c26-announce-card-head">
-        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: style.accent }}>
-          {style.label}
-          {isNew && <span className="c26-announce-new">🆕 New</span>}
-        </span>
-        {a.pinned && !archived && <span className="c26-announce-pin">📌 Pinned</span>}
-      </div>
-      <h4>
-        {a.title}
+      <div className="c26-announce-line1">
+        <span className="c26-announce-type" style={{ color: style.accent }}>{style.label}</span>
+        <h4>{a.title}</h4>
         {a.category && <span className="c26-announce-category">{a.category}</span>}
-      </h4>
+        {isNew && <span className="c26-announce-new">🆕 New</span>}
+        {a.pinned && !archived && <span className="c26-announce-pin">📌</span>}
+      </div>
       {a.message && <p>{a.message}</p>}
-      {a.deadline && (
-        <div className="c26-announce-deadline" style={{ color: !archived && urgency === 'urgent' ? 'var(--rose)' : 'var(--text3)' }}>
-          ⏰ {fmtCountdown(a.deadline)}
-        </div>
-      )}
-      <div className="c26-announce-posted">Posted {fmtPostedAt(a.createdAt)}</div>
+      <div className="c26-announce-line2">
+        {a.deadline && (
+          <span style={{ color: !archived && urgency === 'urgent' ? 'var(--rose)' : 'var(--text3)', fontWeight: 700 }}>
+            ⏰ {fmtCountdown(a.deadline)}
+          </span>
+        )}
+        <span className="c26-announce-posted">Posted {fmtPostedAt(a.createdAt)}</span>
+      </div>
     </div>
   );
 }
@@ -127,13 +133,15 @@ export default function AnnouncementsWidget({ showButton = false }) {
       .catch(() => {});
   }, [featureEnded]);
 
-  // Re-render every 60s so countdowns and the auto-urgent escalation stay
-  // current without a full page reload.
+  // Re-render every second while the popup is open (a genuinely "live"
+  // ticking countdown), or every 60s while it's closed — just enough to
+  // keep the fab badge / auto-urgent escalation current without wasting
+  // cycles on a re-render nobody's looking at.
   useEffect(() => {
     if (featureEnded) return;
-    const id = setInterval(() => forceTick((t) => t + 1), 60000);
+    const id = setInterval(() => forceTick((t) => t + 1), open ? 1000 : 60000);
     return () => clearInterval(id);
-  }, [featureEnded]);
+  }, [featureEnded, open]);
 
   const visible = all.filter((a) => !isArchived(a));
   const archivedOnes = all.filter((a) => isArchived(a));
@@ -187,25 +195,34 @@ export default function AnnouncementsWidget({ showButton = false }) {
         .c26-announce-modal-head button {
           background: none; border: none; color: var(--text3); font-size: 1.1rem; cursor: pointer; line-height: 1;
         }
-        .c26-announce-list { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .c26-announce-card { border-left: 3px solid; border-radius: 8px; padding: 12px 14px; }
-        .c26-announce-card-head {
-          display: flex; justify-content: space-between; align-items: center;
-          font-family: var(--fm); font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px;
+        .c26-announce-list { overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .c26-announce-card { border-left: 3px solid; border-radius: 8px; padding: 9px 12px; }
+        .c26-announce-line1 { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+        .c26-announce-type { font-family: var(--fm); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; }
+        .c26-announce-line1 h4 { margin: 0; font-size: .92rem; color: var(--text); font-weight: 600; }
+        .c26-announce-category {
+          font-family: var(--fm); font-size: .58rem; letter-spacing: .04em; text-transform: uppercase;
+          color: var(--text3); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; font-weight: 400;
         }
-        .c26-announce-pin { color: var(--text3); }
+        .c26-announce-pin { margin-left: auto; }
+        @keyframes c26-heartbeat {
+          0%, 100% { transform: scale(1); }
+          20% { transform: scale(1.18); }
+          35% { transform: scale(1); }
+          50% { transform: scale(1.12); }
+          65% { transform: scale(1); }
+        }
         .c26-announce-new {
           font-family: var(--fm); font-size: .58rem; font-weight: 700; letter-spacing: .02em;
           color: var(--bg); background: var(--amber); border-radius: 10px; padding: 1px 7px;
+          animation: c26-heartbeat 1.6s ease-in-out infinite;
         }
-        .c26-announce-card h4 { margin: 0 0 4px; font-size: .96rem; color: var(--text); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .c26-announce-category {
-          font-family: var(--fm); font-size: .6rem; letter-spacing: .04em; text-transform: uppercase;
-          color: var(--text3); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; font-weight: 400;
+        .c26-announce-card p { margin: 4px 0 0; font-size: .82rem; color: var(--text2); line-height: 1.45; white-space: pre-wrap; }
+        .c26-announce-line2 {
+          display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 5px;
+          font-family: var(--fm); font-size: .66rem; color: var(--text3);
         }
-        .c26-announce-card p { margin: 0; font-size: .84rem; color: var(--text2); line-height: 1.5; white-space: pre-wrap; }
-        .c26-announce-deadline { margin-top: 8px; font-family: var(--fm); font-size: .7rem; font-weight: 600; }
-        .c26-announce-posted { margin-top: 6px; font-family: var(--fm); font-size: .62rem; color: var(--text3); opacity: .75; }
+        .c26-announce-posted { opacity: .8; }
         .c26-announce-section-label {
           font-family: var(--fm); font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text3);
           padding-top: 10px; margin-top: 2px; border-top: 1px solid var(--border);
