@@ -183,10 +183,29 @@ const GRADING = [
   { label: 'Final Exam', pct: 40, color: 'var(--teal)' },
 ];
 
+// Only 3 exams ever exist for this course (Mid-1, Mid-2, Final), so — same
+// convention as LECTURE_NOTES / RECITATIONS / PROBLEM_SETS above — this is
+// just a plain array to hand-edit rather than another admin-panel table.
+// `time` is separate from `date` so both can render bold/colored together
+// once the actual start time is known; add a `{ label, href }` to a given
+// exam's `resources` array (syllabus, seating plan, whatever comes up) and
+// it shows as a small link — omitted/`href: null` shows "Coming soon".
 const EXAMS = [
-  { label: 'Midterm I', duration: '120 minutes', date: 'Oct 3, 2026', tentative: true, spec: 'No notes · No books · No AI' },
-  { label: 'Midterm II', duration: '120 minutes', date: 'Nov 7, 2026', tentative: true, spec: 'No notes · No books · No AI' },
-  { label: 'Final Exam', duration: '3 hours', date: 'TBA', spec: 'No notes · No books · No AI' },
+  {
+    label: 'Midterm I', duration: '120 minutes', date: 'Oct 3, 2026', time: null, tentative: true,
+    spec: 'No notes · No books · No AI',
+    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
+  },
+  {
+    label: 'Midterm II', duration: '120 minutes', date: 'Nov 7, 2026', time: null, tentative: true,
+    spec: 'No notes · No books · No AI',
+    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
+  },
+  {
+    label: 'Final Exam', duration: '3 hours', date: 'TBA', time: null, tentative: false,
+    spec: 'No notes · No books · No AI',
+    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
+  },
 ];
 
 const CLOS = [
@@ -322,12 +341,22 @@ export default function Calc1Fa26() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
             {EXAMS.map((e) => (
               <div key={e.label} className="card" style={{ padding: '16px 18px' }}>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--amber)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '4px' }}>{e.label}</div>
-                <div style={{ fontSize: '.92rem', color: 'var(--text)' }}>{e.duration}</div>
-                <div style={{ fontSize: '.76rem', color: 'var(--text3)', marginTop: '2px' }}>
-                  Date: {e.date}{e.tentative && <span style={{ color: 'var(--amber)', opacity: .8 }}> (tentative)</span>}
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--text3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '6px' }}>{e.label}</div>
+                <div style={{ fontSize: '1.08rem', fontWeight: 700, color: 'var(--amber)', lineHeight: 1.3 }}>
+                  {e.date}{e.time ? ` · ${e.time}` : ''}
                 </div>
-                <div style={{ fontSize: '.72rem', color: 'var(--text3)', marginTop: '6px' }}>{e.spec}</div>
+                {e.tentative && <div style={{ fontSize: '.68rem', color: 'var(--text3)', marginTop: '2px' }}>(tentative)</div>}
+                <div style={{ fontSize: '.84rem', color: 'var(--text2)', marginTop: '8px' }}>{e.duration}</div>
+                <div style={{ fontSize: '.72rem', color: 'var(--text3)', marginTop: '4px' }}>{e.spec}</div>
+                {e.resources?.length > 0 && (
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
+                    {e.resources.map((r) => (
+                      r.href
+                        ? <Link key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.7rem' }}>{r.label}</Link>
+                        : <span key={r.label} className="c26-soon">{r.label}</span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

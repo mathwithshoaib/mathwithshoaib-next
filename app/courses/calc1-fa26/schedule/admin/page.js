@@ -30,6 +30,7 @@ const ADMIN_TOC = [
   { id: 'sec-tas', label: 'TA Roster' },
   { id: 'sec-ta-assignments', label: 'TA Assignments' },
   { id: 'sec-announcements', label: 'Announcements' },
+  { id: 'sec-exam-seating', label: 'Exam Seating' },
 ];
 
 async function api(path, opts) {
@@ -181,6 +182,7 @@ export default function ScheduleAdmin() {
             <div id="sec-tas" className="admin-anchor"><TasSection tas={data.tas} onChanged={fetchState} flash={flash} /></div>
             <div id="sec-ta-assignments" className="admin-anchor"><TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} /></div>
             <div id="sec-announcements" className="admin-anchor"><AnnouncementsSection flash={flash} /></div>
+            <div id="sec-exam-seating" className="admin-anchor"><ExamSeatingSection flash={flash} /></div>
           </>
         )}
       </div>
@@ -1002,6 +1004,192 @@ function AnnouncementsSection({ flash }) {
         <button className="btn" type="submit" disabled={busy || !form.title} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{editingId ? 'Save' : 'Post'}</button>
         {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
       </form>
+    </section>
+  );
+}
+
+/* ─── Exam seating search — the "Find Your Seat" button students see in
+   the announcements pop-up when this is switched on. Bulk-importing a
+   real class roster happens directly against the exam_seating table via a
+   one-off script once you hand over the actual sheet; this section is for
+   the on/off switch, the common instructions text, and single-row
+   corrections/verification. ─── */
+function ExamSeatingSection({ flash }) {
+  const [settings, setSettings] = useState(null); // { active, exam, instructions }
+  const [count, setCount] = useState(0);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  const [importExam, setImportExam] = useState('');
+  const [importFile, setImportFile] = useState(null);
+  const [importBusy, setImportBusy] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+
+  // "Manage one student": look up by exam+roll, then edit/delete what's
+  // found, or add a new entry if nothing turns up — never lists all 600.
+  const [manageExam, setManageExam] = useState('');
+  const [manageRoll, setManageRoll] = useState('');
+  const [manageRow, setManageRow] = useState(undefined); // undefined = not searched; null = not found; object = found
+  const [manageForm, setManageForm] = useState({ name: '', room: '', seatNumber: '' });
+  const [manageBusy, setManageBusy] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    try {
+      const res = await api('/api/schedule/admin/exam-seating');
+      setSettings(res.settings);
+      setCount(res.count);
+      setImportExam((e) => e || res.settings.exam);
+      setManageExam((e) => e || res.settings.exam);
+    } catch (err) { flash(err.message); }
+  }, [flash]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      await api('/api/schedule/admin/exam-seating', { method: 'PATCH', body: settings });
+      flash('Saved.', 'ok');
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setSavingSettings(false); }
+  };
+
+  const runImport = async (e) => {
+    e.preventDefault();
+    if (!importFile) return;
+    setImportBusy(true);
+    setImportResult(null);
+    try {
+      const csv = await importFile.text();
+      const res = await api('/api/schedule/admin/exam-seating/import', { method: 'POST', body: { exam: importExam, csv } });
+      setImportResult(`Imported ${res.imported} student${res.imported === 1 ? '' : 's'}${res.skipped ? ` (${res.skipped} row${res.skipped === 1 ? '' : 's'} skipped — missing a field)` : ''}.`);
+      flash('Roster imported.', 'ok');
+      setImportFile(null);
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setImportBusy(false); }
+  };
+
+  const lookupOne = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api(`/api/schedule/admin/exam-seating/rows?exam=${encodeURIComponent(manageExam)}&roll=${encodeURIComponent(manageRoll)}`);
+      setManageRow(res.row || null);
+      setManageForm(res.row
+        ? { name: res.row.student_name, room: res.row.room, seatNumber: res.row.seat_number }
+        : { name: '', room: '', seatNumber: '' });
+    } catch (err) { flash(err.message); }
+  };
+
+  const saveManaged = async (e) => {
+    e.preventDefault();
+    setManageBusy(true);
+    try {
+      await api('/api/schedule/admin/exam-seating/rows', {
+        method: 'POST',
+        body: { exam: manageExam, rollNumber: manageRoll, name: manageForm.name, room: manageForm.room, seatNumber: manageForm.seatNumber },
+      });
+      flash(manageRow ? 'Updated.' : 'Added.', 'ok');
+      lookupOne(e);
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  const deleteManaged = async () => {
+    if (!manageRow) return;
+    setManageBusy(true);
+    try {
+      await api(`/api/schedule/admin/exam-seating/rows/${manageRow.id}`, { method: 'DELETE' });
+      flash('Deleted.', 'ok');
+      setManageRow(null);
+      setManageForm({ name: '', room: '', seatNumber: '' });
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  if (!settings) {
+    return (
+      <section className="card" style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.05rem' }}>Exam seating search</h3>
+        <div style={{ color: 'var(--text3)', fontSize: '.85rem' }}>Loading…</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Exam seating search</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '16px' }}>
+        Students search their own room &amp; seat by roll number — a "Find Your Seat" link appears in the announcements pop-up (pointing at the Exams page) whenever this is switched on.
+        Turn it on shortly before an exam and off again after; change the exam name and import a fresh roster for the next one (old rows for a past exam are left alone, not deleted).
+        {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
+      </p>
+
+      <form onSubmit={saveSettings} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '20px', paddingBottom: '18px', borderBottom: '1px solid var(--border)' }}>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={settings.active} onChange={(e) => setSettings((s) => ({ ...s, active: e.target.checked }))} />
+          Search button is live
+        </label>
+        <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <div style={{ width: '100%' }}>
+          <Field label="Instructions shown with every result">
+            <textarea
+              value={settings.instructions || ''}
+              onChange={(e) => setSettings((s) => ({ ...s, instructions: e.target.value }))}
+              rows={2} placeholder="e.g. Arrive 15 minutes early. Bring your student card. No bags in the hall."
+              style={{ ...inputStyle, width: '100%', resize: 'vertical' }}
+            />
+          </Field>
+        </div>
+        <button className="btn" type="submit" disabled={savingSettings} style={{ padding: '7px 16px', fontSize: '.75rem' }}>Save settings</button>
+      </form>
+
+      <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Import roster</h4>
+      <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        CSV file with columns Roll Number, Name, Room, Seat Number — any header wording/order is fine, they're matched automatically.
+        From Google Sheets: File → Download → Comma Separated Values. From Excel: Save As → CSV.
+      </p>
+      <form onSubmit={runImport} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '8px' }}>
+        <Field label="Exam"><input value={importExam} onChange={(e) => setImportExam(e.target.value)} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} required /></Field>
+        <Field label="CSV file">
+          <input
+            type="file" accept=".csv,text/csv"
+            onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            style={{ ...inputStyle, width: '230px', padding: '5px 8px' }}
+            required
+          />
+        </Field>
+        <button className="btn" type="submit" disabled={importBusy || !importFile || !importExam.trim()} style={{ padding: '7px 16px', fontSize: '.75rem' }}>
+          {importBusy ? 'Importing…' : 'Import roster'}
+        </button>
+      </form>
+      {importResult && <div style={{ fontSize: '.8rem', color: 'var(--teal)', marginBottom: '10px' }}>{importResult}</div>}
+
+      <div style={{ borderBottom: '1px solid var(--border)', margin: '10px 0 20px' }} />
+
+      <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Manage one student</h4>
+      <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        Look up a roll number to edit or delete that one entry, or add it if it doesn't exist yet — never shows the full roster.
+      </p>
+      <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
+        <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
+        <Field label="Roll Number"><input value={manageRoll} onChange={(e) => setManageRoll(e.target.value)} style={{ ...inputStyle, width: '140px' }} required /></Field>
+        <button className="btn btn-outline" type="submit" style={{ padding: '7px 16px', fontSize: '.75rem' }}>Look up</button>
+      </form>
+
+      {manageRow !== undefined && (
+        <div style={{ padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg2)' }}>
+          {manageRow === null && (
+            <div style={{ fontSize: '.8rem', color: 'var(--text3)', marginBottom: '10px' }}>No entry found for that roll number — fill in the fields below to add one.</div>
+          )}
+          <form onSubmit={saveManaged} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <Field label="Name"><input value={manageForm.name} onChange={(e) => setManageForm((f) => ({ ...f, name: e.target.value }))} style={{ ...inputStyle, width: '170px' }} required /></Field>
+            <Field label="Room"><input value={manageForm.room} onChange={(e) => setManageForm((f) => ({ ...f, room: e.target.value }))} style={{ ...inputStyle, width: '100px' }} required /></Field>
+            <Field label="Seat #"><input value={manageForm.seatNumber} onChange={(e) => setManageForm((f) => ({ ...f, seatNumber: e.target.value }))} style={{ ...inputStyle, width: '90px' }} required /></Field>
+            <button className="btn" type="submit" disabled={manageBusy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{manageRow ? 'Save changes' : 'Add'}</button>
+            {manageRow && <button type="button" onClick={deleteManaged} disabled={manageBusy} style={smallBtn('var(--rose)')}>delete</button>}
+          </form>
+        </div>
+      )}
     </section>
   );
 }

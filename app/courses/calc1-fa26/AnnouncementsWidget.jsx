@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ANNOUNCEMENT_URGENT_WINDOW_HOURS,
   ANNOUNCEMENT_ARCHIVE_GRACE_HOURS,
@@ -117,6 +118,7 @@ export default function AnnouncementsWidget({ showButton = false }) {
   const featureEnded = Date.now() >= new Date(ANNOUNCEMENTS_FEATURE_END).getTime();
 
   const [all, setAll] = useState([]);
+  const [seatStatus, setSeatStatus] = useState(null); // { active, exam } | null while loading
   const [open, setOpen] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [, forceTick] = useState(0);
@@ -131,6 +133,10 @@ export default function AnnouncementsWidget({ showButton = false }) {
       .then((r) => r.json())
       .then((json) => setAll(json.announcements || []))
       .catch(() => {});
+    fetch('/api/schedule/exam-seating')
+      .then((r) => r.json())
+      .then(setSeatStatus)
+      .catch(() => setSeatStatus({ active: false }));
   }, [featureEnded]);
 
   // Re-render every second while the popup is open (a genuinely "live"
@@ -160,7 +166,9 @@ export default function AnnouncementsWidget({ showButton = false }) {
     setOpen(false);
   };
 
-  if (featureEnded || (visible.length === 0 && archivedOnes.length === 0)) return null;
+  const seatingActive = !!seatStatus?.active;
+
+  if (featureEnded || (visible.length === 0 && archivedOnes.length === 0 && !seatingActive)) return null;
 
   const urgentOnes = visible.filter((a) => urgencyOf(a) === 'urgent');
   const restOnes = visible.filter((a) => urgencyOf(a) !== 'urgent');
@@ -233,12 +241,19 @@ export default function AnnouncementsWidget({ showButton = false }) {
           border-top: 1px solid var(--border); margin-top: 4px; width: 100%;
         }
         .c26-announce-archive-toggle:hover { color: var(--amber); }
+
+        .c26-seat-banner {
+          display: block; flex-shrink: 0; text-decoration: none; text-align: center;
+          border: 1px solid var(--violet); border-radius: 8px; background: rgba(155,128,232,.12);
+          padding: 12px 14px; font-family: var(--fh); font-size: .95rem; font-weight: 600; color: var(--violet);
+        }
+        .c26-seat-banner:hover { background: rgba(155,128,232,.2); }
       `}</style>
 
-      {showButton && visible.length > 0 && (
+      {showButton && (visible.length > 0 || seatingActive) && (
         <button onClick={() => setOpen(true)} className="c26-announce-fab" aria-label="Course announcements">
           🔔
-          <span className="c26-announce-badge">{visible.length}</span>
+          {visible.length > 0 && <span className="c26-announce-badge">{visible.length}</span>}
         </button>
       )}
 
@@ -249,6 +264,11 @@ export default function AnnouncementsWidget({ showButton = false }) {
               <h3>📣 Course announcements</h3>
               <button onClick={dismiss} aria-label="Close">✕</button>
             </div>
+            {seatingActive && (
+              <Link href="/courses/calc1-fa26/exams" className="c26-seat-banner">
+                🔍 Find Your Seat — {seatStatus.exam} →
+              </Link>
+            )}
             <div className="c26-announce-list">
               {urgentOnes.map((a) => <AnnouncementCard key={a.id} a={a} isNew={!seenSnapshot.has(a.id)} />)}
               {urgentOnes.length > 0 && restOnes.length > 0 && (
