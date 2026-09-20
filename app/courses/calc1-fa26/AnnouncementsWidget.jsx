@@ -264,11 +264,9 @@ export default function AnnouncementsWidget({ showButton = false }) {
               <h3>📣 Course announcements</h3>
               <button onClick={dismiss} aria-label="Close">✕</button>
             </div>
-            {seatingActive && (
-              <Link href="/courses/calc1-fa26/exams" className="c26-seat-banner">
-                🔍 Find Your Seat — {seatStatus.exam} →
-              </Link>
-            )}
+            <Link href="/courses/calc1-fa26/exams" className="c26-seat-banner">
+              {seatingActive ? `🔍 Find Your Seat — ${seatStatus.exam} →` : '📅 Exam Details & Seating →'}
+            </Link>
             <div className="c26-announce-list">
               {urgentOnes.map((a) => <AnnouncementCard key={a.id} a={a} isNew={!seenSnapshot.has(a.id)} />)}
               {urgentOnes.length > 0 && restOnes.length > 0 && (

@@ -192,19 +192,16 @@ const GRADING = [
 // it shows as a small link — omitted/`href: null` shows "Coming soon".
 const EXAMS = [
   {
-    label: 'Midterm I', duration: '120 minutes', date: 'Oct 3, 2026', time: null, tentative: true,
+    label: 'Midterm I', duration: null, date: 'Oct 4, 2026', time: '6:30 PM', tentative: true,
     spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
   },
   {
     label: 'Midterm II', duration: '120 minutes', date: 'Nov 7, 2026', time: null, tentative: true,
     spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
   },
   {
     label: 'Final Exam', duration: '3 hours', date: 'TBA', time: null, tentative: false,
     spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }, { label: 'Seating Plan', href: null }],
   },
 ];
 
@@ -338,27 +335,23 @@ export default function Calc1Fa26() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '14px' }}>
-            {EXAMS.map((e) => (
-              <div key={e.label} className="card" style={{ padding: '16px 18px' }}>
-                <div style={{ fontFamily: 'var(--fm)', fontSize: '.66rem', color: 'var(--text3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '6px' }}>{e.label}</div>
-                <div style={{ fontSize: '1.08rem', fontWeight: 700, color: 'var(--amber)', lineHeight: 1.3 }}>
-                  {e.date}{e.time ? ` · ${e.time}` : ''}
-                </div>
-                {e.tentative && <div style={{ fontSize: '.68rem', color: 'var(--text3)', marginTop: '2px' }}>(tentative)</div>}
-                <div style={{ fontSize: '.84rem', color: 'var(--text2)', marginTop: '8px' }}>{e.duration}</div>
-                <div style={{ fontSize: '.72rem', color: 'var(--text3)', marginTop: '4px' }}>{e.spec}</div>
-                {e.resources?.length > 0 && (
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border)' }}>
-                    {e.resources.map((r) => (
-                      r.href
-                        ? <Link key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.7rem' }}>{r.label}</Link>
-                        : <span key={r.label} className="c26-soon">{r.label}</span>
-                    ))}
+          <div className="card" style={{ padding: '20px 22px', marginBottom: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '18px', marginBottom: '18px' }}>
+              {EXAMS.map((e) => (
+                <div key={e.label}>
+                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '6px' }}>{e.label}</div>
+                  <div style={{ fontSize: '1.02rem', fontWeight: 700, color: 'var(--amber)', lineHeight: 1.3 }}>
+                    {e.date}{e.time ? ` · ${e.time}` : ''}
                   </div>
-                )}
-              </div>
-            ))}
+                  {e.tentative && <div style={{ fontSize: '.66rem', color: 'var(--text3)', marginTop: '2px' }}>(tentative)</div>}
+                  {e.duration && <div style={{ fontSize: '.8rem', color: 'var(--text2)', marginTop: '6px' }}>{e.duration}</div>}
+                  <div style={{ fontSize: '.7rem', color: 'var(--text3)', marginTop: '4px' }}>{e.spec}</div>
+                </div>
+              ))}
+            </div>
+            <Link href="/courses/calc1-fa26/exams" className="btn" style={{ display: 'inline-block' }}>
+              View exam details &amp; seating →
+            </Link>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '14px' }}>

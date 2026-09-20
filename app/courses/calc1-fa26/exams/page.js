@@ -22,8 +22,8 @@ import ExamSeatingBox from '../ExamSeatingBox';
 
 const EXAM_SCHEDULE = [
   {
-    key: 'mid1', label: 'Midterm I', date: 'Oct 3, 2026', time: null, tentative: true,
-    duration: '120 minutes', spec: 'No notes · No books · No AI',
+    key: 'mid1', label: 'Midterm I', date: 'Oct 4, 2026', time: '6:30 PM', tentative: true,
+    duration: null, spec: 'No notes · No books · No AI',
     resources: [{ label: 'Syllabus', href: null }],
   },
   {
@@ -71,7 +71,7 @@ export default function ExamsPage() {
             {current.date}{current.time ? ` · ${current.time}` : ''}
           </div>
           {current.tentative && <div style={{ fontSize: '.72rem', color: 'var(--text3)', marginTop: '2px' }}>(tentative)</div>}
-          <div style={{ fontSize: '.9rem', color: 'var(--text2)', marginTop: '10px' }}>{current.duration}</div>
+          {current.duration && <div style={{ fontSize: '.9rem', color: 'var(--text2)', marginTop: '10px' }}>{current.duration}</div>}
           <div style={{ fontSize: '.78rem', color: 'var(--text3)', marginTop: '4px' }}>{current.spec}</div>
 
           {current.resources?.length > 0 && (
