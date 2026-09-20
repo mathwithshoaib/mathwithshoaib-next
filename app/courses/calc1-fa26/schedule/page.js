@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
+import AnnouncementsWidget from '../AnnouncementsWidget';
 import { DAY_LABELS, TA_OH_WINDOW, TA_OH_SLOT_MINUTES, TA_OH_WEEKLY_CAP_HOURS } from '../../../../lib/scheduleConfig';
 
 /* ═════════════════════════════════════════════════════════════════
@@ -402,6 +403,7 @@ export default function CalcFA26Schedule() {
       {/* Mutated right before window.print() to set the chosen page orientation. */}
       <style ref={printStyleRef} />
 
+      <div className="no-print"><AnnouncementsWidget /></div>
       <div className="no-print"><Navbar activePage="courses" /></div>
 
       <div className="sched-hero">

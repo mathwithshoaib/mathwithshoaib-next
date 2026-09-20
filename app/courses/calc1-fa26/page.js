@@ -4,6 +4,7 @@ import { useState, useEffect, Fragment } from 'react';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import AnnouncementsWidget from './AnnouncementsWidget';
 
 /* ═════════════════════════════════════════════════════════════════
    MATH-101 · CALCULUS I (Non-SSE) — FALL 2026 — COURSE HOME
@@ -237,6 +238,7 @@ export default function Calc1Fa26() {
         @media (max-width: 640px) { .c26-cta { flex-direction: column; align-items: flex-start; } }
       `}</style>
 
+      <AnnouncementsWidget showButton />
       <Navbar activePage="courses" />
 
       {/* breadcrumb + course switcher */}

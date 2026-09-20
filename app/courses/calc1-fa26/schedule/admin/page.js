@@ -19,6 +19,19 @@ const FIXED_CATEGORIES = [
   ['recitation', 'TF Recitation'],
 ];
 
+// Sticky jump-nav so a long admin page doesn't mean scrolling past 7 other
+// sections just to reach Announcements (or anything else) at the bottom.
+const ADMIN_TOC = [
+  { id: 'sec-settings', label: 'Settings' },
+  { id: 'sec-team', label: 'Teaching Team' },
+  { id: 'sec-fixed', label: 'Lectures/OH/Recitations' },
+  { id: 'sec-tutorial-slots', label: 'Tutorial Slots' },
+  { id: 'sec-tutorial-venues', label: 'Tutorial Venues' },
+  { id: 'sec-tas', label: 'TA Roster' },
+  { id: 'sec-ta-assignments', label: 'TA Assignments' },
+  { id: 'sec-announcements', label: 'Announcements' },
+];
+
 async function api(path, opts) {
   const res = await fetch(path, {
     method: opts?.method || 'GET',
@@ -109,6 +122,15 @@ export default function ScheduleAdmin() {
           .card input, .card select { font-size: 16px !important; }
           .tt-cols { grid-template-columns: 1fr !important; }
         }
+        .admin-anchor { scroll-margin-top: 130px; }
+        .admin-toc { position: sticky; top: calc(var(--nav-h) + 3px); z-index: 50; background: var(--bg2);
+                     border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; margin: 0 0 20px; }
+        .admin-toc-row { display: flex; gap: 6px; overflow-x: auto; }
+        .admin-toc-row a {
+          font-family: var(--fm); font-size: .66rem; letter-spacing: .03em; white-space: nowrap; text-decoration: none;
+          color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; flex-shrink: 0;
+        }
+        .admin-toc-row a:hover { color: var(--amber); border-color: var(--amber); }
       `}</style>
       <Navbar activePage="courses" />
       <div style={{ maxWidth: '980px', margin: '0 auto', padding: 'calc(var(--nav-h) + 3px + 32px) 24px 72px' }}>
@@ -144,13 +166,21 @@ export default function ScheduleAdmin() {
         ) : (
           <>
             <button onClick={logout} style={{ ...smallBtn('var(--text3)'), marginBottom: '24px' }}>Sign out of admin</button>
-            <SettingsSection settings={data.settings} onSaved={fetchState} flash={flash} />
-            <TeachingTeamSection instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
-            <FixedEventsSection events={data.fixedEvents} instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
-            <TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} />
-            <TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} />
-            <TasSection tas={data.tas} onChanged={fetchState} flash={flash} />
-            <TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} />
+
+            <nav className="admin-toc">
+              <div className="admin-toc-row">
+                {ADMIN_TOC.map((t) => <a key={t.id} href={`#${t.id}`}>{t.label}</a>)}
+              </div>
+            </nav>
+
+            <div id="sec-settings" className="admin-anchor"><SettingsSection settings={data.settings} onSaved={fetchState} flash={flash} /></div>
+            <div id="sec-team" className="admin-anchor"><TeachingTeamSection instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} /></div>
+            <div id="sec-fixed" className="admin-anchor"><FixedEventsSection events={data.fixedEvents} instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} /></div>
+            <div id="sec-tutorial-slots" className="admin-anchor"><TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} /></div>
+            <div id="sec-tutorial-venues" className="admin-anchor"><TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} /></div>
+            <div id="sec-tas" className="admin-anchor"><TasSection tas={data.tas} onChanged={fetchState} flash={flash} /></div>
+            <div id="sec-ta-assignments" className="admin-anchor"><TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} /></div>
+            <div id="sec-announcements" className="admin-anchor"><AnnouncementsSection flash={flash} /></div>
           </>
         )}
       </div>
@@ -826,6 +856,152 @@ function TaAssignmentsSection({ tas, tutorialSlots, taOfficeHours }) {
       <button className="btn btn-outline" onClick={downloadCsv} disabled={assignments.length === 0} style={{ padding: '7px 16px', fontSize: '.75rem' }}>
         ⬇ Download as CSV (opens in Excel)
       </button>
+    </section>
+  );
+}
+
+// Converts a stored UTC ISO deadline into the local-time string a
+// <input type="datetime-local"> expects, so re-editing an announcement
+// shows the same wall-clock time the admin originally picked (not that
+// time re-interpreted as UTC).
+function toDatetimeLocalValue(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ─── Announcements — the pop-up/floating-bell notifications students see
+   on the course page and schedule page (see AnnouncementsWidget.jsx). ─── */
+const ANNOUNCEMENT_CATEGORY_SUGGESTIONS = ['Exam', 'Webwork', 'Problem Sheet', 'Schedule', 'Resources', 'General'];
+
+function AnnouncementsSection({ flash }) {
+  const blank = { title: '', message: '', type: 'info', category: '', deadline: '', pinned: false, active: true };
+  const [items, setItems] = useState(null);
+  const [form, setForm] = useState(blank);
+  const [editingId, setEditingId] = useState(null);
+  const [busy, setBusy] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    try { const res = await api('/api/schedule/admin/announcements'); setItems(res.announcements); }
+    catch (err) { flash(err.message); }
+  }, [flash]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const startEdit = (a) => {
+    setEditingId(a.id);
+    setForm({ title: a.title, message: a.message || '', type: a.type, category: a.category || '', deadline: toDatetimeLocalValue(a.deadline), pinned: a.pinned, active: a.active });
+  };
+  const cancelEdit = () => { setEditingId(null); setForm(blank); };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const body = { ...form, deadline: form.deadline ? new Date(form.deadline).toISOString() : null };
+      if (editingId) await api(`/api/schedule/admin/announcements/${editingId}`, { method: 'PATCH', body });
+      else await api('/api/schedule/admin/announcements', { method: 'POST', body });
+      flash(editingId ? 'Updated.' : 'Posted.', 'ok');
+      cancelEdit();
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setBusy(false); }
+  };
+
+  const toggleActive = async (a) => {
+    try {
+      await api(`/api/schedule/admin/announcements/${a.id}`, { method: 'PATCH', body: { active: !a.active } });
+      fetchAll();
+    } catch (err) { flash(err.message); }
+  };
+
+  const remove = async (id) => {
+    try { await api(`/api/schedule/admin/announcements/${id}`, { method: 'DELETE' }); flash('Removed.', 'ok'); fetchAll(); }
+    catch (err) { flash(err.message); }
+  };
+
+  const isExpired = (a) => a.deadline && new Date(a.deadline).getTime() <= Date.now();
+
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Announcements</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        Shown as a pop-up the first time a student opens the course page or schedule page after this is posted (tracked per browser, so it won't nag on repeat visits), plus a floating bell on the course page they can reopen any time.
+        Add a deadline (e.g. a Webwork due date) and it automatically shows a live countdown and turns urgent/red within 48 hours of it — no need to pick "Urgent" yourself for those.
+      </p>
+
+      {items === null ? (
+        <div style={{ color: 'var(--text3)', fontSize: '.85rem' }}>Loading…</div>
+      ) : (
+        <div style={{ overflowX: 'auto', marginBottom: '14px' }}>
+          <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '760px' }}>
+            <thead><tr><th style={th}>Title</th><th style={th}>Category</th><th style={th}>Type</th><th style={th}>Deadline</th><th style={th}>Pinned</th><th style={th}>Status</th><th style={th} /></tr></thead>
+            <tbody>
+              {items.map((a) => {
+                const expired = isExpired(a);
+                return (
+                  <tr key={a.id}>
+                    <td style={td}>{a.title}</td>
+                    <td style={td}>{a.category || '—'}</td>
+                    <td style={{ ...td, textTransform: 'capitalize' }}>{a.type}</td>
+                    <td style={td}>
+                      {a.deadline ? new Date(a.deadline).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'}
+                      {expired && <span style={{ color: 'var(--rose)', marginLeft: '6px' }}>(expired)</span>}
+                    </td>
+                    <td style={td}>{a.pinned ? '📌' : ''}</td>
+                    <td style={td}>
+                      <button onClick={() => toggleActive(a)} style={smallBtn(a.active ? 'var(--teal)' : 'var(--text3)')}>
+                        {a.active ? 'active' : 'hidden'}
+                      </button>
+                    </td>
+                    <td style={td}>
+                      <button onClick={() => startEdit(a)} style={smallBtn('var(--amber)')}>edit</button>
+                      <button onClick={() => remove(a.id)} style={smallBtn('var(--rose)')}>delete</button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {items.length === 0 && <tr><td style={td} colSpan={7}>None yet.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <datalist id="announcement-category-suggestions">
+        {ANNOUNCEMENT_CATEGORY_SUGGESTIONS.map((c) => <option key={c} value={c} />)}
+      </datalist>
+
+      <form onSubmit={submit} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+        <Field label="Title"><input value={form.title} onChange={(e) => set('title', e.target.value)} style={{ ...inputStyle, width: '220px' }} required /></Field>
+        <Field label="Category (optional)">
+          <input list="announcement-category-suggestions" placeholder="e.g. Exam" value={form.category} onChange={(e) => set('category', e.target.value)} style={{ ...inputStyle, width: '150px' }} />
+        </Field>
+        <Field label="Type">
+          <select value={form.type} onChange={(e) => set('type', e.target.value)} style={inputStyle}>
+            <option value="info">Info</option>
+            <option value="warning">Heads up</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </Field>
+        <Field label="Deadline (optional)"><input type="datetime-local" value={form.deadline} onChange={(e) => set('deadline', e.target.value)} style={inputStyle} /></Field>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.pinned} onChange={(e) => set('pinned', e.target.checked)} />
+          Pin to top
+        </label>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.active} onChange={(e) => set('active', e.target.checked)} />
+          Active
+        </label>
+        <div style={{ width: '100%' }}>
+          <Field label="Message (optional)">
+            <textarea value={form.message} onChange={(e) => set('message', e.target.value)} rows={3} placeholder="Leave blank for a title-only heads-up" style={{ ...inputStyle, width: '100%', resize: 'vertical' }} />
+          </Field>
+        </div>
+        <button className="btn" type="submit" disabled={busy || !form.title} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{editingId ? 'Save' : 'Post'}</button>
+        {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
+      </form>
     </section>
   );
 }
