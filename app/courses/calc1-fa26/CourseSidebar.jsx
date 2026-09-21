@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { COURSE_TOPBAR_HEIGHT } from './CourseTopBar';
 
 /* ═════════════════════════════════════════════════════════════════
-   Persistent in-course navigation — Home / Schedule / Exams /
-   Announcements. On wide screens (>1150px) this is truly
+   Persistent in-course navigation — Home / Schedule / Exams / Past
+   Papers / Announcements. On wide screens (>1150px) this is truly
    `position: fixed` to the viewport's left edge, spanning the full
    height below the navbar — always visible at the same screen
    position regardless of scroll or which page's hero is showing
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { href: '/courses/calc1-fa26', label: 'Course Home', key: 'home' },
   { href: '/courses/calc1-fa26/schedule', label: 'Weekly Schedule', key: 'schedule' },
   { href: '/courses/calc1-fa26/exams', label: 'Exams', key: 'exams' },
+  { href: '/courses/calc1-fa26/past-papers', label: 'Past Papers', key: 'past-papers' },
   { href: '/courses/calc1-fa26/announcements', label: 'Announcements', key: 'announcements' },
 ];
 
