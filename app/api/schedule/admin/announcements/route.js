@@ -26,6 +26,7 @@ export async function GET() {
         id: a.id, title: a.title, message: a.message, type: a.type, category: a.category,
         deadline: a.deadline, pinned: a.pinned, active: a.active, createdAt: a.created_at,
         linkUrl: a.link_url, linkLabel: a.link_label, showButton: a.show_button,
+        showDeadline: a.show_deadline,
       })),
     });
   } catch (err) {
@@ -41,7 +42,7 @@ export async function POST(req) {
   }
 
   try {
-    const { title, message, type, category, deadline, pinned, active, linkUrl, linkLabel, showButton } = await req.json();
+    const { title, message, type, category, deadline, pinned, active, linkUrl, linkLabel, showButton, showDeadline } = await req.json();
     if (!title || typeof title !== 'string' || !title.trim()) {
       return Response.json({ error: 'Title is required.' }, { status: 400 });
     }
@@ -61,6 +62,7 @@ export async function POST(req) {
       link_url: linkUrl && linkUrl.trim() ? linkUrl.trim() : null,
       link_label: linkLabel && linkLabel.trim() ? linkLabel.trim() : null,
       show_button: !!showButton,
+      show_deadline: !!showDeadline,
     });
 
     return Response.json({ ok: true, id: row.id });

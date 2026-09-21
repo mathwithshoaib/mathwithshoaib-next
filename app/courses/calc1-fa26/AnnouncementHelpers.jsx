@@ -45,6 +45,14 @@ export function fmtPostedAt(iso) {
   return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
+// Prominent "Oct 4, 2026 · 6:30 PM" text for when an admin ticks
+// "show date/time" on an exam-type announcement — separate from the
+// small countdown line, which stays in the footer either way.
+export function fmtDeadlineDate(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
 export const TYPE_STYLE = {
   info: { accent: 'var(--teal)', bg: 'rgba(56,201,176,.10)', label: 'Info' },
   warning: { accent: 'var(--amber)', bg: 'rgba(232,160,32,.10)', label: 'Heads up' },
@@ -60,6 +68,8 @@ export function AnnouncementCard({ a, isNew, archived }) {
   const urgency = archived ? null : urgencyOf(a);
   const style = archived ? ARCHIVE_STYLE : (TYPE_STYLE[urgency] || TYPE_STYLE.info);
   const isExternal = a.linkUrl && /^https?:\/\//i.test(a.linkUrl);
+  const showDeadlineText = !archived && a.showDeadline && a.deadline;
+  const showLinkBtn = !archived && a.showButton && a.linkUrl;
   return (
     <div className="c26-announce-card" style={{ borderLeftColor: style.accent, background: style.bg, opacity: archived ? 0.75 : 1 }}>
       <div className="c26-announce-line1">
@@ -70,17 +80,24 @@ export function AnnouncementCard({ a, isNew, archived }) {
         {a.pinned && !archived && <span className="c26-announce-pin">📌</span>}
       </div>
       {a.message && <p>{a.message}</p>}
-      {!archived && a.showButton && a.linkUrl && (
-        <div className="c26-announce-link-row">
-          <Link
-            href={a.linkUrl}
-            target={isExternal ? '_blank' : undefined}
-            rel={isExternal ? 'noopener noreferrer' : undefined}
-            className="c26-announce-link-btn"
-            style={{ background: style.accent }}
-          >
-            {a.linkLabel || 'View'} →
-          </Link>
+      {(showDeadlineText || showLinkBtn) && (
+        <div className="c26-announce-link-row" style={{ justifyContent: showDeadlineText ? 'space-between' : 'flex-end' }}>
+          {showDeadlineText && (
+            <span className="c26-announce-deadline-text" style={{ color: style.accent }}>
+              📅 {fmtDeadlineDate(a.deadline)}
+            </span>
+          )}
+          {showLinkBtn && (
+            <Link
+              href={a.linkUrl}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              className="c26-announce-link-btn"
+              style={{ background: style.accent }}
+            >
+              {a.linkLabel || 'View'} →
+            </Link>
+          )}
         </div>
       )}
       <div className="c26-announce-line2">
@@ -136,7 +153,8 @@ export const ANNOUNCEMENT_CARD_CSS = `
     border-top: 1px solid var(--border); margin-top: 4px; width: 100%;
   }
   .c26-announce-archive-toggle:hover { color: var(--amber); }
-  .c26-announce-link-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+  .c26-announce-link-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .c26-announce-deadline-text { font-family: var(--fm); font-size: .8rem; font-weight: 700; white-space: nowrap; }
   .c26-announce-link-btn {
     display: inline-block; text-decoration: none; color: var(--bg); font-weight: 700;
     font-family: var(--fm); font-size: .68rem; padding: 5px 12px; border-radius: 6px; white-space: nowrap;

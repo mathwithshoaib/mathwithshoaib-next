@@ -878,7 +878,7 @@ function toDatetimeLocalValue(iso) {
 const ANNOUNCEMENT_CATEGORY_SUGGESTIONS = ['Exam', 'Webwork', 'Problem Sheet', 'Schedule', 'Resources', 'General'];
 
 function AnnouncementsSection({ flash }) {
-  const blank = { title: '', message: '', type: 'info', category: '', deadline: '', pinned: false, active: true, linkUrl: '', linkLabel: '', showButton: false };
+  const blank = { title: '', message: '', type: 'info', category: '', deadline: '', pinned: false, active: true, linkUrl: '', linkLabel: '', showButton: false, showDeadline: false };
   const [items, setItems] = useState(null);
   const [form, setForm] = useState(blank);
   const [editingId, setEditingId] = useState(null);
@@ -899,6 +899,7 @@ function AnnouncementsSection({ flash }) {
       title: a.title, message: a.message || '', type: a.type, category: a.category || '',
       deadline: toDatetimeLocalValue(a.deadline), pinned: a.pinned, active: a.active,
       linkUrl: a.linkUrl || '', linkLabel: a.linkLabel || '', showButton: !!a.showButton,
+      showDeadline: !!a.showDeadline,
     });
   };
   const cancelEdit = () => { setEditingId(null); setForm(blank); };
@@ -943,7 +944,7 @@ function AnnouncementsSection({ flash }) {
       ) : (
         <div style={{ overflowX: 'auto', marginBottom: '14px' }}>
           <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '760px' }}>
-            <thead><tr><th style={th}>Title</th><th style={th}>Category</th><th style={th}>Type</th><th style={th}>Deadline</th><th style={th}>Pinned</th><th style={th}>Button</th><th style={th}>Status</th><th style={th} /></tr></thead>
+            <thead><tr><th style={th}>Title</th><th style={th}>Category</th><th style={th}>Type</th><th style={th}>Deadline</th><th style={th}>Shown?</th><th style={th}>Pinned</th><th style={th}>Button</th><th style={th}>Status</th><th style={th} /></tr></thead>
             <tbody>
               {items.map((a) => {
                 const expired = isExpired(a);
@@ -955,6 +956,9 @@ function AnnouncementsSection({ flash }) {
                     <td style={td}>
                       {a.deadline ? new Date(a.deadline).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '—'}
                       {expired && <span style={{ color: 'var(--rose)', marginLeft: '6px' }}>(expired)</span>}
+                    </td>
+                    <td style={{ ...td, color: a.showDeadline && a.deadline ? 'var(--teal)' : 'var(--text3)' }}>
+                      {a.showDeadline && a.deadline ? 'yes' : '—'}
                     </td>
                     <td style={td}>{a.pinned ? '📌' : ''}</td>
                     <td style={{ ...td, color: a.showButton && a.linkUrl ? 'var(--violet)' : 'var(--text3)' }}>
@@ -972,7 +976,7 @@ function AnnouncementsSection({ flash }) {
                   </tr>
                 );
               })}
-              {items.length === 0 && <tr><td style={td} colSpan={8}>None yet.</td></tr>}
+              {items.length === 0 && <tr><td style={td} colSpan={9}>None yet.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -995,6 +999,10 @@ function AnnouncementsSection({ flash }) {
           </select>
         </Field>
         <Field label="Deadline (optional)"><input type="datetime-local" value={form.deadline} onChange={(e) => set('deadline', e.target.value)} style={inputStyle} /></Field>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: form.deadline ? 'pointer' : 'not-allowed', opacity: form.deadline ? 1 : .5 }}>
+          <input type="checkbox" checked={form.showDeadline} disabled={!form.deadline} onChange={(e) => set('showDeadline', e.target.checked)} />
+          Show date/time on card
+        </label>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
           <input type="checkbox" checked={form.pinned} onChange={(e) => set('pinned', e.target.checked)} />
           Pin to top
