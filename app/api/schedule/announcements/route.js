@@ -12,7 +12,7 @@ export async function GET() {
   try {
     const rows = await sbSelect(
       'announcements',
-      `course_code=eq.${COURSE_CODE}&active=eq.true&select=id,title,message,type,category,deadline,pinned,created_at&order=pinned.desc,created_at.desc`
+      `course_code=eq.${COURSE_CODE}&active=eq.true&select=id,title,message,type,category,deadline,pinned,created_at,link_url,link_label,show_button&order=pinned.desc,created_at.desc`
     );
 
     return Response.json({
@@ -25,6 +25,9 @@ export async function GET() {
         deadline: a.deadline,
         pinned: a.pinned,
         createdAt: a.created_at,
+        linkUrl: a.link_url,
+        linkLabel: a.link_label,
+        showButton: a.show_button,
       })),
     });
   } catch (err) {

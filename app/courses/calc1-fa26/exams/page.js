@@ -4,6 +4,8 @@ import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ExamSeatingBox from '../ExamSeatingBox';
+import CourseSidebar from '../CourseSidebar';
+import CourseTopBar from '../CourseTopBar';
 
 /* ═════════════════════════════════════════════════════════════════
    MATH-101 · CALCULUS I (Non-SSE) FA26 — EXAMS
@@ -49,6 +51,8 @@ export default function ExamsPage() {
   return (
     <>
       <style>{`
+        .exm-shell { }
+        @media (min-width: 1151px) { .exm-shell { margin-left: 210px; } }
         .exm-wrap { max-width: 780px; margin: 0 auto; padding: calc(var(--nav-h) + 3px + 40px) 24px 80px; }
         .exm-section { margin-bottom: 32px; }
         .exm-datetime { font-size: 1.15rem; font-weight: 700; color: var(--amber); line-height: 1.3; }
@@ -57,7 +61,10 @@ export default function ExamsPage() {
       `}</style>
 
       <Navbar activePage="courses" />
+      <CourseTopBar />
+      <CourseSidebar active="exams" />
 
+      <div className="exm-shell">
       <div className="exm-wrap">
         <span className="eyebrow">MATH 101 · Non-SSE Section · Fall 2026</span>
         <h1 style={{ fontSize: 'clamp(1.8rem,4vw,2.6rem)', margin: '6px 0 24px' }}>Exams</h1>
@@ -110,6 +117,7 @@ export default function ExamsPage() {
             Weekly schedule →
           </Link>
         </div>
+      </div>
       </div>
 
       <Footer />

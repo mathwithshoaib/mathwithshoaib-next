@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import AnnouncementsWidget from './AnnouncementsWidget';
+import CourseSidebar from './CourseSidebar';
+import CourseTopBar from './CourseTopBar';
 
 /* ═════════════════════════════════════════════════════════════════
    MATH-101 · CALCULUS I (Non-SSE) — FALL 2026 — COURSE HOME
@@ -34,13 +36,6 @@ async function api(path) {
   if (!res.ok) throw new Error('Failed to load');
   return res.json();
 }
-
-const SWITCHER = [
-  { href: '/courses/precalc', label: 'Pre-Calculus' },
-  { href: '/courses/calc1', label: 'Calculus I · Fall 2025' },
-  { href: '/courses/calc1-fa26', label: 'Calculus I · Non-SSE · Fall 2026', active: true },
-  { href: '/courses/linalg', label: 'Linear Algebra · Summer 2026' },
-];
 
 const WEEK_COUNT = 14;
 const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
@@ -225,7 +220,9 @@ export default function Calc1Fa26() {
   return (
     <>
       <style>{`
-        .c26-wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+        .c26-shell { transition: none; }
+        @media (min-width: 1151px) { .c26-shell { margin-left: 210px; } }
+        .c26-wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
         .c26-section { margin-bottom: 48px; }
         .c26-team-cols { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; align-items: start; }
         .c26-ta-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
@@ -260,25 +257,10 @@ export default function Calc1Fa26() {
 
       <AnnouncementsWidget showButton />
       <Navbar activePage="courses" />
+      <CourseSidebar active="home" />
 
-      {/* breadcrumb + course switcher */}
-      <div style={{ position: 'sticky', top: 'calc(var(--nav-h) + 3px)', zIndex: 500, background: 'var(--bg2)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '8px 24px', display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)', borderBottom: '1px solid var(--border)' }}>
-          <Link href="/" style={{ color: 'var(--amber)' }}>Home</Link><span>›</span>
-          <Link href="/courses" style={{ color: 'var(--amber)' }}>Courses</Link><span>›</span>
-          <span style={{ color: 'var(--text2)', fontWeight: 500 }}>Calculus I · Non-SSE · FA26</span>
-        </div>
-        <div style={{ maxWidth: '1080px', margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 24px', overflowX: 'auto' }}>
-          {SWITCHER.map(({ href, label, active }) => (
-            <Link key={href} href={href} style={{
-              fontFamily: 'var(--fm)', fontSize: '.72rem', letterSpacing: '.06em', textTransform: 'uppercase',
-              color: active ? 'var(--amber)' : 'var(--text3)', padding: '9px 18px',
-              borderBottom: active ? '2px solid var(--amber)' : '2px solid transparent', whiteSpace: 'nowrap', textDecoration: 'none',
-            }}>{label}</Link>
-          ))}
-        </div>
-      </div>
-
+      <CourseTopBar />
+      <div className="c26-shell">
       {/* HERO */}
       <div style={{ padding: 'calc(var(--nav-h) + 3px + 37px) 24px 40px', borderBottom: '1px solid var(--border)',
                     background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)' }}>
@@ -319,7 +301,7 @@ export default function Calc1Fa26() {
       <div className="c26-wrap">
 
         {/* GRADING & EXAMS */}
-        <div className="c26-section" style={{ marginTop: '40px' }}>
+        <div className="c26-section">
           <h3 style={{ fontSize: '1.3rem', marginBottom: '16px' }}>Grading &amp; exams</h3>
           <div className="card" style={{ padding: '22px 24px', marginBottom: '14px' }}>
             <div className="c26-bar">
@@ -544,6 +526,7 @@ export default function Calc1Fa26() {
             All Courses →
           </Link>
         </div>
+      </div>
       </div>
 
       <Footer />

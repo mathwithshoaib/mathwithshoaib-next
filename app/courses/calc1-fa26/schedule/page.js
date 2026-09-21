@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import AnnouncementsWidget from '../AnnouncementsWidget';
+import CourseSidebar from '../CourseSidebar';
+import CourseTopBar from '../CourseTopBar';
 import { DAY_LABELS, TA_OH_WINDOW, TA_OH_SLOT_MINUTES, TA_OH_WEEKLY_CAP_HOURS } from '../../../../lib/scheduleConfig';
 
 /* ═════════════════════════════════════════════════════════════════
@@ -274,6 +276,8 @@ export default function CalcFA26Schedule() {
     return (
       <>
         <Navbar activePage="courses" />
+        <CourseTopBar />
+        <CourseSidebar active="schedule" />
         <div style={{ padding: 'calc(var(--nav-h) + 80px) 24px', textAlign: 'center', color: 'var(--text3)' }}>
           {loadError || 'Loading schedule…'}
         </div>
@@ -322,6 +326,8 @@ export default function CalcFA26Schedule() {
   return (
     <>
       <style>{`
+        .sched-shell { }
+        @media (min-width: 1151px) { .sched-shell { margin-left: 210px; } }
         .sched-wrap { max-width: 1600px; margin: 0 auto; padding: 0 24px 72px; }
         .sched-hero { padding: calc(var(--nav-h) + 3px + 34px) 24px 28px; border-bottom: 1px solid var(--border);
                       background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%); }
@@ -373,6 +379,7 @@ export default function CalcFA26Schedule() {
           .print-only { display: block !important; }
           .sched-hero { padding: 4px 0 10px !important; border-bottom: none !important; }
           .sched-wrap { padding: 0 0 20px !important; }
+          .sched-shell { margin-left: 0 !important; }
 
           /* decorative gradient bar under the title */
           .sched-print-band { height: 6px; border-radius: 4px; margin: 0 0 14px;
@@ -405,7 +412,10 @@ export default function CalcFA26Schedule() {
 
       <div className="no-print"><AnnouncementsWidget /></div>
       <div className="no-print"><Navbar activePage="courses" /></div>
+      <CourseTopBar />
+      <CourseSidebar active="schedule" />
 
+      <div className="sched-shell">
       <div className="sched-hero">
         <div className="sched-hero-inner">
           <span className="eyebrow no-print">MATH 101 · Calculus I (Non-SSE) · Fall 2026</span>
@@ -677,6 +687,7 @@ export default function CalcFA26Schedule() {
 
       <div className="sched-side">
         <TutorialVenueCard tutorialSlots={tutorialSlots} tutorialVenues={tutorialVenues} />
+      </div>
       </div>
       </div>
       </div>

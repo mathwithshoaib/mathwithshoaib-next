@@ -19,7 +19,7 @@ export async function PATCH(req, { params }) {
 
   try {
     const { id } = await params;
-    const { title, message, type, category, deadline, pinned, active } = await req.json();
+    const { title, message, type, category, deadline, pinned, active, linkUrl, linkLabel, showButton } = await req.json();
     const patch = {};
     if (title !== undefined) {
       if (!title.trim()) return Response.json({ error: 'Title cannot be empty.' }, { status: 400 });
@@ -34,6 +34,9 @@ export async function PATCH(req, { params }) {
     if (deadline !== undefined) patch.deadline = deadline || null;
     if (pinned !== undefined) patch.pinned = !!pinned;
     if (active !== undefined) patch.active = !!active;
+    if (linkUrl !== undefined) patch.link_url = linkUrl && linkUrl.trim() ? linkUrl.trim() : null;
+    if (linkLabel !== undefined) patch.link_label = linkLabel && linkLabel.trim() ? linkLabel.trim() : null;
+    if (showButton !== undefined) patch.show_button = !!showButton;
 
     if (Object.keys(patch).length === 0) {
       return Response.json({ error: 'Nothing to update.' }, { status: 400 });

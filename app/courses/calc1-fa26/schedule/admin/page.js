@@ -878,7 +878,7 @@ function toDatetimeLocalValue(iso) {
 const ANNOUNCEMENT_CATEGORY_SUGGESTIONS = ['Exam', 'Webwork', 'Problem Sheet', 'Schedule', 'Resources', 'General'];
 
 function AnnouncementsSection({ flash }) {
-  const blank = { title: '', message: '', type: 'info', category: '', deadline: '', pinned: false, active: true };
+  const blank = { title: '', message: '', type: 'info', category: '', deadline: '', pinned: false, active: true, linkUrl: '', linkLabel: '', showButton: false };
   const [items, setItems] = useState(null);
   const [form, setForm] = useState(blank);
   const [editingId, setEditingId] = useState(null);
@@ -895,7 +895,11 @@ function AnnouncementsSection({ flash }) {
 
   const startEdit = (a) => {
     setEditingId(a.id);
-    setForm({ title: a.title, message: a.message || '', type: a.type, category: a.category || '', deadline: toDatetimeLocalValue(a.deadline), pinned: a.pinned, active: a.active });
+    setForm({
+      title: a.title, message: a.message || '', type: a.type, category: a.category || '',
+      deadline: toDatetimeLocalValue(a.deadline), pinned: a.pinned, active: a.active,
+      linkUrl: a.linkUrl || '', linkLabel: a.linkLabel || '', showButton: !!a.showButton,
+    });
   };
   const cancelEdit = () => { setEditingId(null); setForm(blank); };
 
@@ -939,7 +943,7 @@ function AnnouncementsSection({ flash }) {
       ) : (
         <div style={{ overflowX: 'auto', marginBottom: '14px' }}>
           <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: '760px' }}>
-            <thead><tr><th style={th}>Title</th><th style={th}>Category</th><th style={th}>Type</th><th style={th}>Deadline</th><th style={th}>Pinned</th><th style={th}>Status</th><th style={th} /></tr></thead>
+            <thead><tr><th style={th}>Title</th><th style={th}>Category</th><th style={th}>Type</th><th style={th}>Deadline</th><th style={th}>Pinned</th><th style={th}>Button</th><th style={th}>Status</th><th style={th} /></tr></thead>
             <tbody>
               {items.map((a) => {
                 const expired = isExpired(a);
@@ -953,6 +957,9 @@ function AnnouncementsSection({ flash }) {
                       {expired && <span style={{ color: 'var(--rose)', marginLeft: '6px' }}>(expired)</span>}
                     </td>
                     <td style={td}>{a.pinned ? '📌' : ''}</td>
+                    <td style={{ ...td, color: a.showButton && a.linkUrl ? 'var(--violet)' : 'var(--text3)' }}>
+                      {a.showButton && a.linkUrl ? (a.linkLabel || 'Linked') : '—'}
+                    </td>
                     <td style={td}>
                       <button onClick={() => toggleActive(a)} style={smallBtn(a.active ? 'var(--teal)' : 'var(--text3)')}>
                         {a.active ? 'active' : 'hidden'}
@@ -965,7 +972,7 @@ function AnnouncementsSection({ flash }) {
                   </tr>
                 );
               })}
-              {items.length === 0 && <tr><td style={td} colSpan={7}>None yet.</td></tr>}
+              {items.length === 0 && <tr><td style={td} colSpan={8}>None yet.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -1001,6 +1008,16 @@ function AnnouncementsSection({ flash }) {
             <textarea value={form.message} onChange={(e) => set('message', e.target.value)} rows={3} placeholder="Leave blank for a title-only heads-up" style={{ ...inputStyle, width: '100%', resize: 'vertical' }} />
           </Field>
         </div>
+        <Field label="Link URL (optional)">
+          <input value={form.linkUrl} onChange={(e) => set('linkUrl', e.target.value)} placeholder="/courses/calc1-fa26/exams or https://…" style={{ ...inputStyle, width: '260px' }} />
+        </Field>
+        <Field label="Button text (optional)">
+          <input value={form.linkLabel} onChange={(e) => set('linkLabel', e.target.value)} placeholder="e.g. Exam Details & Seating" style={{ ...inputStyle, width: '200px' }} />
+        </Field>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.showButton} onChange={(e) => set('showButton', e.target.checked)} />
+          Show as button on this announcement
+        </label>
         <button className="btn" type="submit" disabled={busy || !form.title} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{editingId ? 'Save' : 'Post'}</button>
         {editingId && <button type="button" onClick={cancelEdit} style={smallBtn('var(--text3)')}>cancel</button>}
       </form>
