@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
@@ -26,17 +27,39 @@ const EXAM_SCHEDULE = [
   {
     key: 'mid1', label: 'Midterm I', date: 'Oct 4, 2026', time: '6:30 PM', tentative: true,
     duration: null, spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }],
+    syllabus: {
+      note: 'Everything through Section 2.4 The Chain Rule (inclusive).',
+      chapters: [
+        {
+          title: 'Chapter 1: Functions, Graphs, and Limits',
+          sections: [
+            '1.1 Functions',
+            '1.2 The Graph of a Function',
+            '1.3 Lines and Linear Functions',
+            '1.4 Functional Models',
+            '1.5 Limits',
+            '1.6 One-Sided Limits and Continuity',
+          ],
+        },
+        {
+          title: 'Chapter 2: Differentiation: Basic Concepts',
+          sections: [
+            '2.1 The Derivative',
+            '2.2 Techniques of Differentiation',
+            '2.3 Product and Quotient Rules; Higher-Order Derivatives',
+            '2.4 The Chain Rule',
+          ],
+        },
+      ],
+    },
   },
   {
     key: 'mid2', label: 'Midterm II', date: 'Nov 7, 2026', time: null, tentative: true,
     duration: '120 minutes', spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }],
   },
   {
     key: 'final', label: 'Final Exam', date: 'TBA', time: null, tentative: false,
     duration: '3 hours', spec: 'No notes · No books · No AI',
-    resources: [{ label: 'Syllabus', href: null }],
   },
 ];
 
@@ -47,6 +70,7 @@ export default function ExamsPage() {
   const currentIndex = EXAM_SCHEDULE.findIndex((e) => e.key === CURRENT_EXAM_KEY);
   const current = EXAM_SCHEDULE[currentIndex];
   const next = EXAM_SCHEDULE[currentIndex + 1];
+  const [syllabusOpen, setSyllabusOpen] = useState(false);
 
   return (
     <>
@@ -58,6 +82,18 @@ export default function ExamsPage() {
         .exm-datetime { font-size: 1.15rem; font-weight: 700; color: var(--amber); line-height: 1.3; }
         .exm-soon { font-family: var(--fm); font-size: .72rem; color: var(--text3); opacity: .5; }
         .exm-resource-link { color: var(--teal); text-decoration: none; font-family: var(--fm); font-size: .78rem; }
+        .exm-syllabus-btn {
+          background: none; border: 1px solid var(--border); border-radius: 7px; cursor: pointer;
+          color: var(--teal); font-family: var(--fm); font-size: .78rem; padding: 6px 14px;
+        }
+        .exm-syllabus-btn:hover { border-color: var(--teal); background: rgba(56,201,176,.06); }
+        .exm-syllabus-panel { margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .exm-syllabus-note { font-size: .82rem; color: var(--text2); margin: 0 0 14px; }
+        .exm-syllabus-chapter { margin-bottom: 14px; }
+        .exm-syllabus-chapter:last-child { margin-bottom: 0; }
+        .exm-syllabus-chapter h5 { font-size: .85rem; margin: 0 0 6px; color: var(--text); }
+        .exm-syllabus-chapter ul { margin: 0; padding-left: 20px; }
+        .exm-syllabus-chapter li { font-size: .82rem; color: var(--text2); line-height: 1.7; }
       `}</style>
 
       <Navbar activePage="courses" />
@@ -81,12 +117,24 @@ export default function ExamsPage() {
           {current.duration && <div style={{ fontSize: '.9rem', color: 'var(--text2)', marginTop: '10px' }}>{current.duration}</div>}
           <div style={{ fontSize: '.78rem', color: 'var(--text3)', marginTop: '4px' }}>{current.spec}</div>
 
-          {current.resources?.length > 0 && (
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
-              {current.resources.map((r) => (
-                r.href
-                  ? <Link key={r.label} href={r.href} target="_blank" rel="noopener noreferrer" className="exm-resource-link">{r.label}</Link>
-                  : <span key={r.label} className="exm-soon">{r.label} — coming soon</span>
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
+            {current.syllabus ? (
+              <button type="button" onClick={() => setSyllabusOpen((s) => !s)} className="exm-syllabus-btn">
+                {syllabusOpen ? '▾ Hide syllabus' : '▸ View syllabus'}
+              </button>
+            ) : (
+              <span className="exm-soon">Syllabus — coming soon</span>
+            )}
+          </div>
+
+          {current.syllabus && syllabusOpen && (
+            <div className="exm-syllabus-panel">
+              <p className="exm-syllabus-note">{current.syllabus.note}</p>
+              {current.syllabus.chapters.map((c) => (
+                <div key={c.title} className="exm-syllabus-chapter">
+                  <h5>{c.title}</h5>
+                  <ul>{c.sections.map((s) => <li key={s}>{s}</li>)}</ul>
+                </div>
               ))}
             </div>
           )}
