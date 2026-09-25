@@ -53,12 +53,16 @@ export default function CourseSidebar({ active }) {
 
         @media (max-width: 1150px) {
           .c26-sidebar {
-            position: static; width: 100%; height: auto; overflow-y: visible;
-            flex-direction: row; overflow-x: auto; gap: 6px;
-            padding: 4px 2px 12px; border-right: none; border-bottom: 1px solid var(--border);
-            background: transparent;
+            position: sticky; top: calc(var(--nav-h) + 3px); z-index: 450;
+            width: 100%; height: auto; overflow-y: visible;
+            flex-direction: row; overflow-x: auto; gap: 6px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+            padding: 8px 16px; border-right: none; border-bottom: 1px solid var(--border);
+            background: var(--bg);
           }
-          .c26-sidebar-link { white-space: nowrap; flex-shrink: 0; }
+          .c26-sidebar::-webkit-scrollbar { display: none; }
+          .c26-sidebar + div { margin-top: calc(-1 * (var(--nav-h) + 3px)); }
+          .c26-sidebar-link { white-space: nowrap; flex-shrink: 0; padding: 9px 16px; font-size: .8rem; border: 1px solid var(--border); }
+          .c26-sidebar-link.active { border-color: rgba(232,160,32,.5); }
         }
       `}</style>
       {NAV_ITEMS.map((item) => (

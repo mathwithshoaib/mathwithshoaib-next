@@ -224,20 +224,20 @@ export default function Calc1Fa26() {
         @media (min-width: 1151px) { .c26-shell { margin-left: 210px; } }
         .c26-wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
         .c26-section { margin-bottom: 48px; }
-        .c26-team-cols { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; align-items: start; }
-        .c26-ta-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+        .c26-team-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 14px; align-items: start; }
+        .c26-ta-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; }
         .c26-ta-split > div:first-child { border-right: 1px solid var(--border); }
         @media (max-width: 560px) {
-          .c26-ta-split { grid-template-columns: 1fr; }
+          .c26-ta-split { grid-template-columns: minmax(0, 1fr); }
           .c26-ta-split > div:first-child { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 6px; }
         }
         .c26-team-row { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border); }
         .c26-team-row:last-child { border-bottom: none; }
-        .c26-clo-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .c26-clo-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
         .c26-cta { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
                    border: 1px solid rgba(232,160,32,.4); border-radius: var(--radius); padding: 24px 28px;
                    background: linear-gradient(135deg, var(--amber-lt) 0%, transparent 100%); }
-        .c26-resources-cols { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; align-items: start; }
+        .c26-resources-cols { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start; }
         .c26-table-scroll { overflow-x: auto; }
         .c26-table { width: 100%; border-collapse: collapse; font-size: .82rem; min-width: 360px; }
         .c26-table th { text-align: left; font-family: var(--fm); font-size: .6rem; letter-spacing: .07em; text-transform: uppercase;
@@ -250,16 +250,15 @@ export default function Calc1Fa26() {
                           font-family: var(--fh); font-size: .92rem; font-weight: 600; text-align: center; color: var(--text); }
         .c26-quickfacts { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
         .c26-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
-        @media (max-width: 900px) { .c26-resources-cols { grid-template-columns: 1fr; } }
-        @media (max-width: 720px) { .c26-team-cols, .c26-clo-cols { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) { .c26-resources-cols { grid-template-columns: minmax(0, 1fr); } }
+        @media (max-width: 720px) { .c26-team-cols, .c26-clo-cols { grid-template-columns: minmax(0, 1fr); } }
         @media (max-width: 640px) { .c26-cta { flex-direction: column; align-items: flex-start; } }
       `}</style>
 
       <AnnouncementsWidget showButton />
       <Navbar activePage="courses" />
-      <CourseSidebar active="home" />
-
       <CourseTopBar />
+      <CourseSidebar active="home" />
       <div className="c26-shell">
       {/* HERO */}
       <div style={{ padding: 'calc(var(--nav-h) + 3px + 37px) 24px 40px', borderBottom: '1px solid var(--border)',

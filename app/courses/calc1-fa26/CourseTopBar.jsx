@@ -35,12 +35,14 @@ export default function CourseTopBar() {
           font-family: var(--fm); font-size: .72rem; color: var(--text3); border-bottom: 1px solid var(--border);
         }
         .c26-topbar-crumb a { color: var(--amber); text-decoration: none; }
-        .c26-topbar-tabs { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; padding: 0 24px; overflow-x: auto; }
+        .c26-topbar-tabs { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; padding: 0 24px; overflow-x: auto; scrollbar-width: none; }
+        .c26-topbar-tabs::-webkit-scrollbar { display: none; }
         .c26-topbar-tab {
           font-family: var(--fm); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
           padding: 9px 18px; border-bottom: 2px solid transparent; white-space: nowrap; text-decoration: none; color: var(--text3);
         }
         .c26-topbar-tab.active { color: var(--amber); border-bottom-color: var(--amber); }
+        @media (max-width: 1150px) { .c26-topbar { position: static; margin-top: calc(var(--nav-h) + 3px); } }
       `}</style>
       <div className="c26-topbar-crumb">
         <Link href="/">Home</Link><span>›</span>

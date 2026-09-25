@@ -337,11 +337,11 @@ export default function CalcFA26Schedule() {
         .sched-cell-btn { font-family: var(--fm); font-size: .62rem; letter-spacing: .04em; border-radius: 5px;
                            padding: 3px 8px; cursor: pointer; border: 1px solid; background: transparent; }
         .print-only { display: none; }
-        .sched-cols { display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+        .sched-cols { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start; }
         .sched-grid-scroll, .sched-oh-scroll { -webkit-overflow-scrolling: touch; }
         @media (max-width: 900px) {
           .sched-hero h1 { font-size: clamp(1.5rem, 7vw, 2rem) !important; }
-          .sched-cols { grid-template-columns: 1fr; }
+          .sched-cols { grid-template-columns: minmax(0, 1fr); }
           .sched-side { position: static !important; } /* sticky is pointless once stacked below main */
         }
 
