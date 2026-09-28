@@ -50,6 +50,7 @@ const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => {
   if (i === 0) return { href: 'https://drive.google.com/file/d/1E3VlkDSu2A8isMdux8XA5ixZvlR3KRLD/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1hWpGkcPXREaYb5Jxpu19QAyshye9i-v3/view?usp=sharing' };
   if (i === 1) return { href: 'https://drive.google.com/file/d/1qgu2XqNboGUSsrQ6keDTPfhlHNlJIu6q/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1Z0bBDoN3PF5cGTGP5fYilOJsAhrLJpMa/view?usp=sharing' };
   if (i === 2) return { href: 'https://drive.google.com/file/d/1QrV-U0M0-6sVOPULRXVGPICD1ZVN7CUY/view?usp=sharing', solutionHref: null };
+  if (i === 3) return { href: 'https://drive.google.com/file/d/1HFqmGQfbLQKql7iI-Dob5lK12ETgmU_i/view?usp=sharing', solutionHref: null };
   return { href: null, solutionHref: null };
 });
 
@@ -151,8 +152,8 @@ const RECITATIONS = Array.from({ length: WEEK_COUNT }, () => ({ slides: null, no
 RECITATIONS[0] = { slides: 'https://canva.link/fa26-w1-cal-1-racitation-shoaib', notes: 'https://drive.google.com/file/d/1I53YOLf9ivn13hK4_u4XhNTMXJEtuPYn/view?usp=sharing' };
 RECITATIONS[1] = { slides: 'https://canva.link/fa26-w2-cal-1-recitation', notes: null };
 RECITATIONS[2] = { slides: 'https://canva.link/fa26-w3-cal-1-recitation', notes: null };
-// University was off the usual recitation day that week, so this one was recorded on video instead of slides+PDF notes.
-RECITATIONS[3] = { slides: null, notes: '/courses/calc1-fa26/video-resources', notesLabel: 'Videos →' };
+// University was off the usual recitation day that week, so this one was recorded on video instead of PDF notes.
+RECITATIONS[3] = { slides: 'https://canva.link/fa26-w4-cal-1-recitation', notes: '/courses/calc1-fa26/video-resources', notesLabel: 'Videos →' };
 
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
