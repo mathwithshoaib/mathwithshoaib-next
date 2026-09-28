@@ -151,6 +151,8 @@ const RECITATIONS = Array.from({ length: WEEK_COUNT }, () => ({ slides: null, no
 RECITATIONS[0] = { slides: 'https://canva.link/fa26-w1-cal-1-racitation-shoaib', notes: 'https://drive.google.com/file/d/1I53YOLf9ivn13hK4_u4XhNTMXJEtuPYn/view?usp=sharing' };
 RECITATIONS[1] = { slides: 'https://canva.link/fa26-w2-cal-1-recitation', notes: null };
 RECITATIONS[2] = { slides: 'https://canva.link/fa26-w3-cal-1-recitation', notes: null };
+// University was off the usual recitation day that week, so this one was recorded on video instead of slides+PDF notes.
+RECITATIONS[3] = { slides: null, notes: '/courses/calc1-fa26/video-resources', notesLabel: 'Videos →' };
 
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
@@ -450,7 +452,16 @@ export default function Calc1Fa26() {
                           </td>
                           <td>
                             {r.notes
-                              ? <Link href={r.notes} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--rose)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' }}>PDF →</Link>
+                              ? (
+                                <Link
+                                  href={r.notes}
+                                  target={r.notes.startsWith('/') ? undefined : '_blank'}
+                                  rel={r.notes.startsWith('/') ? undefined : 'noopener noreferrer'}
+                                  style={{ color: 'var(--rose)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' }}
+                                >
+                                  {r.notesLabel || 'PDF →'}
+                                </Link>
+                              )
                               : <span className="c26-soon">Coming soon</span>}
                           </td>
                         </tr>
