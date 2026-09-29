@@ -19,8 +19,8 @@ export async function GET() {
   }
 
   try {
-    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions`);
-    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '' };
+    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions,exam_date,exam_time`);
+    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '', exam_date: '', exam_time: '' };
 
     let count = 0;
     if (s.exam) {
@@ -29,7 +29,10 @@ export async function GET() {
     }
 
     return Response.json({
-      settings: { active: !!s.active, exam: s.exam || '', instructions: s.instructions || '' },
+      settings: {
+        active: !!s.active, exam: s.exam || '', instructions: s.instructions || '',
+        examDate: s.exam_date || '', examTime: s.exam_time || '',
+      },
       count,
     });
   } catch (err) {
@@ -45,12 +48,14 @@ export async function PATCH(req) {
   }
 
   try {
-    const { active, exam, instructions } = await req.json();
+    const { active, exam, instructions, examDate, examTime } = await req.json();
     await sbUpsert('exam_seating_settings', {
       course_code: COURSE_CODE,
       active: !!active,
       exam: exam && exam.trim() ? exam.trim() : null,
       instructions: instructions && instructions.trim() ? instructions.trim() : null,
+      exam_date: examDate && examDate.trim() ? examDate.trim() : null,
+      exam_time: examTime && examTime.trim() ? examTime.trim() : null,
     }, 'course_code');
     return Response.json({ ok: true });
   } catch (err) {

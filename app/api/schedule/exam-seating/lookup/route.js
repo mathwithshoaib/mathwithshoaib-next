@@ -1,27 +1,33 @@
 // app/api/schedule/exam-seating/lookup/route.js
-// POST { rollNumber } -> the ONLY route that ever touches the actual
+// POST { studentId } -> the ONLY route that ever touches the actual
 // exam_seating roster from the public side, and even then it returns
-// exactly one student's row (name/room/seat), matched by exact roll
-// number against whichever exam is currently marked active in settings.
+// exactly one student's row (name/section/venue/seat), matched by exact
+// LUMS ID against whichever exam is currently marked active in settings.
 // Never exposes anyone else's data, and does nothing at all once the
 // search is switched off in the admin panel.
 
 import { sbSelect } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
 
-function normalize(s) {
-  return (s || '').trim().toUpperCase();
+// Same normalization as the CSV import and the admin single-row route —
+// accepts the raw 8-digit form or the dashed "20XX-XX-XXXX" form students
+// sometimes type, and reduces either to the same 8-digit lookup key.
+function normalizeId(s) {
+  let digits = (s || '').replace(/\D/g, '');
+  if (digits.length === 10 && digits.startsWith('20')) digits = digits.slice(2);
+  if (digits.length === 7) digits = '0' + digits;
+  return digits;
 }
 
 export async function POST(req) {
   try {
-    const { rollNumber } = await req.json();
-    const roll = normalize(rollNumber);
-    if (!roll) {
-      return Response.json({ found: false, error: 'Enter your roll number.' }, { status: 400 });
+    const { studentId } = await req.json();
+    const id = normalizeId(studentId);
+    if (!id) {
+      return Response.json({ found: false, error: 'Enter your LUMS ID.' }, { status: 400 });
     }
 
-    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions`);
+    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions,exam_date,exam_time`);
     const settings = settingsRows?.[0];
     if (!settings || !settings.active || !settings.exam) {
       return Response.json({ found: false, error: "The seating plan hasn't been released yet — check back closer to the exam." }, { status: 400 });
@@ -29,19 +35,22 @@ export async function POST(req) {
 
     const rows = await sbSelect(
       'exam_seating',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(roll)}&select=student_name,room,seat_number`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(id)}&select=student_name,section,venue,seat_number`
     );
     const row = rows?.[0];
     if (!row) {
-      return Response.json({ found: false, error: "No seat found for that roll number — double-check it, or contact your TF." });
+      return Response.json({ found: false, error: "No seat found for that ID — double-check it, or contact your TF." });
     }
 
     return Response.json({
       found: true,
       exam: settings.exam,
       name: row.student_name,
-      room: row.room,
+      section: row.section,
+      venue: row.venue,
       seatNumber: row.seat_number,
+      examDate: settings.exam_date || '',
+      examTime: settings.exam_time || '',
       instructions: settings.instructions || '',
     });
   } catch (err) {

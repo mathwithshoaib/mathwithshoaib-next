@@ -1054,7 +1054,7 @@ function ExamSeatingSection({ flash }) {
   const [manageExam, setManageExam] = useState('');
   const [manageRoll, setManageRoll] = useState('');
   const [manageRow, setManageRow] = useState(undefined); // undefined = not searched; null = not found; object = found
-  const [manageForm, setManageForm] = useState({ name: '', room: '', seatNumber: '' });
+  const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', seatNumber: '' });
   const [manageBusy, setManageBusy] = useState(false);
 
   const fetchAll = useCallback(async () => {
@@ -1087,7 +1087,10 @@ function ExamSeatingSection({ flash }) {
     try {
       const csv = await importFile.text();
       const res = await api('/api/schedule/admin/exam-seating/import', { method: 'POST', body: { exam: importExam, csv } });
-      setImportResult(`Imported ${res.imported} student${res.imported === 1 ? '' : 's'}${res.skipped ? ` (${res.skipped} row${res.skipped === 1 ? '' : 's'} skipped — missing a field)` : ''}.`);
+      const parts = [`${res.added} new`, `${res.updated} already loaded (updated)`];
+      if (res.duplicateInFile) parts.push(`${res.duplicateInFile} duplicate row${res.duplicateInFile === 1 ? '' : 's'} in the file (merged)`);
+      if (res.skipped) parts.push(`${res.skipped} row${res.skipped === 1 ? '' : 's'} skipped — missing a field`);
+      setImportResult(`${res.imported} student${res.imported === 1 ? '' : 's'} in file — ${parts.join(', ')}.`);
       flash('Roster imported.', 'ok');
       setImportFile(null);
       fetchAll();
@@ -1100,8 +1103,8 @@ function ExamSeatingSection({ flash }) {
       const res = await api(`/api/schedule/admin/exam-seating/rows?exam=${encodeURIComponent(manageExam)}&roll=${encodeURIComponent(manageRoll)}`);
       setManageRow(res.row || null);
       setManageForm(res.row
-        ? { name: res.row.student_name, room: res.row.room, seatNumber: res.row.seat_number }
-        : { name: '', room: '', seatNumber: '' });
+        ? { name: res.row.student_name, section: res.row.section, venue: res.row.venue, seatNumber: res.row.seat_number }
+        : { name: '', section: '', venue: '', seatNumber: '' });
     } catch (err) { flash(err.message); }
   };
 
@@ -1111,7 +1114,7 @@ function ExamSeatingSection({ flash }) {
     try {
       await api('/api/schedule/admin/exam-seating/rows', {
         method: 'POST',
-        body: { exam: manageExam, rollNumber: manageRoll, name: manageForm.name, room: manageForm.room, seatNumber: manageForm.seatNumber },
+        body: { exam: manageExam, rollNumber: manageRoll, name: manageForm.name, section: manageForm.section, venue: manageForm.venue, seatNumber: manageForm.seatNumber },
       });
       flash(manageRow ? 'Updated.' : 'Added.', 'ok');
       lookupOne(e);
@@ -1126,7 +1129,7 @@ function ExamSeatingSection({ flash }) {
       await api(`/api/schedule/admin/exam-seating/rows/${manageRow.id}`, { method: 'DELETE' });
       flash('Deleted.', 'ok');
       setManageRow(null);
-      setManageForm({ name: '', room: '', seatNumber: '' });
+      setManageForm({ name: '', section: '', venue: '', seatNumber: '' });
       fetchAll();
     } catch (err) { flash(err.message); } finally { setManageBusy(false); }
   };
@@ -1144,7 +1147,7 @@ function ExamSeatingSection({ flash }) {
     <section className="card" style={{ marginBottom: '20px' }}>
       <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Exam seating search</h3>
       <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '16px' }}>
-        Students search their own room &amp; seat by roll number — a "Find Your Seat" link appears in the announcements pop-up (pointing at the Exams page) whenever this is switched on.
+        Students search their own venue, section &amp; seat by LUMS ID — a "Find Your Seat" link appears in the announcements pop-up (pointing at the Exams page) whenever this is switched on.
         Turn it on shortly before an exam and off again after; change the exam name and import a fresh roster for the next one (old rows for a past exam are left alone, not deleted).
         {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
       </p>
@@ -1155,6 +1158,12 @@ function ExamSeatingSection({ flash }) {
           Search button is live
         </label>
         <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <Field label="Exam date (shown to students)">
+          <input value={settings.examDate || ''} onChange={(e) => setSettings((s) => ({ ...s, examDate: e.target.value }))} placeholder="e.g. Sunday, 4 October 2026" style={{ ...inputStyle, width: '220px' }} />
+        </Field>
+        <Field label="Exam time (shown to students)">
+          <input value={settings.examTime || ''} onChange={(e) => setSettings((s) => ({ ...s, examTime: e.target.value }))} placeholder="e.g. 6:30pm - 9:00pm" style={{ ...inputStyle, width: '160px' }} />
+        </Field>
         <div style={{ width: '100%' }}>
           <Field label="Instructions shown with every result">
             <textarea
@@ -1170,8 +1179,9 @@ function ExamSeatingSection({ flash }) {
 
       <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Import roster</h4>
       <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
-        CSV file with columns Roll Number, Name, Room, Seat Number — any header wording/order is fine, they're matched automatically.
-        From Google Sheets: File → Download → Comma Separated Values. From Excel: Save As → CSV.
+        CSV file with columns Name, ID, Section, Venue, Seat No. — any header wording/order is fine, they're matched automatically (a leading "Number" column, if present, is simply ignored).
+        The Name column may be "Actual Name, 26100123" (name and ID comma-joined) — only the part before the comma is kept.
+        From Google Sheets: File → Download → Comma Separated Values. From Excel: Save As → CSV (an .xlsx file must be saved as .csv first — upload here doesn't read .xlsx directly).
       </p>
       <form onSubmit={runImport} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '8px' }}>
         <Field label="Exam"><input value={importExam} onChange={(e) => setImportExam(e.target.value)} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} required /></Field>
@@ -1197,7 +1207,7 @@ function ExamSeatingSection({ flash }) {
       </p>
       <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
         <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
-        <Field label="Roll Number"><input value={manageRoll} onChange={(e) => setManageRoll(e.target.value)} style={{ ...inputStyle, width: '140px' }} required /></Field>
+        <Field label="LUMS ID"><input value={manageRoll} onChange={(e) => setManageRoll(e.target.value)} placeholder="8 digits or 20XX-XX-XXXX" style={{ ...inputStyle, width: '160px' }} required /></Field>
         <button className="btn btn-outline" type="submit" style={{ padding: '7px 16px', fontSize: '.75rem' }}>Look up</button>
       </form>
 
@@ -1208,7 +1218,8 @@ function ExamSeatingSection({ flash }) {
           )}
           <form onSubmit={saveManaged} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <Field label="Name"><input value={manageForm.name} onChange={(e) => setManageForm((f) => ({ ...f, name: e.target.value }))} style={{ ...inputStyle, width: '170px' }} required /></Field>
-            <Field label="Room"><input value={manageForm.room} onChange={(e) => setManageForm((f) => ({ ...f, room: e.target.value }))} style={{ ...inputStyle, width: '100px' }} required /></Field>
+            <Field label="Section"><input value={manageForm.section} onChange={(e) => setManageForm((f) => ({ ...f, section: e.target.value }))} placeholder="3, 4, or 5" style={{ ...inputStyle, width: '90px' }} required /></Field>
+            <Field label="Venue"><input value={manageForm.venue} onChange={(e) => setManageForm((f) => ({ ...f, venue: e.target.value }))} style={{ ...inputStyle, width: '110px' }} required /></Field>
             <Field label="Seat #"><input value={manageForm.seatNumber} onChange={(e) => setManageForm((f) => ({ ...f, seatNumber: e.target.value }))} style={{ ...inputStyle, width: '90px' }} required /></Field>
             <button className="btn" type="submit" disabled={manageBusy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{manageRow ? 'Save changes' : 'Add'}</button>
             {manageRow && <button type="button" onClick={deleteManaged} disabled={manageBusy} style={smallBtn('var(--rose)')}>delete</button>}

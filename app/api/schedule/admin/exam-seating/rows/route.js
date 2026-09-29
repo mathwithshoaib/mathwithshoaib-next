@@ -12,8 +12,13 @@ import { readAdminSession } from '../../../../../../lib/scheduleAuth';
 import { sbSelect, sbUpsert } from '../../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../../lib/scheduleConfig';
 
-function normalize(s) {
-  return (s || '').trim().toUpperCase();
+// Same normalization as the CSV import and the public lookup route — keep
+// all three in sync if this ever changes.
+function normalizeId(s) {
+  let digits = (s || '').replace(/\D/g, '');
+  if (digits.length === 10 && digits.startsWith('20')) digits = digits.slice(2);
+  if (digits.length === 7) digits = '0' + digits;
+  return digits;
 }
 
 export async function GET(req) {
@@ -31,7 +36,7 @@ export async function GET(req) {
     }
     const rows = await sbSelect(
       'exam_seating',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam)}&roll_number=eq.${encodeURIComponent(normalize(roll))}&select=*`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam)}&roll_number=eq.${encodeURIComponent(normalizeId(roll))}&select=*`
     );
     return Response.json({ row: rows?.[0] || null });
   } catch (err) {
@@ -47,17 +52,18 @@ export async function POST(req) {
   }
 
   try {
-    const { exam, rollNumber, name, room, seatNumber } = await req.json();
-    if (!exam?.trim() || !rollNumber?.trim() || !name?.trim() || !room?.trim() || !String(seatNumber ?? '').trim()) {
-      return Response.json({ error: 'exam, rollNumber, name, room, and seatNumber are all required.' }, { status: 400 });
+    const { exam, rollNumber, name, section, venue, seatNumber } = await req.json();
+    if (!exam?.trim() || !rollNumber?.trim() || !name?.trim() || !section?.trim() || !venue?.trim() || !String(seatNumber ?? '').trim()) {
+      return Response.json({ error: 'exam, rollNumber, name, section, venue, and seatNumber are all required.' }, { status: 400 });
     }
 
     const [row] = await sbUpsert('exam_seating', {
       course_code: COURSE_CODE,
       exam: exam.trim(),
-      roll_number: normalize(rollNumber),
+      roll_number: normalizeId(rollNumber),
       student_name: name.trim(),
-      room: room.trim(),
+      section: section.trim(),
+      venue: venue.trim(),
       seat_number: String(seatNumber).trim(),
     }, 'course_code,exam,roll_number');
 

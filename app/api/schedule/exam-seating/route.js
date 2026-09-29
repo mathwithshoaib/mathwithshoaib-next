@@ -8,10 +8,10 @@ import { COURSE_CODE } from '../../../../lib/scheduleConfig';
 
 export async function GET() {
   try {
-    const rows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam`);
+    const rows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,exam_date,exam_time`);
     const s = rows?.[0];
     if (!s || !s.active || !s.exam) return Response.json({ active: false });
-    return Response.json({ active: true, exam: s.exam });
+    return Response.json({ active: true, exam: s.exam, examDate: s.exam_date || '', examTime: s.exam_time || '' });
   } catch (err) {
     console.error('exam-seating status error:', err);
     return Response.json({ active: false });
