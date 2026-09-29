@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 
 const SITE_URL = 'https://mathwithshoaib.com';
 const SITE_TITLE = 'Muhammad Shoaib Khan · Shoaib-K · LUMS';
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
       <body>
         <div id="sk-progress"><div id="sk-progress-bar" suppressHydrationWarning></div></div>
         {children}
+        <Analytics />
       </body>
     </html>
   );
