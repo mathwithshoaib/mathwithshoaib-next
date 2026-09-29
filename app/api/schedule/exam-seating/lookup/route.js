@@ -6,7 +6,7 @@
 // Never exposes anyone else's data, and does nothing at all once the
 // search is switched off in the admin panel.
 
-import { sbSelect } from '../../../../../lib/supabaseAdmin';
+import { sbSelect, sbRpc } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
 
 // Same normalization as the CSV import and the admin single-row route —
@@ -32,6 +32,13 @@ export async function POST(req) {
     if (!settings || !settings.active || !settings.exam) {
       return Response.json({ found: false, error: "The seating plan hasn't been released yet — check back closer to the exam." }, { status: 400 });
     }
+
+    // Best-effort usage counter for the admin panel — every real attempted
+    // search against a live roster, found or not. Never let a hiccup here
+    // fail the actual lookup the student is waiting on.
+    sbRpc('increment_exam_seating_search_count', { p_course_code: COURSE_CODE }).catch((err) => {
+      console.error('exam-seating search count increment failed:', err);
+    });
 
     const rows = await sbSelect(
       'exam_seating',

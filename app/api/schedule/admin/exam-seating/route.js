@@ -1,11 +1,15 @@
 // app/api/schedule/admin/exam-seating/route.js
 // GET   -> current settings (active/exam/instructions) plus how many rows
 //          are loaded for that exam, so the admin can confirm an import
-//          worked without dumping the whole roster into the page.
+//          worked without dumping the whole roster into the page. Also
+//          returns searchCount — a running total of every public search
+//          attempt, incremented server-side by the lookup route itself.
 // PATCH -> update settings. Switch `active` on shortly before an exam and
 //          off again after; change `exam` and re-import rows for the next
 //          one — old rows for a past exam are left alone (a different
 //          exam string), so nothing needs to be deleted between exams.
+//          Pass `resetSearchCount: true` to zero the counter back out
+//          (e.g. right before the next exam, for a fresh per-exam count).
 
 import { cookies } from 'next/headers';
 import { readAdminSession } from '../../../../../lib/scheduleAuth';
@@ -19,8 +23,8 @@ export async function GET() {
   }
 
   try {
-    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions,exam_date,exam_time`);
-    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '', exam_date: '', exam_time: '' };
+    const settingsRows = await sbSelect('exam_seating_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions,exam_date,exam_time,search_count`);
+    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '', exam_date: '', exam_time: '', search_count: 0 };
 
     let count = 0;
     if (s.exam) {
@@ -34,6 +38,7 @@ export async function GET() {
         examDate: s.exam_date || '', examTime: s.exam_time || '',
       },
       count,
+      searchCount: s.search_count || 0,
     });
   } catch (err) {
     console.error('admin/exam-seating GET error:', err);
@@ -48,15 +53,17 @@ export async function PATCH(req) {
   }
 
   try {
-    const { active, exam, instructions, examDate, examTime } = await req.json();
-    await sbUpsert('exam_seating_settings', {
+    const { active, exam, instructions, examDate, examTime, resetSearchCount } = await req.json();
+    const patch = {
       course_code: COURSE_CODE,
       active: !!active,
       exam: exam && exam.trim() ? exam.trim() : null,
       instructions: instructions && instructions.trim() ? instructions.trim() : null,
       exam_date: examDate && examDate.trim() ? examDate.trim() : null,
       exam_time: examTime && examTime.trim() ? examTime.trim() : null,
-    }, 'course_code');
+    };
+    if (resetSearchCount) patch.search_count = 0;
+    await sbUpsert('exam_seating_settings', patch, 'course_code');
     return Response.json({ ok: true });
   } catch (err) {
     console.error('admin/exam-seating PATCH error:', err);
