@@ -16,6 +16,7 @@ const SITE_URL = 'https://mathwithshoaib.com';
 const PATHS = [
   '',
   '/education',
+  '/research',
   '/courses',
   '/courses/precalc',
 
