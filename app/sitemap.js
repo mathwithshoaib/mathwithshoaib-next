@@ -17,6 +17,7 @@ const PATHS = [
   '',
   '/education',
   '/research',
+  '/experience/math-circles',
   '/courses',
   '/courses/precalc',
 

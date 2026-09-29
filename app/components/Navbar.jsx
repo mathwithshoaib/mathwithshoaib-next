@@ -10,8 +10,9 @@ const NAV = [
   {
     label: 'Experience', page: 'experience',
     children: [
-      { href: '/experience/instructor', label: '👨‍🏫 As Instructor' },
-      { href: '/experience/ta',         label: '📋 As Teaching Assistant' },
+      { href: '/experience/instructor',   label: '👨‍🏫 As Instructor' },
+      { href: '/experience/ta',           label: '📋 As Teaching Assistant' },
+      { href: '/experience/math-circles', label: '🧮 Math Circles' },
     ],
   },
   { href: '/courses',  label: 'Courses',   page: 'courses' },
