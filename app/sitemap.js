@@ -18,6 +18,7 @@ const PATHS = [
   '/education',
   '/research',
   '/experience/math-circles',
+  '/experience/ta',
   '/courses',
   '/courses/precalc',
 
