@@ -1,9 +1,26 @@
 import './globals.css';
 
+const SITE_URL = 'https://mathwithshoaib.com';
+const SITE_TITLE = 'Muhammad Shoaib Khan · Shoaib-K · LUMS';
+const SITE_DESCRIPTION = 'Academic portfolio of Muhammad Shoaib Khan — Mathematician, Educator, and Researcher at LUMS, Lahore. Calculus and Linear Algebra course pages, lecture notes, and schedules.';
+
 export const metadata = {
-  title: 'Muhammad Shoaib Khan · Shoaib-K · LUMS',
-  description: 'Academic portfolio of Muhammad Shoaib Khan — Mathematician, Educator, and Researcher at LUMS, Lahore.',
-  keywords: 'mathematics, calculus, LUMS, Lahore, integration, lecture notes, math tutor Pakistan',
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_TITLE, template: '%s · Shoaib-K' },
+  description: SITE_DESCRIPTION,
+  keywords: 'mathematics, calculus, linear algebra, LUMS, Lahore, math tutor Pakistan, lecture notes, MATH 101, LUMS calculus',
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: 'Shoaib-K',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }) {
