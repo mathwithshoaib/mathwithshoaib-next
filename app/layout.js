@@ -1,9 +1,11 @@
 import './globals.css';
+import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 
 const SITE_URL = 'https://mathwithshoaib.com';
 const SITE_TITLE = 'Muhammad Shoaib Khan · Shoaib-K · LUMS';
 const SITE_DESCRIPTION = 'Academic portfolio of Muhammad Shoaib Khan — Mathematician, Educator, and Researcher at LUMS, Lahore. Calculus and Linear Algebra course pages, lecture notes, and schedules.';
+const GA_MEASUREMENT_ID = 'G-LR89SGVCLZ';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -36,6 +38,15 @@ export default function RootLayout({ children }) {
         <div id="sk-progress"><div id="sk-progress-bar" suppressHydrationWarning></div></div>
         {children}
         <Analytics />
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `}
+        </Script>
       </body>
     </html>
   );
