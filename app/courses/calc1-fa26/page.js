@@ -190,11 +190,11 @@ const GRADING = [
 // it shows as a small link — omitted/`href: null` shows "Coming soon".
 const EXAMS = [
   {
-    label: 'Midterm I', duration: null, date: 'Oct 4, 2026', time: '6:30 PM', tentative: true,
+    label: 'Midterm I', duration: null, date: 'Oct 4, 2026', time: '6:30 PM', tentative: false,
     spec: 'No notes · No books · No AI',
   },
   {
-    label: 'Midterm II', duration: '120 minutes', date: 'Nov 7, 2026', time: null, tentative: true,
+    label: 'Midterm II', duration: '120 minutes', date: 'Oct 31, 2026', time: null, tentative: false,
     spec: 'No notes · No books · No AI',
   },
   {

@@ -137,7 +137,11 @@ export default function ExamSeatingBox() {
       {stage === 'revealed' && pending && (
         <div className="seatbox-result">
           <div className="seatbox-result-name">{pending.name}</div>
-          {pending.section && <div className="seatbox-result-section">Section {pending.section}</div>}
+          <div className="seatbox-result-section">
+            {pending.studentId && `ID ${pending.studentId}`}
+            {pending.studentId && pending.section && ' · '}
+            {pending.section && `Section ${pending.section}`}
+          </div>
           <div className="seatbox-grid">
             <div className="seatbox-tile">
               <div className="seatbox-tile-label">Venue</div>

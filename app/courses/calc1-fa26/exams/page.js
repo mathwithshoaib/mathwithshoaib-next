@@ -25,7 +25,7 @@ import CourseTopBar from '../CourseTopBar';
 
 const EXAM_SCHEDULE = [
   {
-    key: 'mid1', label: 'Midterm I', date: 'Oct 4, 2026', time: '6:30 PM', tentative: true,
+    key: 'mid1', label: 'Midterm I', date: 'Oct 4, 2026', time: '6:30 PM', tentative: false,
     duration: null, spec: 'No notes · No books · No AI',
     syllabus: {
       note: 'Everything through Section 2.4 The Chain Rule (inclusive).',
@@ -54,7 +54,7 @@ const EXAM_SCHEDULE = [
     },
   },
   {
-    key: 'mid2', label: 'Midterm II', date: 'Nov 7, 2026', time: null, tentative: true,
+    key: 'mid2', label: 'Midterm II', date: 'Oct 31, 2026', time: null, tentative: false,
     duration: '120 minutes', spec: 'No notes · No books · No AI',
   },
   {

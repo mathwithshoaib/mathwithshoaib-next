@@ -35,7 +35,7 @@ export async function POST(req) {
 
     const rows = await sbSelect(
       'exam_seating',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(id)}&select=student_name,section,venue,seat_number`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(id)}&select=roll_number,student_name,section,venue,seat_number`
     );
     const row = rows?.[0];
     if (!row) {
@@ -45,6 +45,7 @@ export async function POST(req) {
     return Response.json({
       found: true,
       exam: settings.exam,
+      studentId: row.roll_number,
       name: row.student_name,
       section: row.section,
       venue: row.venue,
