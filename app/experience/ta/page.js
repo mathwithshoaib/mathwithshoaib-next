@@ -42,8 +42,8 @@ const TA_COURSES = [
       { icon: '🎥', text: 'Produced instructional videos on limits, continuity, derivatives, and inverse trig functions' },
       { icon: '📋', text: 'Developed practice materials and mock exams for midterm/final prep' },
     ],
-    href: 'https://sites.google.com/view/shoaib-k/math-101-calculus-sp-25',
-    hrefLabel: 'View original materials →',
+    href: '/ta/calculus-sp25',
+    hrefLabel: 'View course resources →',
   },
   {
     id: 'precal-fa24',
@@ -57,8 +57,8 @@ const TA_COURSES = [
       { icon: '💻', text: 'Designed homework sets on the WEBWORK platform' },
       { icon: '📄', text: 'Wrote quizzes and exams, and reviewed grade contestations' },
     ],
-    href: 'https://sites.google.com/view/shoaib-k/math-100-pre-cal-fa-24',
-    hrefLabel: 'View original materials →',
+    href: '/ta/precalc-fa24',
+    hrefLabel: 'View course resources →',
   },
   {
     id: 'prob-su24',
@@ -81,8 +81,8 @@ const TA_COURSES = [
       { icon: '📚', text: '9 tutorials, 5 quiz solutions, and exam solutions produced for students' },
       { icon: '🎥', text: 'Several tutorials included linked video explanations' },
     ],
-    href: 'https://sites.google.com/view/shoaib-k/math-100-pre-cal-sp-24',
-    hrefLabel: 'View original materials →',
+    href: '/ta/precalc-sp24',
+    hrefLabel: 'View course resources →',
   },
   {
     id: 'precal-fa23',
