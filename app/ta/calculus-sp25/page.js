@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { CourseHero } from '../CourseHero';
-import { ResourceSection, TA_RESOURCE_CSS } from '../ResourceSection';
+import { ResourceSection, ResourceGrid, TA_RESOURCE_CSS } from '../ResourceSection';
 
 /* ══════════════════════════════════════════════════════
    MATH-101 Calculus · Spring 2025 — carried over in full from
@@ -102,6 +102,8 @@ const SECTIONS = [
   },
   {
     title: 'Tutorials by Topic — All TAs',
+    gridGroups: true,
+    fullWidth: true,
     groups: [
       {
         subtitle: 'Functions and Limits',
@@ -151,6 +153,8 @@ const SECTIONS = [
   },
   {
     title: 'Exams',
+    gridGroups: true,
+    fullWidth: true,
     groups: [
       {
         subtitle: 'Previous Midterms',
@@ -194,13 +198,15 @@ export default function CalculusSp25Page() {
         description={DESCRIPTION}
       />
 
-      <section className="sk-section">
-        <div className="container" style={{ maxWidth: '820px' }}>
-          {SECTIONS.map((s) => (
-            <ResourceSection key={s.title} section={s} />
-          ))}
+      <section className="sk-section-sm">
+        <div className="container" style={{ maxWidth: '1080px' }}>
+          <ResourceGrid>
+            {SECTIONS.map((s) => (
+              <ResourceSection key={s.title} section={s} fullWidth={s.fullWidth} />
+            ))}
+          </ResourceGrid>
 
-          <div style={{ paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+          <div style={{ paddingTop: '20px', marginTop: '20px', borderTop: '1px solid var(--border)' }}>
             <Link href="/experience/ta" style={{ color: 'var(--text3)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.78rem' }}>
               ← Back to TA Experience
             </Link>
