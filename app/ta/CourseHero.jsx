@@ -7,7 +7,13 @@ import Link from 'next/link';
    course description/objectives carried over verbatim from the original
    course site. Kept compact — details go into a native <details> so the
    page doesn't open with a wall of text. */
-export function CourseHero({ title, term, instructors, tas, description, objective, backHref = '/experience/ta' }) {
+function joinNatural(list) {
+  if (list.length <= 1) return list.join('');
+  if (list.length === 2) return list.join(' & ');
+  return `${list.slice(0, -1).join(', ')} & ${list[list.length - 1]}`;
+}
+
+export function CourseHero({ title, term, instructors, tas, description, objective, backHref = '/experience/ta', backLabel = '← Back to TA Experience' }) {
   return (
     <section style={{
       paddingTop: 'calc(var(--nav-h) + 3px)',
@@ -16,7 +22,7 @@ export function CourseHero({ title, term, instructors, tas, description, objecti
     }}>
       <div className="container" style={{ padding: '40px 32px 32px', maxWidth: '900px' }}>
         <Link href={backHref} style={{ display: 'inline-block', marginBottom: '14px', color: 'var(--text3)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.74rem' }}>
-          ← Back to TA Experience
+          {backLabel}
         </Link>
         <span className="eyebrow">{term}</span>
         <h1 style={{ margin: '4px 0 14px', fontSize: 'clamp(1.6rem,3.5vw,2.2rem)' }}>{title}</h1>
@@ -24,7 +30,7 @@ export function CourseHero({ title, term, instructors, tas, description, objecti
         <div className="ta-hero-meta">
           <div>
             <div className="ta-hero-meta-label">Instructor{instructors.length > 1 ? 's' : ''}</div>
-            <div className="ta-hero-meta-value">{instructors.join(' & ')}</div>
+            <div className="ta-hero-meta-value">{joinNatural(instructors)}</div>
           </div>
           <div>
             <div className="ta-hero-meta-label">Teaching Assistants ({tas.length})</div>
