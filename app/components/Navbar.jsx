@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import styles from './Navbar.module.css';
+import SiteSearch from './SiteSearch';
 
 /* NAV ITEMS — add/remove pages here only */
 const NAV = [
@@ -25,7 +26,21 @@ const NAV = [
 export default function Navbar({ activePage = 'home' }) {
   const [menuOpen,  setMenuOpen]  = useState(false);
   const [dropOpen,  setDropOpen]  = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const dropRef = useRef(null);
+
+  /* "/" opens search from anywhere, unless already typing in a field */
+  useEffect(() => {
+    function handler(e) {
+      if (e.key !== '/') return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+      e.preventDefault();
+      setSearchOpen(true);
+    }
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   /* Close dropdown when clicking outside */
   useEffect(() => {
@@ -100,6 +115,16 @@ export default function Navbar({ activePage = 'home' }) {
           })}
         </div>
 
+        {/* SEARCH */}
+        <button
+          className={styles.searchBtn}
+          onClick={() => { closeAll(); setSearchOpen(true); }}
+          aria-label="Search the site"
+          title="Search (press /)"
+        >
+          🔍
+        </button>
+
         {/* HAMBURGER */}
         <button
           className={`${styles.hamburger} ${menuOpen ? styles.hamActive : ''}`}
@@ -115,6 +140,8 @@ export default function Navbar({ activePage = 'home' }) {
       {menuOpen && (
         <div className={styles.backdrop} onClick={closeAll} />
       )}
+
+      <SiteSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

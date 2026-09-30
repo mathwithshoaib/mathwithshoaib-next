@@ -17,6 +17,8 @@ const PATHS = [
   '',
   '/education',
   '/research',
+  '/explore',
+  '/contact',
   '/experience/math-circles',
   '/experience/ta',
   '/experience/instructor',
