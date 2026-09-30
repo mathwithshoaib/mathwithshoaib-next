@@ -132,6 +132,9 @@ h4 { font-family: var(--fh); font-size: 1.15rem; font-weight: 600; margin-bottom
 .sk-footer-bottom { max-width: var(--max-w); margin: 32px auto 0; padding: 20px 32px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 .sk-footer-bottom p { font-family: var(--fm); font-size: .72rem; color: var(--text3); margin: 0; }
 .sk-footer-logo { font-family: var(--fm); font-size: 1rem; color: var(--amber); }
+.sk-footer-badge { display: block; line-height: 0; opacity: .55; filter: grayscale(.3); transition: opacity .2s; }
+.sk-footer-badge:hover { opacity: .9; filter: none; }
+.sk-footer-badge img { display: block; border-radius: 8px; }
 
 /* ── REVEAL ANIMATIONS ── */
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }

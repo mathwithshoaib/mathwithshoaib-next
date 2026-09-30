@@ -32,13 +32,13 @@ export default function Footer() {
       </div>
       <div className="sk-footer-bottom">
         <p>© 2025 Muhammad Shoaib Khan · LUMS · Lahore, Pakistan</p>
-        <a href="https://websitelaunches.com/site/mathwithshoaib.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://websitelaunches.com/site/mathwithshoaib.com" target="_blank" rel="noopener noreferrer" className="sk-footer-badge">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://websitelaunches.com/badge/mathwithshoaib.com.svg"
+            src="https://websitelaunches.com/badge/mathwithshoaib.com.svg?theme=dark"
             alt="Established online - Public launch record"
-            width="255"
-            height="55"
+            width="220"
+            height="48"
           />
         </a>
         <p>Built with Next.js &amp; Mathematics</p>
