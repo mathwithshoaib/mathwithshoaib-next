@@ -18,9 +18,9 @@ const INITIATIVES = [
     period: 'Oct 15 – Nov 12, 2024',
     color: 'var(--amber)',
     location: 'Skardu, Kharmang, Ghanche & Diamer, Gilgit-Baltistan',
-    description: `A one-month program, in partnership with the Gilgit-Baltistan government and Agha Khan University, training newly hired education fellows across the region in "Gamifying Math Teaching" — an approach to make mathematics engaging and fun for students. 1,200 fellows were trained across all 10 districts of Gilgit-Baltistan; I personally travelled to and taught in 4 of them.`,
+    description: `A one-month program, in partnership with the Gilgit-Baltistan government and Agha Khan University, training newly hired education fellows across the region in "Gamifying Math Teaching" — an approach to make mathematics engaging and fun for students. 1,200 fellows were trained across all 10 districts of Gilgit-Baltistan in total; I personally travelled to 4 of those districts and directly trained around 200+ of the fellows myself.`,
     stats: [
-      { label: 'Teachers trained', value: '1,200' },
+      { label: 'Teachers trained (personally)', value: '200+' },
       { label: 'Districts (GB-wide)', value: '10' },
       { label: 'Districts visited personally', value: '4' },
     ],
@@ -38,24 +38,27 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'syedanwala-2024',
-    title: 'Syedanwala Summer Camp',
-    period: 'Summer 2024',
+    id: 'syedanwala-2024-25',
+    title: 'Syedanwala Summer School',
+    period: '2024 & 2025',
     color: 'var(--teal)',
     location: 'Syedanwala Higher Secondary School, District Kasur',
     description: `A one-month summer program at Syedanwala Higher Secondary School, serving students in grades 6–8 with hands-on problem-solving instruction alongside teacher training for the school's own staff.`,
-    highlights: [],
+    highlights: [
+      { icon: '👥', text: '~250 students trained (roughly equal boys and girls)' },
+      { icon: '📍', text: 'Qasoor Campus (2025): a further 130 students, all girls' },
+    ],
   },
   {
     id: 'gb-bootcamp-2023',
     title: 'GB Summer Fiesta BootCamp',
-    period: '2023 · 10 days',
+    period: '2023 · 2 weeks',
     color: 'var(--violet)',
-    location: 'Ghanche District, Gilgit-Baltistan',
+    location: 'Khaplu, Ghanche District, Gilgit-Baltistan',
     description: `The Gilgit-Baltistan government's "Summer Fiesta" — a ten-day camp redefining schools as centers of learning and enjoyment over the summer, combining creative learning, extracurriculars, health awareness, field trips, sports, entrepreneurship training, IT bootcamps, and robotics. It brought together the private sector, NGOs, banks, IT institutions, LUMS, NUST, philanthropists, and civil society. LUMS deployed 45 people in 9 teams of 5 — one team per district — each team pairing a leader with four instructors across math circles, machine learning, design thinking, renewable energy, and computer learning.`,
     highlights: [
-      { icon: '📍', text: 'Assigned to Ghanche district as Math Circle instructor, two weeks' },
-      { icon: '👥', text: '~200 students reached (about 100 per week)' },
+      { icon: '📍', text: 'Assigned to Khaplu, Ghanche district as Math Circle instructor, two weeks' },
+      { icon: '👥', text: '150+ female students trained' },
       { icon: '⭕', text: 'Taught concepts through games — including enlarging circles to introduce the idea of infinity' },
       { icon: '🪐', text: 'Ran the "Jumping Julia" activity as a hands-on favorite' },
     ],
@@ -67,18 +70,45 @@ const INITIATIVES = [
     color: 'var(--rose)',
     location: 'Chak 678 GB Khair Shah, Tehsil Pirmahal, District Toba Tek Singh',
     description: `I became the first PhD student at LUMS to set up a Math Circle in his own village — running two sessions in one day at the village's two government schools (Government Primary School for Boys and Government Middle School for Girls). Dr. Waqas Ali Azhar of the LUMS Math Department later wrote about the initiative in a blog post titled "A candle that lights another loses nothing," calling it "the beginning of a new journey of LUMS Math Circles to inspire young instructors to promote Mathematics at the grassroot level."`,
-    highlights: [],
+    highlights: [
+      { icon: '👥', text: '~100 students reached (roughly equal boys and girls)' },
+    ],
+  },
+  {
+    id: 'gojra-girls',
+    title: 'Math Circle — Gojra Girls High School',
+    period: '',
+    color: 'var(--teal)',
+    location: 'Gojra, District Toba Tek Singh',
+    description: `A Math Circle session for students at Gojra Girls High School.`,
+    highlights: [
+      { icon: '👥', text: '120+ students trained (all girls)' },
+    ],
+  },
+  {
+    id: 'lahore-science-mela',
+    title: 'Lahore Science Mela',
+    period: '2023 & 2025',
+    color: 'var(--amber)',
+    location: 'Lahore, Punjab',
+    description: `A Math Circle presence at the Lahore Science Mela, a public science festival, across two editions.`,
+    highlights: [
+      { icon: '👥', text: '200+ students reached (roughly equal boys and girls)' },
+    ],
   },
   {
     id: 'lums-volunteer',
     title: 'Volunteer, LUMS Math Circles',
     period: 'Ongoing · Bi-weekly',
-    color: 'var(--amber)',
+    color: 'var(--rose)',
     location: 'LUMS, Lahore',
     description: `Beyond leading my own sessions, I volunteer with LUMS Math Circles' own bi-weekly events at the Math Department — the organization whose mission every initiative above builds on.`,
+    highlights: [
+      { icon: '🏛️', text: 'Epsilon (on-campus circle): 50+ students reached (roughly equal boys and girls)' },
+      { icon: '📅', text: 'In-house activities, 2022–2024 (as volunteer): 300+ students reached' },
+    ],
     href: 'https://sites.google.com/view/lumsmathcircles/home',
     hrefLabel: 'Visit LUMS Math Circles →',
-    highlights: [],
   },
 ];
 
@@ -127,11 +157,11 @@ export default function MathCirclesPage() {
         <div className="container">
           <div className="mc-stats reveal">
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--amber)' }}>1,200+</div>
-              <div className="mc-stat-label">Teachers trained</div>
+              <div className="mc-stat-value" style={{ color: 'var(--amber)' }}>200+</div>
+              <div className="mc-stat-label">Teachers trained directly</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--teal)' }}>200+</div>
+              <div className="mc-stat-value" style={{ color: 'var(--teal)' }}>1,300+</div>
               <div className="mc-stat-label">Students taught directly</div>
             </div>
             <div className="mc-stat">

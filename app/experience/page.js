@@ -38,7 +38,7 @@ const ROLES = [
     icon: '🧮',
     title: 'Math Circles',
     period: '2022 – present',
-    description: 'Outreach across Gilgit-Baltistan, my home village, and LUMS — 1,200+ teachers and 200+ students reached directly.',
+    description: 'Outreach across Gilgit-Baltistan, Punjab, and LUMS — 200+ teachers and 1,300+ students reached directly.',
     href: '/experience/math-circles',
     color: 'var(--violet)',
   },
