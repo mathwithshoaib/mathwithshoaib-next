@@ -42,15 +42,21 @@ const ROLES = [
     href: '/experience/math-circles',
     color: 'var(--violet)',
   },
-  {
-    id: 'tutoring',
-    icon: '📚',
-    title: 'Private Tutoring',
-    period: 'Ongoing',
-    description: 'One-on-one tutoring including GRE test-prep and general math support through Preply.',
-    href: null,
-    color: 'var(--rose)',
-  },
+];
+
+/* Private tutoring doesn't have its own /experience/<role> page — the
+   detail lives right here instead of behind a "View details" click,
+   since there's no separate page to send people to. */
+const TUTORING_SUBJECTS = [
+  'IB Diploma Math — Analysis & Approaches (SL & HL)',
+  'IB Diploma Math — Applications & Interpretation (SL & HL)',
+  'O-Level Mathematics',
+  'A-Level Mathematics & Additional Mathematics',
+  'Oxford NSM',
+  'Matriculation / FSc / BSc / ADP Preparation',
+  'GRE Quantitative Reasoning',
+  'Calculus',
+  'Linear Algebra',
 ];
 
 export default function ExperienceHubPage() {
@@ -86,32 +92,54 @@ export default function ExperienceHubPage() {
       </section>
 
       {/* ── ROLE CARDS ── */}
-      <section className="sk-section">
+      <section className="sk-section-sm">
         <div className="container">
           <div className="exp-hub-grid">
-            {ROLES.map((r) => {
-              const Wrapper = r.href ? Link : 'div';
-              return (
-                <Wrapper
-                  key={r.id}
-                  {...(r.href ? { href: r.href } : {})}
-                  className={`reveal card exp-hub-card${r.href ? ' exp-hub-card-link' : ''}`}
-                  style={{ borderTop: `3px solid ${r.color}` }}
-                >
-                  <div style={{ fontSize: '2rem', marginBottom: '12px' }}>{r.icon}</div>
-                  <div style={{ fontFamily: 'var(--fm)', fontSize: '.68rem', color: r.color, letterSpacing: '.04em', marginBottom: '6px' }}>
-                    {r.period}
-                  </div>
-                  <h3 style={{ fontSize: '1.1rem', margin: '0 0 8px', color: 'var(--text)' }}>{r.title}</h3>
-                  <p style={{ fontSize: '.88rem', color: 'var(--text2)', lineHeight: 1.65, margin: 0 }}>{r.description}</p>
-                  {r.href && (
-                    <div style={{ marginTop: '16px', color: r.color, fontFamily: 'var(--fm)', fontSize: '.78rem', fontWeight: 600 }}>
-                      View details →
-                    </div>
-                  )}
-                </Wrapper>
-              );
-            })}
+            {ROLES.map((r) => (
+              <Link
+                key={r.id}
+                href={r.href}
+                className="reveal card exp-hub-card"
+                style={{ borderTop: `3px solid ${r.color}` }}
+              >
+                <div style={{ fontSize: '1.4rem', marginBottom: '8px' }}>{r.icon}</div>
+                <div style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: r.color, letterSpacing: '.04em', marginBottom: '4px' }}>
+                  {r.period}
+                </div>
+                <h3 style={{ fontSize: '.96rem', margin: '0 0 6px', color: 'var(--text)' }}>{r.title}</h3>
+                <p style={{ fontSize: '.8rem', color: 'var(--text2)', lineHeight: 1.55, margin: 0 }}>{r.description}</p>
+                <div style={{ marginTop: '10px', color: r.color, fontFamily: 'var(--fm)', fontSize: '.72rem', fontWeight: 600 }}>
+                  View details →
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRIVATE & ONLINE TUTORING ── */}
+      <section className="sk-section">
+        <div className="container" style={{ maxWidth: '820px' }}>
+          <div className="reveal card" style={{ padding: '26px 28px', borderTop: '3px solid var(--rose)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
+              <h3 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--text)' }}>
+                Private &amp; Online Tutor <span style={{ color: 'var(--text3)', fontWeight: 400, fontSize: '.9rem' }}>— independent and via Preply</span>
+              </h3>
+              <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--rose)', whiteSpace: 'nowrap' }}>2016 – Present</span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', margin: '16px 0' }}>
+              {TUTORING_SUBJECTS.map((s) => (
+                <span key={s} className="tag" style={{ borderColor: 'rgba(224,107,107,.4)', color: 'var(--rose)', fontSize: '.74rem' }}>
+                  {s}
+                </span>
+              ))}
+            </div>
+
+            <p style={{ color: 'var(--text2)', lineHeight: 1.8, margin: 0, fontSize: '.9rem' }}>
+              Produces bespoke lecture notes, worked examples, and revision material tailored to each syllabus
+              and student.
+            </p>
           </div>
         </div>
       </section>
@@ -131,9 +159,8 @@ export default function ExperienceHubPage() {
       <Footer />
 
       <style>{`
-        .exp-hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-        .exp-hub-card { display: block; text-decoration: none; padding: 26px 24px; }
-        .exp-hub-card-link { cursor: pointer; }
+        .exp-hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 760px; }
+        .exp-hub-card { display: block; text-decoration: none; padding: 18px 20px; }
       `}</style>
     </>
   );
