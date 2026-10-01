@@ -9,7 +9,7 @@ const NAV = [
   { href: '/',          label: 'Home',      page: 'home' },
   { href: '/education', label: 'Education', page: 'education' },
   {
-    label: 'Experience', page: 'experience',
+    href: '/experience', label: 'Experience', page: 'experience',
     children: [
       { href: '/experience/instructor',   label: '👨‍🏫 As Instructor' },
       { href: '/experience/ta',           label: '📋 As Teaching Assistant' },
@@ -18,7 +18,7 @@ const NAV = [
   },
   { href: '/courses',  label: 'Courses',   page: 'courses' },
   { href: '/research', label: 'Research',  page: 'research' },
-  { href: '/hobbies',  label: 'Hobbies',   page: 'hobbies' },
+  // Hobbies hidden from nav until the page has real content — see app/hobbies (not yet built).
   { href: '/explore',  label: 'Explore',   page: 'explore' },
   { href: '/contact',  label: 'Contact',   page: 'contact' },
 ];
@@ -73,19 +73,24 @@ export default function Navbar({ activePage = 'home' }) {
         {/* DESKTOP LINKS */}
         <div className={`${styles.links} ${menuOpen ? styles.open : ''}`}>
           {NAV.map(item => {
-            /* Dropdown item */
+            /* Dropdown item — label links to its own hub page; the arrow is a separate toggle */
             if (item.children) {
               const isActive = activePage === item.page;
               return (
                 <div key={item.label} className={styles.item} ref={dropRef}>
-                  <button
-                    className={`${styles.link} ${isActive ? styles.active : ''}`}
-                    onClick={() => setDropOpen(o => !o)}
-                    aria-expanded={dropOpen}
-                  >
-                    {item.label}
-                    <span className={`${styles.arrow} ${dropOpen ? styles.arrowOpen : ''}`}>▾</span>
-                  </button>
+                  <div className={`${styles.linkGroup} ${isActive ? styles.active : ''}`}>
+                    <Link href={item.href} className={styles.linkMain} onClick={closeAll}>
+                      {item.label}
+                    </Link>
+                    <button
+                      className={styles.arrowBtn}
+                      onClick={() => setDropOpen(o => !o)}
+                      aria-expanded={dropOpen}
+                      aria-label={`${item.label} submenu`}
+                    >
+                      <span className={`${styles.arrow} ${dropOpen ? styles.arrowOpen : ''}`}>▾</span>
+                    </button>
+                  </div>
                   {dropOpen && (
                     <div className={styles.dropdown}>
                       {item.children.map(c => (

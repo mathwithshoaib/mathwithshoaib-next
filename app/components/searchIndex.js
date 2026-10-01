@@ -16,6 +16,7 @@ export const SEARCH_INDEX = [
   { title: 'Contact', description: 'Email, phone, and social links', url: '/contact', type: 'Page' },
 
   // Experience
+  { title: 'Experience', description: 'Teaching overview — Instructor, TA, Math Circles, private tutoring', url: '/experience', type: 'Page' },
   { title: 'As an Instructor', description: 'Teaching roles — Calculus, Fall 2025 through Fall 2026', url: '/experience/instructor', type: 'Experience' },
   { title: 'As a Teaching Assistant', description: 'TA roles — Calculus and Pre-Calculus, 2023–2026', url: '/experience/ta', type: 'Experience' },
   { title: 'Math Circles', description: 'Outreach — Gilgit-Baltistan, home village, LUMS volunteering', url: '/experience/math-circles', type: 'Experience' },

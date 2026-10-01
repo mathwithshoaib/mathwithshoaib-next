@@ -19,6 +19,7 @@ const PATHS = [
   '/research',
   '/explore',
   '/contact',
+  '/experience',
   '/experience/math-circles',
   '/experience/ta',
   '/experience/instructor',
