@@ -154,6 +154,7 @@ RECITATIONS[1] = { slides: 'https://canva.link/fa26-w2-cal-1-recitation', notes:
 RECITATIONS[2] = { slides: 'https://canva.link/fa26-w3-cal-1-recitation', notes: null };
 // University was off the usual recitation day that week, so this one was recorded on video instead of PDF notes.
 RECITATIONS[3] = { slides: 'https://canva.link/fa26-w4-cal-1-recitation', notes: '/courses/calc1-fa26/video-resources', notesLabel: 'Videos →' };
+RECITATIONS[4] = { slides: 'https://canva.link/1m9oe4zocopurvm', notes: null };
 
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
