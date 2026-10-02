@@ -104,7 +104,7 @@ export default function Home() {
             <Link href="/explore" className="card card-violet" style={{ textDecoration: 'none' }}>
               <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🚀</div>
               <h4>Explore</h4>
-              <p style={{ fontSize: '.88rem' }}>Interactive mathematical activities — fold paper to the Moon and more!</p>
+              <p style={{ fontSize: '.88rem' }}>A hub of math games, puzzles, and a new daily puzzle to solve.</p>
             </Link>
           </div>
         </div>

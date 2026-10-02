@@ -12,7 +12,7 @@ export const SEARCH_INDEX = [
   { title: 'Education', description: 'Academic journey — GCU, COMSATS, University of Lille', url: '/education', type: 'Page' },
   { title: 'Research', description: 'Mathematical epidemiology & optimal control — co-infection modeling', url: '/research', type: 'Page' },
   { title: 'Courses', description: 'All courses taught or assisted', url: '/courses', type: 'Page' },
-  { title: 'Explore', description: 'Math games and puzzles — Nim, Paper Folding to the Moon', url: '/explore', type: 'Page' },
+  { title: 'Explore', description: 'A hub of math games, simulations, puzzles, and a daily puzzle — Nim, Paper Folding to the Moon, and more', url: '/explore', type: 'Page' },
   { title: 'Contact', description: 'Email, phone, and social links', url: '/contact', type: 'Page' },
 
   // Experience
