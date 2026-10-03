@@ -92,7 +92,7 @@ export default function ResearchPage() {
           pointerEvents: 'none',
         }} />
         <div className="container" style={{ padding: '64px 32px 56px' }}>
-          <span className="eyebrow reveal">Doctoral Research</span>
+          <span className="eyebrow reveal">Current Research</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '680px' }} className="reveal">
             Mathematical Epidemiology &amp; <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>Optimal Control</em>
           </h1>

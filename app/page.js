@@ -53,7 +53,7 @@ export default function Home() {
               <h1>Muhammad<br /><em>Shoaib Khan</em></h1>
               <div className="hero-role">Adjunct Teaching Fellow &amp; Research Assistant · LUMS</div>
               <p className="hero-desc">
-                Welcome to my academic home. I teach mathematics rigorously and passionately at LUMS, and pursue doctoral research in mathematical epidemiology — using differential equations to understand how diseases spread through populations.
+                Welcome to my academic home. I teach mathematics rigorously and passionately at LUMS, and conduct research in mathematical epidemiology — using differential equations to understand how diseases spread through populations.
               </p>
               <div className="hero-btns">
                 <Link href="/courses" className="btn">My Courses</Link>
@@ -74,7 +74,7 @@ export default function Home() {
             <div className="stat"><span className="stat-n">4</span><div className="stat-l">Courses Taught</div></div>
             <div className="stat"><span className="stat-n">🥇</span><div className="stat-l">Gold Medal</div></div>
             <div className="stat"><span className="stat-n">LUMS</span><div className="stat-l">Institution</div></div>
-            <div className="stat"><span className="stat-n">PhD</span><div className="stat-l">Research Ongoing</div></div>
+            <div className="stat"><span className="stat-n">🔬</span><div className="stat-l">Research Ongoing</div></div>
             <div className="stat"><span className="stat-n">∞</span><div className="stat-l">Love for Math</div></div>
           </div>
         </div>
@@ -117,7 +117,7 @@ export default function Home() {
             <div className="reveal">
               <span className="eyebrow">Current Focus</span>
               <h2>Research in Mathematical Epidemiology</h2>
-              <p>My doctoral research develops compartmental ODE models for disease co-infection — studying how pathogens like influenza and pneumonia interact in shared host populations. The work involves computing ℛ₀ via the Next Generation Matrix, stability analysis, and bifurcation theory.</p>
+              <p>My research develops compartmental ODE models for disease co-infection — studying how pathogens like influenza and pneumonia interact in shared host populations. The work involves computing ℛ₀ via the Next Generation Matrix, stability analysis, and bifurcation theory.</p>
               <Link href="/research" className="btn btn-outline" style={{ marginTop: '8px' }}>View Research →</Link>
             </div>
             <div className="code-card reveal">

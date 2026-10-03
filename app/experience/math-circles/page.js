@@ -69,7 +69,7 @@ const INITIATIVES = [
     period: 'November 7, 2022',
     color: 'var(--rose)',
     location: 'Chak 678 GB Khair Shah, Tehsil Pirmahal, District Toba Tek Singh',
-    description: `I became the first PhD student at LUMS to set up a Math Circle in his own village — running two sessions in one day at the village's two government schools (Government Primary School for Boys and Government Middle School for Girls). Dr. Waqas Ali Azhar of the LUMS Math Department later wrote about the initiative in a blog post titled "A candle that lights another loses nothing," calling it "the beginning of a new journey of LUMS Math Circles to inspire young instructors to promote Mathematics at the grassroot level."`,
+    description: `I became the first LUMS Teaching Fellow to set up a Math Circle in his own village — running two sessions in one day at the village's two government schools (Government Primary School for Boys and Government Middle School for Girls). Dr. Waqas Ali Azhar of the LUMS Math Department later wrote about the initiative in a blog post titled "A candle that lights another loses nothing," calling it "the beginning of a new journey of LUMS Math Circles to inspire young instructors to promote Mathematics at the grassroot level."`,
     highlights: [
       { icon: '👥', text: '~100 students reached (roughly equal boys and girls)' },
     ],

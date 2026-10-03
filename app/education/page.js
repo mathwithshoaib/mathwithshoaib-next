@@ -198,7 +198,7 @@ export default function Education() {
           <span className="eyebrow reveal">What's Next</span>
           <h2 className="reveal">Currently at LUMS</h2>
           <p className="reveal" style={{ maxWidth: '520px', margin: '0 auto 32px', color: 'var(--text2)' }}>
-            Teaching fellow and research assistant at the Lahore University of Management Sciences, pursuing doctoral research in mathematical epidemiology.
+            Teaching Fellow and research assistant at the Lahore University of Management Sciences, researching mathematical epidemiology.
           </p>
           <div className="reveal" style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/courses" className="btn">View My Courses</Link>
