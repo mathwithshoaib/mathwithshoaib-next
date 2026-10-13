@@ -40,6 +40,21 @@ export const ACTIVITIES = [
     course: null,
   },
   {
+    slug: '100-square-jigsaw',
+    title: '100 Square Jigsaw',
+    hook: 'Rebuild the hundred square, piece by piece — no two numbers run quite the way you expect.',
+    category: 'puzzles',
+    minutes: 15,
+    difficulty: 'medium',
+    status: 'live',
+    addedOn: '2026-10-13',
+    badge: null,
+    course: null,
+    // Needs real room for the 10x10 board + piece tray side by side — skip
+    // the standard narrow activity container (see ActivityShell).
+    fullWidth: true,
+  },
+  {
     slug: 'birthday-paradox',
     title: 'Birthday Paradox',
     hook: 'How few people need to be in a room before two share a birthday?',

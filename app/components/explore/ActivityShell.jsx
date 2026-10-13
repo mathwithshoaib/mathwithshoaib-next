@@ -46,7 +46,7 @@ export default function ActivityShell({ activity }) {
       </div>
 
       <section className="sk-section" style={{ paddingTop: '48px' }}>
-        <div className="container" style={{ maxWidth: '820px' }}>
+        <div className="container" style={{ maxWidth: activity.fullWidth ? 'var(--max-w)' : '820px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
             <CategoryTag category={activity.category} />
             <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>{activity.minutes} min</span>
@@ -58,9 +58,15 @@ export default function ActivityShell({ activity }) {
             </p>
           )}
 
-          <div className="card" style={{ padding: '28px 30px', marginBottom: '32px' }}>
-            <ActivityLoader slug={activity.slug} onEvent={handleEvent} />
-          </div>
+          {activity.fullWidth ? (
+            <div style={{ marginBottom: '32px' }}>
+              <ActivityLoader slug={activity.slug} onEvent={handleEvent} />
+            </div>
+          ) : (
+            <div className="card" style={{ padding: '28px 30px', marginBottom: '32px' }}>
+              <ActivityLoader slug={activity.slug} onEvent={handleEvent} />
+            </div>
+          )}
 
           {content?.whyItWorks && (
             <div style={{ marginBottom: '40px' }}>

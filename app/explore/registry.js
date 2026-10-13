@@ -9,4 +9,5 @@ import dynamic from 'next/dynamic';
 export const REGISTRY = {
   nim: dynamic(() => import('./activities/NimGame'), { ssr: false }),
   'paper-folding': dynamic(() => import('./activities/PaperFolding'), { ssr: false }),
+  '100-square-jigsaw': dynamic(() => import('./activities/HundredSquareJigsaw'), { ssr: false }),
 };
