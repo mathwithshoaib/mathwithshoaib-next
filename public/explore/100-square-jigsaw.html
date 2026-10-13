@@ -8,10 +8,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Layout: a 10 x 10 board beside a tray of loose pieces; stacked on phones.
-   Pieces are drawn at one shared cell size so a piece in the tray matches the board exactly.
-   Theme: re-mapped to mathwithshoaib.com's dark palette (site is dark-only, no light mode,
-   so the colors below are hardcoded instead of following prefers-color-scheme). */
+/* Layout: a 10 x 10 board (sticky, so it stays visible while scrolling) with
+   the tray of loose pieces below it, always full width — there are often 15+
+   irregularly-shaped pieces, so a side column is too narrow and forces a lot
+   of vertical scrolling just to see them all. Pieces are drawn at one shared
+   cell size so a piece in the tray matches the board exactly.
+   Theme: re-mapped to mathwithshoaib.com's dark palette (site is dark-only, no
+   light mode, so the colors below are hardcoded instead of following
+   prefers-color-scheme). */
 :root {
   --bg: #181f2e;
   --surface: #1e2840;
@@ -33,7 +37,7 @@
   --p8: #8a4a82; --p9: #4a5568; --p10: #8a4f33; --p11: #2b6d66;
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
-  --cell: 40px;
+  --cell: 36px;
   color-scheme: dark;
 }
 
@@ -44,19 +48,11 @@ body {
   font-size: 16px;
   line-height: 1.45;
   padding-inline: 16px;
-  padding-block: 20px 32px;
+  padding-block: 14px 24px;
 }
-.app { max-width: 1120px; margin: 0 auto; display: grid; gap: 18px; }
-h1 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.7rem, 4.5vw, 2.5rem);
-  line-height: 1.05;
-  margin: 0 0 8px;
-  text-wrap: balance;
-}
-.lead { margin: 0; max-width: 62ch; color: var(--muted); }
-.credit { margin: 6px 0 0; font-size: 0.85rem; color: var(--muted); }
+.app { max-width: 1120px; margin: 0 auto; display: grid; gap: 12px; }
+header { margin-bottom: 2px; }
+.credit { margin: 0; font-size: 0.8rem; color: var(--muted); }
 .credit a { color: var(--accent); }
 
 .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -69,12 +65,15 @@ h1 {
 .tab .tick { margin-left: 6px; }
 .desc { margin: 0; min-height: 1.5em; }
 
-.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
 .panel {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: 14px; padding: 14px; min-width: 0;
+  border-radius: 14px; padding: 12px; min-width: 0;
 }
-.boardpanel { display: grid; gap: 12px; justify-items: center; }
+.boardpanel {
+  display: grid; gap: 8px; justify-items: center;
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 2;
+}
 .meta {
   display: flex; justify-content: space-between; gap: 12px; width: 100%;
   font-weight: 700; font-variant-numeric: tabular-nums;
@@ -106,9 +105,9 @@ h1 {
 }
 .win strong { font-family: var(--font-display); font-size: 1.25rem; }
 
-.traypanel h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; margin: 0; }
-.traynote { margin: 2px 0 0; color: var(--muted); font-size: 0.9rem; }
-.tray { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; padding-top: 14px; }
+.traypanel h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0; }
+.traynote { margin: 2px 0 0; color: var(--muted); font-size: 0.88rem; }
+.tray { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; padding-top: 10px; }
 .empty { color: var(--muted); margin: 0; }
 
 .piece { position: relative; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
@@ -147,18 +146,12 @@ h1 {
   border-block: 2px dashed var(--hint);
 }
 
-@media (max-width: 600px) { .panel { padding: 8px; } .tray { gap: 14px; } }
-@media (min-width: 900px) {
-  .stage { grid-template-columns: auto minmax(0, 1fr); }
-  .boardpanel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
-}
+@media (max-width: 600px) { .panel { padding: 8px; } .tray { gap: 10px; } }
 @media (prefers-reduced-motion: reduce) { .piece.hinted { animation: none; } }
 </style>
 
 <div class="app">
   <header>
-    <h1>100 Square Jigsaw</h1>
-    <p class="lead">Complete the hundred square by fitting every piece into place. Drag a piece onto the board, or tap a piece and then tap a square. Pieces stay the same way up.</p>
     <p class="credit">Inspired by the NRICH task <a href="https://nrich.maths.org/problems/100-square-jigsaw?tab=overview" target="_blank" rel="noopener">100 Square Jigsaw</a> from the University of Cambridge.</p>
   </header>
 
@@ -297,13 +290,14 @@ h1 {
   }
 
   function fit() {
+    // Board and tray are always full width (stacked, not side-by-side), so
+    // cell size is based on the full available width, not a shared column —
+    // capped fairly small so the board+tray together stay compact and the
+    // whole puzzle fits comfortably in one screen without much scrolling.
     var vw = root.clientWidth;
-    if (vw >= 900) {
-      var avail = Math.min(vw, 1120) - 32;
-      cellPx = Math.max(34, Math.min(50, Math.floor((avail - 400) / 10)));
-    } else {
-      cellPx = Math.max(24, Math.min(46, Math.floor((vw - (vw <= 600 ? 52 : 64)) / 10)));
-    }
+    var reserve = vw <= 600 ? 48 : 64;
+    var avail = Math.min(vw, 1120) - reserve;
+    cellPx = Math.max(24, Math.min(38, Math.floor(avail / 10)));
     root.style.setProperty('--cell', cellPx + 'px');
   }
 
