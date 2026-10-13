@@ -8,10 +8,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* Layout: a 10 x 10 board (sticky, so it stays visible while scrolling) with
-   the tray of loose pieces below it, always full width — there are often 15+
-   irregularly-shaped pieces, so a side column is too narrow and forces a lot
-   of vertical scrolling just to see them all. Pieces are drawn at one shared
+/* Layout: one panel holding both the 10x10 board and the piece tray. The
+   board floats to the right, so pieces wrap along its left side first and
+   then continue at full width once past its bottom edge — one box with
+   pieces on two sides of the board, instead of a side column too narrow to
+   show 15+ irregularly-shaped pieces without a lot of scrolling. On narrow
+   screens the float is dropped (board on top, pieces below) since there's
+   no room for anything to sit beside it. Pieces are drawn at one shared
    cell size so a piece in the tray matches the board exactly.
    Theme: re-mapped to mathwithshoaib.com's dark palette (site is dark-only, no
    light mode, so the colors below are hardcoded instead of following
@@ -65,14 +68,23 @@ header { margin-bottom: 2px; }
 .tab .tick { margin-left: 6px; }
 .desc { margin: 0; min-height: 1.5em; }
 
-.stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-items: start; }
 .panel {
   background: var(--surface); border: 1px solid var(--line);
   border-radius: 14px; padding: 12px; min-width: 0;
 }
-.boardpanel {
+/* Board floats inside the same panel as the pieces, so pieces wrap along its
+   left side first and then continue full-width below it — one box holding
+   everything, instead of a separate board column pushing pieces far down. */
+.stage::after { content: ''; display: block; clear: both; }
+.boardblock {
+  float: right;
+  width: calc(var(--cell) * 10);
+  margin: 0 0 16px 16px;
   display: grid; gap: 8px; justify-items: center;
-  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 8px); z-index: 2;
+}
+.stage h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0; }
+@media (max-width: 620px) {
+  .boardblock { float: none; margin: 0 auto 16px; }
 }
 .meta {
   display: flex; justify-content: space-between; gap: 12px; width: 100%;
@@ -105,12 +117,12 @@ header { margin-bottom: 2px; }
 }
 .win strong { font-family: var(--font-display); font-size: 1.25rem; }
 
-.traypanel h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 0; }
 .traynote { margin: 2px 0 0; color: var(--muted); font-size: 0.88rem; }
-.tray { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; padding-top: 10px; }
+.tray { padding-top: 10px; }
 .empty { color: var(--muted); margin: 0; }
 
 .piece { position: relative; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.piece:not(.onboard) { display: inline-block; vertical-align: top; margin: 0 10px 10px 0; }
 .piece.onboard { position: absolute; }
 .piece.locked { cursor: default; }
 .cell {
@@ -146,7 +158,7 @@ header { margin-bottom: 2px; }
   border-block: 2px dashed var(--hint);
 }
 
-@media (max-width: 600px) { .panel { padding: 8px; } .tray { gap: 10px; } }
+@media (max-width: 600px) { .panel { padding: 8px; } .piece:not(.onboard) { margin: 0 8px 8px 0; } }
 @media (prefers-reduced-motion: reduce) { .piece.hinted { animation: none; } }
 </style>
 
@@ -158,8 +170,8 @@ header { margin-bottom: 2px; }
   <div class="tabs" role="tablist" aria-label="Puzzles" id="tabs"></div>
   <p class="desc" id="desc"></p>
 
-  <div class="stage">
-    <section class="panel boardpanel" aria-label="The 100 square">
+  <section class="panel stage" aria-label="100 square puzzle">
+    <div class="boardblock" role="group" aria-label="The 100 square">
       <div class="meta"><span id="progress"></span><span id="timer" aria-label="Time">0:00</span></div>
       <div id="board" aria-label="Hundred square board, 10 rows of 10"></div>
       <div class="actions">
@@ -173,14 +185,12 @@ header { margin-bottom: 2px; }
         <span id="winText"></span>
         <div class="actions"><button class="btn primary" id="next" type="button"></button></div>
       </div>
-    </section>
+    </div>
 
-    <section class="panel traypanel" aria-label="Loose pieces">
-      <h2>Pieces</h2>
-      <p class="traynote" id="traynote"></p>
-      <div class="tray" id="tray"></div>
-    </section>
-  </div>
+    <h2>Pieces</h2>
+    <p class="traynote" id="traynote"></p>
+    <div class="tray" id="tray"></div>
+  </section>
 </div>
 
 <script>
