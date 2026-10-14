@@ -65,6 +65,9 @@ const LECTURE_NOTES = {
     if (i === 0) return 'https://drive.google.com/file/d/1B0hNzAlGgBK-ZvUKfxNzqTX1_X_Aaelm/view?usp=sharing';
     if (i === 1) return 'https://drive.google.com/file/d/1nbI9EJ6UcZNzIIHUTBASVL1Cc_jxHNa-/view?usp=sharing';
     if (i === 2) return 'https://drive.google.com/file/d/1FY6m-dG6gKanCeCJ3RGOT0ns0oYOORpv/view?usp=sharing';
+    if (i === 3) return 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Week-IV.pdf';
+    if (i === 4) return 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Week-V.pdf';
+    if (i === 5) return 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Week-VI.pdf';
     return v;
   }),
   'Dr. Omer Khawar Malik': Array(WEEK_COUNT).fill(null),
@@ -96,6 +99,15 @@ ADNAN_LECTURE_LINKS[2] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal
 ADNAN_LECTURE_LINKS[3] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec4WkBk.pdf';
 ADNAN_LECTURE_LINKS[4] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec5WkBk.pdf';
 ADNAN_LECTURE_LINKS[5] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec7WkBk.pdf';
+ADNAN_LECTURE_LINKS[6] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec9WkBk.pdf';
+ADNAN_LECTURE_LINKS[7] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec10WkBk.pdf';
+ADNAN_LECTURE_LINKS[8] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec11WkBkNonSSE.pdf';
+ADNAN_LECTURE_LINKS[9] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec11WkBkNonSSE.pdf';
+// This slot is the Mid-1 exam PDF, not a lecture — hence the {href,label} form instead of a plain URL.
+ADNAN_LECTURE_LINKS[10] = { href: 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/2026Exam1.pdf', label: 'Mid-1' };
+ADNAN_LECTURE_LINKS[11] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec13WkBk.pdf';
+ADNAN_LECTURE_LINKS[12] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec13WkBk-New.pdf';
+ADNAN_LECTURE_LINKS[13] = 'http://web.lums.edu.pk/~adnan.khan/classes/classes/Cal1/Lec14WkBk.pdf';
 
 // One lecture-notes table cell. Adnan Khan's column shows 2 small labeled
 // links (Lec-N / Lec-N+1) instead of the single "View" link everyone else
@@ -107,8 +119,9 @@ function LectureNoteCell({ person, week }) {
       <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
         {[0, 1].map((j) => {
           const idx = (week - 1) * 2 + j;
-          const href = ADNAN_LECTURE_LINKS[idx];
-          const label = `Lec-${idx + 1}`;
+          const entry = ADNAN_LECTURE_LINKS[idx];
+          const href = typeof entry === 'string' ? entry : entry?.href;
+          const label = (entry && typeof entry === 'object' && entry.label) ? entry.label : `Lec-${idx + 1}`;
           return href
             ? <Link key={j} href={href} target="_blank" rel="noopener noreferrer" style={linkStyle}>{label}</Link>
             : <span key={j} className="c26-soon">{label}</span>;
