@@ -45,14 +45,14 @@ export default function ActivityShell({ activity }) {
         </div>
       </div>
 
-      <section className="sk-section" style={{ paddingTop: '48px' }}>
+      <section className="sk-section" style={{ paddingTop: activity.minimalChrome ? '20px' : '48px' }}>
         <div className="container" style={{ maxWidth: activity.fullWidth ? 'var(--max-w)' : '820px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: activity.minimalChrome ? '4px' : '8px' }}>
             <CategoryTag category={activity.category} />
             <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: 'var(--text3)' }}>{activity.minutes} min</span>
           </div>
-          <h1 style={{ fontSize: 'clamp(2.2rem,4vw,3.2rem)', marginBottom: '14px' }}>{activity.title}</h1>
-          {content?.howToPlay && (
+          <h1 style={{ fontSize: activity.minimalChrome ? 'clamp(1.6rem,3vw,2.1rem)' : 'clamp(2.2rem,4vw,3.2rem)', marginBottom: activity.minimalChrome ? '10px' : '14px' }}>{activity.title}</h1>
+          {!activity.minimalChrome && content?.howToPlay && (
             <p style={{ color: 'var(--text2)', lineHeight: 1.8, marginBottom: '28px' }}>
               <strong style={{ color: 'var(--text)' }}>How to play: </strong>{content.howToPlay}
             </p>

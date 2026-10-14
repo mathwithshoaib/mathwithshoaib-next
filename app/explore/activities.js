@@ -55,6 +55,23 @@ export const ACTIVITIES = [
     fullWidth: true,
   },
   {
+    slug: 'wall-hurdle',
+    title: 'Wall Hurdle',
+    hook: 'Race your pawn to the far side — but every wall you place can trap you too.',
+    category: 'games',
+    minutes: 10,
+    difficulty: 'medium',
+    status: 'live',
+    addedOn: '2026-10-14',
+    badge: null,
+    course: null,
+    // Wants real width for its board + sidebar, and its own menu/tutorial
+    // already explain how to play — skip the narrow container and the
+    // redundant "how to play" paragraph (see ActivityShell).
+    fullWidth: true,
+    minimalChrome: true,
+  },
+  {
     slug: 'birthday-paradox',
     title: 'Birthday Paradox',
     hook: 'How few people need to be in a room before two share a birthday?',

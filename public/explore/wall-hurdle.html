@@ -1,0 +1,1732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html{color-scheme:dark;height:100%}body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Wall Hurdle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Outfit:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: menu and setup are single columns. The game is the board with the two player cards,
+   and a side column (status, wall tools, actions, moves) that drops below the board on phones. */
+:root {
+  --bg: #090f21;
+  --bg2: #0d1630;
+  --panel: #111b38;
+  --panel2: #16224a;
+  --line: #23336a;
+  --ink: #eaf0ff;
+  --muted: #93a5d1;
+  --cyan: #25e8d4;
+  --cyan-dim: rgba(37, 232, 212, 0.16);
+  --magenta: #ff4aa5;
+  --magenta-dim: rgba(255, 74, 165, 0.16);
+  --ok: #4dffb8;
+  --bad: #ff5a6e;
+  --warn: #ffc34d;
+  --cellc: #101a38;
+  --cellb: #1b2b58;
+  --font: 'Outfit', 'Trebuchet MS', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(60rem 40rem at 0% -10%, rgba(37, 232, 212, 0.10), transparent 60%),
+    radial-gradient(60rem 40rem at 100% 110%, rgba(255, 74, 165, 0.10), transparent 60%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.4;
+  padding-inline: 16px;
+  padding-block: 14px 28px;
+  min-height: 100%;
+}
+button { font: inherit; color: inherit; }
+h1, h2, h3, p { margin: 0; }
+.shell { max-width: 1080px; margin: 0 auto; }
+.screen[hidden], [hidden] { display: none !important; }
+
+/* ---------- shared controls ---------- */
+.btn {
+  min-height: 48px; padding: 10px 18px; border-radius: 12px; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--panel); color: var(--ink); font-weight: 600; letter-spacing: 0.01em;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: var(--cyan); border-color: var(--cyan); color: #04211e; }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.07); }
+.btn.danger { border-color: #7a2f44; color: #ffb3c1; }
+.btn.ghost { background: transparent; }
+.btn.small { min-height: 40px; padding: 6px 12px; font-size: 0.92rem; }
+.btn:focus-visible, .seg button:focus-visible, .tile:focus-visible, .toolbtn:focus-visible, input:focus-visible, summary:focus-visible, .board:focus-visible {
+  outline: 3px solid var(--warn); outline-offset: 2px;
+}
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.brand { font-weight: 800; letter-spacing: 0.22em; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+.brand i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+.brand i + i { background: var(--magenta); box-shadow: 0 0 12px var(--magenta); margin-left: -4px; }
+.muted { color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- menu ---------- */
+.hero { padding-block: 18px 12px; display: grid; gap: 10px; max-width: 40rem; }
+.hero h1 { font-size: clamp(2.2rem, 7vw, 3.6rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.01em; text-wrap: balance; }
+.hero h1 b { color: var(--cyan); font-weight: 800; }
+.hero h1 em { color: var(--magenta); font-style: normal; }
+.hero p { color: var(--muted); max-width: 34rem; font-size: 1.05rem; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-block: 18px; }
+.tile {
+  text-align: left; padding: 16px; border-radius: 16px; cursor: pointer; background: var(--panel);
+  border: 1.5px solid var(--line); display: grid; gap: 4px; min-height: 92px; align-content: start;
+}
+.tile:hover { border-color: var(--cyan); }
+.tile strong { font-size: 1.15rem; font-weight: 700; }
+.tile span { color: var(--muted); font-size: 0.95rem; }
+.tile .glyph { font-family: var(--mono); color: var(--cyan); font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.tile:nth-child(even) .glyph { color: var(--magenta); }
+details.rules { background: var(--panel); border: 1.5px solid var(--line); border-radius: 16px; padding: 4px 16px; }
+details.rules summary { cursor: pointer; padding: 12px 0; font-weight: 600; }
+details.rules ul { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); max-width: 46rem; }
+details.rules li b { color: var(--ink); font-weight: 600; }
+.foot { margin-top: 18px; color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- setup and lobby ---------- */
+.panel { background: var(--panel); border: 1.5px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 16px; max-width: 40rem; }
+.panel h2 { font-size: 1.5rem; font-weight: 700; }
+.field { display: grid; gap: 8px; }
+.field > label, .field > .lab { font-weight: 600; font-size: 0.92rem; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { min-height: 46px; padding: 8px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg2); cursor: pointer; font-weight: 600; }
+.seg button[aria-checked="true"] { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); }
+.seg button:disabled { opacity: 0.55; cursor: default; }
+.hint { color: var(--muted); font-size: 0.9rem; }
+input.txt {
+  min-height: 48px; padding: 8px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--bg2); color: var(--ink); font: inherit; width: 100%;
+}
+input.code { font-family: var(--mono); font-size: 1.4rem; letter-spacing: 0.3em; text-transform: uppercase; text-align: center; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.row > * { min-width: 0; }
+.grow { flex: 1 1 10rem; }
+.or { text-align: center; color: var(--muted); font-size: 0.9rem; }
+.codebig { font-family: var(--mono); font-size: clamp(2rem, 9vw, 3rem); letter-spacing: 0.3em; font-weight: 600; color: var(--cyan); text-align: center; padding-block: 6px; }
+.plist { display: grid; gap: 8px; }
+.pl { display: flex; align-items: center; gap: 10px; background: var(--bg2); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+.pl .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.chip { font-size: 0.78rem; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.on { color: var(--ok); border-color: rgba(77, 255, 184, 0.5); }
+.chip.off { color: var(--bad); border-color: rgba(255, 90, 110, 0.5); }
+.errbox { color: #ffd0d8; background: rgba(255, 90, 110, 0.12); border: 1.5px solid rgba(255, 90, 110, 0.5); border-radius: 12px; padding: 10px 12px; }
+
+/* ---------- game ---------- */
+.gbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.gbar .modelab { font-weight: 600; color: var(--muted); font-size: 0.95rem; flex: 1; text-align: center; min-width: 8rem; }
+.gamegrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+.stage { display: grid; gap: 10px; min-width: 0; justify-items: center; }
+.stage > * { width: 100%; }
+.side { display: grid; gap: 12px; min-width: 0; }
+@media (min-width: 900px) {
+  .gamegrid { grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; }
+  .side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+}
+.card {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--panel); border: 1.5px solid var(--line); border-radius: 16px; max-width: 640px; margin-inline: auto;
+}
+.card.active.p0 { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--cyan-dim); }
+.card.active.p1 { border-color: var(--magenta); box-shadow: 0 0 0 3px var(--magenta-dim); }
+.sym {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 1.1rem; font-weight: 800;
+  border: 3px solid currentColor; background: rgba(255, 255, 255, 0.04);
+}
+.p0 .sym, .sym.p0 { color: var(--cyan); }
+.p1 .sym, .sym.p1 { color: var(--magenta); }
+.who { min-width: 0; display: grid; gap: 3px; }
+.who .nm { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.who .sub { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.85rem; flex-wrap: wrap; }
+.pips { display: flex; gap: 3px; flex-wrap: wrap; max-width: 12rem; }
+.pips i { width: 9px; height: 5px; border-radius: 2px; background: currentColor; opacity: 0.9; }
+.pips i.used { opacity: 0.18; }
+.p0 .pips { color: var(--cyan); }
+.p1 .pips { color: var(--magenta); }
+.clock { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 4.2ch; text-align: right; }
+.clock.low { color: var(--bad); }
+.clock.off { color: var(--muted); font-size: 1rem; }
+
+.boardwrap { display: grid; justify-items: center; max-width: 640px; margin-inline: auto; }
+.frame { position: relative; padding-left: 22px; padding-bottom: 22px; }
+.board { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; border-radius: 10px; outline-offset: 6px; }
+.lbl { position: absolute; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); display: grid; place-items: center; pointer-events: none; }
+.cellb { position: absolute; background: var(--cellc); border: 1px solid var(--cellb); border-radius: 6px; }
+.cellb.g0 { background: linear-gradient(180deg, rgba(37, 232, 212, 0.30), rgba(37, 232, 212, 0.10)); border-color: rgba(37, 232, 212, 0.45); }
+.cellb.g1 { background: linear-gradient(0deg, rgba(255, 74, 165, 0.30), rgba(255, 74, 165, 0.10)); border-color: rgba(255, 74, 165, 0.45); }
+.pawn {
+  position: absolute; left: 0; top: 0; border-radius: 50%; display: grid; place-items: center; font-weight: 800; z-index: 6;
+  background: radial-gradient(circle at 35% 30%, #fff8, transparent 40%), currentColor; color: var(--cyan);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 18px currentColor; transition: transform 0.22s cubic-bezier(.3, .7, .3, 1);
+}
+.pawn.p1 { color: var(--magenta); }
+.pawn span { color: #06101f; line-height: 1; }
+.pawn.sel { outline: 3px solid var(--ink); outline-offset: 3px; }
+.pawn.mine::after { content: ''; position: absolute; inset: -7px; border-radius: 50%; border: 2px dashed currentColor; opacity: 0.55; animation: spin 14s linear infinite; }
+.wall { position: absolute; border-radius: 99px; z-index: 4; background: #dfe8ff; box-shadow: 0 0 10px rgba(223, 232, 255, 0.55); }
+.wall.o0 { background: #b8fff6; box-shadow: 0 0 12px var(--cyan); }
+.wall.o1 { background: #ffc6e3; box-shadow: 0 0 12px var(--magenta); }
+.wall.fresh { animation: drop 0.28s ease-out; }
+.wall.ghost { opacity: 0.95; z-index: 8; }
+.wall.ghost.ok { background: var(--ok); box-shadow: 0 0 14px var(--ok); }
+.wall.ghost.bad { background: var(--bad); box-shadow: 0 0 14px var(--bad); }
+.wall.ghost.mark { background: var(--warn); box-shadow: 0 0 16px var(--warn); animation: pulse 1s ease-in-out infinite; }
+.dest { position: absolute; z-index: 5; border-radius: 6px; cursor: pointer; display: grid; place-items: center; }
+.dest::after { content: ''; width: 34%; height: 34%; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; animation: pulse 1.2s ease-in-out infinite; }
+.dest.p0 { color: var(--cyan); background: rgba(37, 232, 212, 0.14); }
+.dest.p1 { color: var(--magenta); background: rgba(255, 74, 165, 0.14); }
+.dest.hint { outline: 3px dashed var(--warn); outline-offset: -3px; }
+.rt { position: absolute; z-index: 3; border-radius: 50%; opacity: 0.8; pointer-events: none; }
+.rt.p0 { background: var(--cyan); }
+.rt.p1 { background: var(--magenta); }
+.anc { position: absolute; z-index: 2; border-radius: 50%; background: rgba(147, 165, 209, 0.45); pointer-events: none; }
+.cursor { position: absolute; z-index: 9; border: 3px solid var(--warn); border-radius: 8px; pointer-events: none; display: none; }
+.board:focus-visible .cursor { display: block; }
+.board.nomotion .pawn { transition: none; }
+
+.status { min-height: 3.1em; padding: 10px 14px; border-radius: 12px; background: var(--panel); border: 1.5px solid var(--line); max-width: 640px; margin-inline: auto; }
+.status.bad { border-color: rgba(255, 90, 110, 0.6); color: #ffd0d8; }
+.status.good { border-color: rgba(77, 255, 184, 0.5); }
+.status.info { border-color: rgba(255, 195, 77, 0.5); }
+
+.tools { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; }
+.toolbtn { min-height: 64px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--panel); cursor: pointer; display: grid; place-items: center; }
+.toolbtn[aria-pressed="true"] { border-color: var(--ok); background: rgba(77, 255, 184, 0.12); }
+.toolbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+.toolbtn i { display: block; background: var(--ink); border-radius: 99px; }
+.toolbtn.h i { width: 44px; height: 8px; }
+.toolbtn.v i { width: 8px; height: 44px; }
+.toolbtn .t { font-size: 0.72rem; color: var(--muted); }
+.wcount { display: grid; place-items: center; align-content: center; padding-inline: 12px; }
+.wcount b { font-size: 1.9rem; line-height: 1; }
+.wcount span { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+.wallact { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions .btn { flex: 1 1 auto; }
+.moves { background: var(--panel); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+.moves h3 { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.moves ol { list-style: none; margin: 0; padding: 0; max-height: 9.5rem; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 4px 8px; font-family: var(--mono); font-size: 0.82rem; }
+.moves li { padding: 1px 6px; border-radius: 6px; background: var(--bg2); }
+.moves li.p0 { color: var(--cyan); }
+.moves li.p1 { color: var(--magenta); }
+.moves .none { color: var(--muted); }
+.banner { padding: 10px 14px; border-radius: 12px; background: rgba(255, 195, 77, 0.12); border: 1.5px solid rgba(255, 195, 77, 0.55); display: grid; gap: 8px; }
+.banner .row { gap: 8px; }
+.tut { background: var(--panel2); border: 1.5px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.tut h3 { font-size: 1.15rem; }
+.tut p { color: var(--ink); white-space: pre-line; }
+.tut .step { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ---------- dialogs ---------- */
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(4, 8, 20, 0.72); }
+.dialog { width: min(26rem, 100%); background: var(--panel); border: 1.5px solid var(--line); border-radius: 20px; padding: 20px; display: grid; gap: 14px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); text-align: center; }
+.dialog h2 { font-size: 1.7rem; font-weight: 800; text-wrap: balance; }
+.dialog .big { font-size: 3rem; line-height: 1; }
+.dialog .big.p0 { color: var(--cyan); }
+.dialog .big.p1 { color: var(--magenta); }
+.dialog .btns { display: grid; gap: 10px; }
+.dialog .btns.two { grid-template-columns: 1fr 1fr; }
+.dialog.win h2 { color: var(--ok); }
+.dialog.lose h2 { color: var(--bad); }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); transform: translateX(-50%); z-index: 60; background: var(--panel2); border: 1.5px solid var(--line); padding: 10px 16px; border-radius: 12px; max-width: min(92vw, 30rem); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@keyframes pulse { 50% { transform: scale(1.15); opacity: 0.75; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes drop { from { transform: scale(1.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .pawn { transition: none; }
+  .pawn.mine::after, .dest::after, .wall.fresh, .wall.ghost.mark { animation: none; }
+}
+@media (max-width: 420px) {
+  .card { padding: 8px 10px; gap: 8px; }
+  .sym { width: 38px; height: 38px; }
+  .clock { font-size: 1.25rem; }
+}
+
+</style>
+<div class="shell" id="shell">
+
+  <section id="menu" class="screen">
+    <div class="topbar">
+      <div class="brand"><i></i><i></i> WALL HURDLE</div>
+      <button class="btn small ghost" id="soundMenu" type="button" aria-pressed="false">Sound: off</button>
+    </div>
+    <div class="hero">
+      <h1>Cross the board first. <b>Wall</b> your rival, <em>never</em> shut them in.</h1>
+      <p>Two pawns race to opposite sides. On your turn, move one square or place one wall. Walls slow your rival down, but every pawn must always keep a way through.</p>
+    </div>
+    <div class="tiles">
+      <button class="tile" id="goComputer" type="button"><span class="glyph">Solo</span><strong>Play the computer</strong><span>Easy, Medium, Hard or Expert</span></button>
+      <button class="tile" id="goLocal" type="button"><span class="glyph">Same screen</span><strong>Two players, one device</strong><span>Pass the phone or share the laptop</span></button>
+      <button class="tile" id="goOnline" type="button" hidden><span class="glyph">Live</span><strong>Play online</strong><span>Make a private room and share the code</span></button>
+      <button class="tile" id="goTutorial" type="button"><span class="glyph">Learn</span><strong>Interactive tutorial</strong><span>Six short steps, about two minutes</span></button>
+    </div>
+    <details class="rules">
+      <summary>Quick rules</summary>
+      <ul>
+        <li><b>Goal.</b> Cyan starts at the bottom and must reach any square on the top row. Magenta starts at the top and must reach the bottom row. The first to arrive wins.</li>
+        <li><b>Your turn.</b> Do exactly one thing: move your pawn one square up, down, left or right, or place one wall. You cannot pass.</li>
+        <li><b>Walls.</b> Each wall covers two squares of edge. Walls cannot overlap or cross, cannot be moved, and every pawn must keep at least one route to its goal row.</li>
+        <li><b>Jumps.</b> If the other pawn is next to you with no wall between, jump straight over it. If a wall or the board edge sits behind it, step to either side of it instead.</li>
+        <li><b>Repeats.</b> If the exact same position appears three times, the game is a draw.</li>
+      </ul>
+    </details>
+    <p class="foot">Keyboard: arrow keys move the cursor, Enter selects, W switches to walls, R turns a wall, Esc cancels.</p>
+  </section>
+
+  <section id="setup" class="screen" hidden></section>
+
+  <section id="game" class="screen" hidden>
+    <div class="gbar">
+      <button class="btn small" id="btnMenu" type="button">Menu</button>
+      <div class="modelab" id="modeLab"></div>
+      <div class="row">
+        <button class="btn small ghost" id="btnSound" type="button" aria-pressed="false">Sound: off</button>
+      </div>
+    </div>
+    <div class="gamegrid">
+      <div class="stage" id="stage">
+        <div class="card p1" id="cardTop"></div>
+        <div class="boardwrap">
+          <div class="frame" id="frame">
+            <div class="board" id="board" tabindex="0" role="application" aria-label="Game board. Arrow keys move the cursor, Enter selects, W switches to walls, R turns a wall, Escape cancels."></div>
+          </div>
+        </div>
+        <div class="status" id="status"></div>
+        <div class="card p0" id="cardBottom"></div>
+      </div>
+      <aside class="side">
+        <div class="tut" id="tutBox" hidden></div>
+        <div class="banner" id="banner" hidden></div>
+        <div class="tools" id="tools">
+          <button class="toolbtn h" id="toolH" type="button" aria-pressed="false" aria-label="Place a horizontal wall"><i></i><span class="t">Flat wall</span></button>
+          <div class="wcount"><b id="wnum">10</b><span>Walls</span></div>
+          <button class="toolbtn v" id="toolV" type="button" aria-pressed="false" aria-label="Place a vertical wall"><i></i><span class="t">Upright wall</span></button>
+        </div>
+        <div class="wallact" id="wallAct" hidden>
+          <button class="btn primary" id="btnConfirm" type="button">Place wall</button>
+          <button class="btn" id="btnCancel" type="button">Cancel</button>
+        </div>
+        <div class="actions" id="actions"></div>
+        <div class="moves"><h3>Moves</h3><ol id="movesList"></ol></div>
+      </aside>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal" id="modal" hidden><div class="dialog" id="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgTitle"></div></div>
+<div class="toast" id="toast" hidden role="status"></div>
+<div class="sr" id="live" aria-live="polite"></div>
+
+<script>
+/* Online server address, for example 'wss://wall-hurdle.onrender.com'. Leave empty to use the host that serves this page. */
+window.HURDLE_SERVER = "";
+</script>
+<script id="src-rules">
+/* Wall Hurdle rules engine.
+   One copy of the rules, used by the browser page, the computer-player worker and the online server.
+   Coordinates are zero-based: row 0 is the top, column 0 is the left.
+   Wall H(r,c) blocks (r,c)-(r+1,c) and (r,c+1)-(r+1,c+1).
+   Wall V(r,c) blocks (r,c)-(r,c+1) and (r+1,c)-(r+1,c+1). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.HurdleRules = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  var INF = 99;
+  var DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  var QUEUE = new Int16Array(400);
+
+  function mulberry(a) {
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return (t ^ (t >>> 14)) >>> 0;
+    };
+  }
+  var zr = mulberry(0x5eed1234);
+  var ZH1 = [], ZH2 = [], ZV1 = [], ZV2 = [];
+  for (var zi = 0; zi < 256; zi++) { ZH1.push(zr()); ZH2.push(zr()); ZV1.push(zr()); ZV2.push(zr()); }
+
+  function create(opts) {
+    opts = opts || {};
+    var n = opts.n || 9;
+    var walls = opts.walls == null ? 10 : opts.walls;
+    var m = n - 1, mid = (n - 1) >> 1;
+    return {
+      n: n, m: m,
+      hw: new Uint8Array(m * m), vw: new Uint8Array(m * m),
+      pr: [n - 1, 0], pc: [mid, mid],
+      inv: [walls, walls],
+      turn: opts.turn ? 1 : 0,
+      goal: [0, n - 1],
+      wl: [], h1: 0, h2: 0, winner: -1
+    };
+  }
+
+  function clone(s) {
+    return {
+      n: s.n, m: s.m, hw: s.hw.slice(), vw: s.vw.slice(),
+      pr: s.pr.slice(), pc: s.pc.slice(), inv: s.inv.slice(),
+      turn: s.turn, goal: s.goal.slice(), wl: s.wl.slice(),
+      h1: s.h1, h2: s.h2, winner: s.winner
+    };
+  }
+
+  function blockedDown(s, r, c) { // between (r,c) and (r+1,c)
+    var m = s.m;
+    return r < m && ((c < m && s.hw[r * m + c] === 1) || (c > 0 && s.hw[r * m + c - 1] === 1));
+  }
+  function blockedRight(s, r, c) { // between (r,c) and (r,c+1)
+    var m = s.m;
+    return c < m && ((r < m && s.vw[r * m + c] === 1) || (r > 0 && s.vw[(r - 1) * m + c] === 1));
+  }
+  function canStep(s, r, c, dr, dc) {
+    var nr = r + dr, nc = c + dc, n = s.n;
+    if (nr < 0 || nc < 0 || nr >= n || nc >= n) return false;
+    if (dr === 1) return !blockedDown(s, r, c);
+    if (dr === -1) return !blockedDown(s, nr, c);
+    if (dc === 1) return !blockedRight(s, r, c);
+    return !blockedRight(s, r, nc);
+  }
+
+  function legalMoves(s, p) {
+    var out = [], r = s.pr[p], c = s.pc[p], or = s.pr[1 - p], oc = s.pc[1 - p];
+    for (var i = 0; i < 4; i++) {
+      var dr = DIRS[i][0], dc = DIRS[i][1];
+      if (!canStep(s, r, c, dr, dc)) continue;
+      var nr = r + dr, nc = c + dc;
+      if (nr === or && nc === oc) {
+        if (canStep(s, nr, nc, dr, dc)) {
+          out.push({ r: nr + dr, c: nc + dc });
+        } else {
+          var sides = dr === 0 ? [[1, 0], [-1, 0]] : [[0, 1], [0, -1]];
+          for (var k = 0; k < 2; k++) {
+            if (canStep(s, nr, nc, sides[k][0], sides[k][1])) out.push({ r: nr + sides[k][0], c: nc + sides[k][1] });
+          }
+        }
+      } else {
+        out.push({ r: nr, c: nc });
+      }
+    }
+    return out;
+  }
+  function isLegalMove(s, p, r, c) {
+    var mv = legalMoves(s, p);
+    for (var i = 0; i < mv.length; i++) if (mv[i].r === r && mv[i].c === c) return true;
+    return false;
+  }
+  function moveKind(s, p, r, c) {
+    var dr = Math.abs(r - s.pr[p]), dc = Math.abs(c - s.pc[p]);
+    if (dr + dc === 1) return 'step';
+    if (dr === 1 && dc === 1) return 'diagonal';
+    return 'jump';
+  }
+
+  // Distance field: steps from every cell to the goal row, using walls only (pawns ignored).
+  function field(s, goalRow, out) {
+    var n = s.n, f = out || new Int8Array(n * n), h = 0, t = 0, i, c;
+    f.fill(INF);
+    for (c = 0; c < n; c++) { i = goalRow * n + c; f[i] = 0; QUEUE[t++] = i; }
+    while (h < t) {
+      i = QUEUE[h++];
+      var r = (i / n) | 0; c = i - r * n;
+      var d = f[i] + 1;
+      for (var k = 0; k < 4; k++) {
+        var dr = DIRS[k][0], dc = DIRS[k][1];
+        if (canStep(s, r, c, dr, dc)) {
+          var j = (r + dr) * n + c + dc;
+          if (f[j] === INF) { f[j] = d; QUEUE[t++] = j; }
+        }
+      }
+    }
+    return f;
+  }
+  function dist(s, p) { return field(s, s.goal[p])[s.pr[p] * s.n + s.pc[p]]; }
+
+  function shortestPath(s, p) {
+    var f = field(s, s.goal[p]), n = s.n, r = s.pr[p], c = s.pc[p], path = [];
+    var pref = p === 0 ? 0 : 1; // prefer moving toward the goal
+    var order = [pref, 2, 3, 1 - pref];
+    while (f[r * n + c] > 0 && f[r * n + c] < INF) {
+      var d = f[r * n + c], moved = false;
+      for (var k = 0; k < 4 && !moved; k++) {
+        var dr = DIRS[order[k]][0], dc = DIRS[order[k]][1];
+        if (canStep(s, r, c, dr, dc) && f[(r + dr) * n + c + dc] === d - 1) { r += dr; c += dc; path.push({ r: r, c: c }); moved = true; }
+      }
+      if (!moved) break;
+    }
+    return path;
+  }
+
+  function wallBasicError(s, o, r, c) {
+    var m = s.m;
+    if (!(o === 'H' || o === 'V') || !Number.isInteger(r) || !Number.isInteger(c) || r < 0 || c < 0 || r >= m || c >= m)
+      return { code: 'bounds', msg: 'This wall does not fit on the board.' };
+    var i = r * m + c;
+    if (o === 'H') {
+      if (s.hw[i]) return { code: 'overlap', msg: 'A wall is already here.' };
+      if ((c > 0 && s.hw[i - 1]) || (c < m - 1 && s.hw[i + 1])) return { code: 'overlap', msg: 'This wall would overlap another wall.' };
+      if (s.vw[i]) return { code: 'cross', msg: 'This wall would cross another wall.' };
+    } else {
+      if (s.vw[i]) return { code: 'overlap', msg: 'A wall is already here.' };
+      if ((r > 0 && s.vw[i - m]) || (r < m - 1 && s.vw[i + m])) return { code: 'overlap', msg: 'This wall would overlap another wall.' };
+      if (s.hw[i]) return { code: 'cross', msg: 'This wall would cross another wall.' };
+    }
+    return null;
+  }
+
+  function setWall(s, o, r, c, on) {
+    var i = r * s.m + c;
+    if (o === 'H') { s.hw[i] = on ? 1 : 0; s.h1 ^= ZH1[r * 16 + c]; s.h2 ^= ZH2[r * 16 + c]; }
+    else { s.vw[i] = on ? 1 : 0; s.h1 ^= ZV1[r * 16 + c]; s.h2 ^= ZV2[r * 16 + c]; }
+  }
+
+  function routesOpen(s) {
+    for (var p = 0; p < 2; p++) {
+      if (field(s, s.goal[p])[s.pr[p] * s.n + s.pc[p]] >= INF) return p === 0 ? 0 : 1;
+    }
+    return -1;
+  }
+
+  // Returns null when the current player may place this wall, otherwise { code, msg, who? }.
+  function wallError(s, o, r, c) {
+    if (s.winner >= 0) return { code: 'over', msg: 'The game is over.' };
+    if (s.inv[s.turn] <= 0) return { code: 'none', msg: 'You have no walls left.' };
+    var e = wallBasicError(s, o, r, c);
+    if (e) return e;
+    setWall(s, o, r, c, true);
+    var blocked = routesOpen(s);
+    setWall(s, o, r, c, false);
+    if (blocked >= 0) return { code: 'route', who: blocked, msg: 'This wall would block every route to the goal.' };
+    return null;
+  }
+
+  // Low-level changes without validation. Each returns an undo record.
+  function doMove(s, r, c) {
+    var p = s.turn, u = { t: 'm', p: p, r: s.pr[p], c: s.pc[p], w: s.winner };
+    s.pr[p] = r; s.pc[p] = c;
+    if (r === s.goal[p]) s.winner = p; else s.turn = 1 - p;
+    return u;
+  }
+  function undoMove(s, u) { s.pr[u.p] = u.r; s.pc[u.p] = u.c; s.winner = u.w; s.turn = u.p; }
+  function doWall(s, o, r, c) {
+    var p = s.turn;
+    setWall(s, o, r, c, true);
+    s.wl.push({ o: o, r: r, c: c });
+    s.inv[p]--; s.turn = 1 - p;
+    return { t: 'w', p: p, o: o, r: r, c: c };
+  }
+  function undoWall(s, u) {
+    setWall(s, u.o, u.r, u.c, false);
+    s.wl.pop(); s.inv[u.p]++; s.turn = u.p;
+  }
+  function undo(s, u) { if (u.t === 'm') undoMove(s, u); else undoWall(s, u); }
+
+  // Validate and apply one action: { t:'move', r, c } or { t:'wall', o:'H'|'V', r, c }.
+  function apply(s, a) {
+    if (!a || typeof a !== 'object') return { ok: false, error: { code: 'bad', msg: 'That action is not valid.' } };
+    if (s.winner >= 0) return { ok: false, error: { code: 'over', msg: 'The game is over.' } };
+    if (a.t === 'move') {
+      if (!Number.isInteger(a.r) || !Number.isInteger(a.c) || !isLegalMove(s, s.turn, a.r, a.c))
+        return { ok: false, error: { code: 'move', msg: 'That move is not allowed.' } };
+      return { ok: true, undo: doMove(s, a.r, a.c) };
+    }
+    if (a.t === 'wall') {
+      var e = wallError(s, a.o, a.r, a.c);
+      if (e) return { ok: false, error: e };
+      return { ok: true, undo: doWall(s, a.o, a.r, a.c) };
+    }
+    return { ok: false, error: { code: 'bad', msg: 'That action is not valid.' } };
+  }
+
+  function wallsKey(s) { return (s.h1 & 0x1fffff) * 4294967296 + (s.h2 >>> 0); }
+  function positionKey(s) {
+    var w = s.wl.map(function (x) { return x.o + x.r + ',' + x.c; }).sort().join(';');
+    return s.pr[0] + ',' + s.pc[0] + '|' + s.pr[1] + ',' + s.pc[1] + '|' + s.inv[0] + ',' + s.inv[1] + '|' + s.turn + '|' + w;
+  }
+
+  function snapshot(s) {
+    return { n: s.n, pr: s.pr.slice(), pc: s.pc.slice(), inv: s.inv.slice(), turn: s.turn, winner: s.winner,
+             walls: s.wl.map(function (w) { return { o: w.o, r: w.r, c: w.c }; }) };
+  }
+  function fromSnapshot(b) {
+    var s = create({ n: b.n, walls: 0 });
+    s.pr = b.pr.slice(); s.pc = b.pc.slice(); s.inv = b.inv.slice(); s.turn = b.turn; s.winner = b.winner == null ? -1 : b.winner;
+    for (var i = 0; i < b.walls.length; i++) {
+      var w = b.walls[i];
+      setWall(s, w.o, w.r, w.c, true);
+      s.wl.push({ o: w.o, r: w.r, c: w.c });
+    }
+    return s;
+  }
+
+  var FILES = 'abcdefghijklmnopqrstuvwxyz';
+  function cellName(s, r, c) { return FILES[c] + (s.n - r); }
+
+  return {
+    INF: INF, DIRS: DIRS, create: create, clone: clone, canStep: canStep, legalMoves: legalMoves,
+    isLegalMove: isLegalMove, moveKind: moveKind, field: field, dist: dist, shortestPath: shortestPath,
+    wallBasicError: wallBasicError, wallError: wallError, routesOpen: routesOpen,
+    doMove: doMove, undoMove: undoMove, doWall: doWall, undoWall: undoWall, undo: undo, apply: apply,
+    wallsKey: wallsKey, positionKey: positionKey, snapshot: snapshot, fromSnapshot: fromSnapshot, cellName: cellName
+  };
+});
+
+</script>
+<script id="src-ai">
+/* Wall Hurdle computer opponents. Every move comes from the shared rules engine, so the computer plays by the same rules.
+   Easy:   mostly walks the shortest route, with understandable mistakes.
+   Medium: compares both routes, searches two plies.
+   Hard:   iterative deepening alpha-beta search, move ordering, up to six plies in a time budget.
+   Expert: the same search with a wider wall list, a flexibility term, up to twelve plies and a bigger time budget. */
+(function (root, factory) {
+  var R = typeof module === 'object' && module.exports ? require('./rules') : root.HurdleRules;
+  var api = factory(R);
+  if (typeof module === 'object' && module.exports) module.exports = api; else root.HurdleAI = api;
+})(typeof self !== 'undefined' ? self : this, function (R) {
+  'use strict';
+
+  var INF = R.INF, WIN = 100000;
+  var LEVELS = {
+    easy:   { name: 'Easy' },
+    medium: { name: 'Medium', maxDepth: 2, budget: 450,  walls: 6 },
+    hard:   { name: 'Hard',   maxDepth: 6, budget: 1500, walls: 10 },
+    expert: { name: 'Expert', maxDepth: 12, budget: 4000, walls: 14, flex: true }
+  };
+  var now = typeof performance !== 'undefined' && performance.now ? function () { return performance.now(); } : function () { return Date.now(); };
+
+  function rng(seed) {
+    var a = (seed || 1) >>> 0;
+    return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+
+  var caches = {};
+  function fields(s) {
+    var c = caches[s.n] || (caches[s.n] = new Map());
+    var k = R.wallsKey(s), e = c.get(k);
+    if (!e) {
+      if (c.size > 120000) c.clear();
+      e = [R.field(s, s.goal[0]), R.field(s, s.goal[1])];
+      c.set(k, e);
+    }
+    return e;
+  }
+
+  // Walls that would lengthen the opponent's route: the ones sitting on a shortest path.
+  function candidateWalls(s, F, q) {
+    var n = s.n, f = F[q], out = [], seen = {};
+    function add(o, r, c) { var k = o + r + ',' + c; if (!seen[k] && r >= 0 && c >= 0 && r < s.m && c < s.m) { seen[k] = 1; out.push({ o: o, r: r, c: c }); } }
+    function blockEdge(r1, c1, r2, c2) {
+      if (c1 === c2) { var rr = Math.min(r1, r2); add('H', rr, c1); add('H', rr, c1 - 1); }
+      else { var cc = Math.min(c1, c2); add('V', r1, cc); add('V', r1 - 1, cc); }
+    }
+    var r = s.pr[q], c = s.pc[q], pref = q === 0 ? 0 : 1, order = [pref, 2, 3, 1 - pref], guard = 0;
+    while (f[r * n + c] > 0 && f[r * n + c] < INF && guard++ < 60) {
+      var d = f[r * n + c], moved = false;
+      for (var k = 0; k < 4 && !moved; k++) {
+        var dr = R.DIRS[order[k]][0], dc = R.DIRS[order[k]][1];
+        if (R.canStep(s, r, c, dr, dc) && f[(r + dr) * n + c + dc] === d - 1) {
+          blockEdge(r, c, r + dr, c + dc);
+          r += dr; c += dc; moved = true;
+        }
+      }
+      if (!moved) break;
+    }
+    // other shortest first steps from the pawn's own cell
+    var pr = s.pr[q], pc = s.pc[q], d0 = f[pr * n + pc];
+    for (var k2 = 0; k2 < 4; k2++) {
+      var ddr = R.DIRS[k2][0], ddc = R.DIRS[k2][1];
+      if (R.canStep(s, pr, pc, ddr, ddc) && f[(pr + ddr) * n + pc + ddc] === d0 - 1) blockEdge(pr, pc, pr + ddr, pc + ddc);
+    }
+    return out;
+  }
+
+  function evaluate(s, p, cfg) {
+    var F = fields(s), n = s.n, q = 1 - p;
+    var dp = F[p][s.pr[p] * n + s.pc[p]], dq = F[q][s.pr[q] * n + s.pc[q]];
+    var v = 10 * (dq - dp) + 1.5 * (s.inv[p] - s.inv[q]) + 2;
+    if (cfg.flex) {
+      var fp = 0, fq = 0;
+      for (var k = 0; k < 4; k++) {
+        var dr = R.DIRS[k][0], dc = R.DIRS[k][1];
+        if (R.canStep(s, s.pr[p], s.pc[p], dr, dc) && F[p][(s.pr[p] + dr) * n + s.pc[p] + dc] <= dp) fp++;
+        if (R.canStep(s, s.pr[q], s.pc[q], dr, dc) && F[q][(s.pr[q] + dr) * n + s.pc[q] + dc] <= dq) fq++;
+      }
+      v += 1.2 * (fp - fq);
+    }
+    return v;
+  }
+
+  function children(s, wallLimit) {
+    var p = s.turn, q = 1 - p, n = s.n, F = fields(s), out = [];
+    var dp = F[p][s.pr[p] * n + s.pc[p]], dq = F[q][s.pr[q] * n + s.pc[q]];
+    var mv = R.legalMoves(s, p), i;
+    for (i = 0; i < mv.length; i++) {
+      var win = mv[i].r === s.goal[p];
+      out.push({ t: 'move', r: mv[i].r, c: mv[i].c, sc: win ? 1e6 : 10 * (dp - F[p][mv[i].r * n + mv[i].c]) });
+    }
+    if (s.inv[p] > 0 && dq < INF) {
+      var cands = candidateWalls(s, F, q), ws = [];
+      for (i = 0; i < cands.length; i++) {
+        var w = cands[i];
+        if (R.wallBasicError(s, w.o, w.r, w.c)) continue;
+        var u = R.doWall(s, w.o, w.r, w.c);
+        var G = fields(s);
+        var a0 = G[0][s.pr[0] * n + s.pc[0]], a1 = G[1][s.pr[1] * n + s.pc[1]];
+        R.undoWall(s, u);
+        if (a0 >= INF || a1 >= INF) continue;
+        var dp2 = p === 0 ? a0 : a1, dq2 = p === 0 ? a1 : a0;
+        var gain = 10 * ((dq2 - dq) - (dp2 - dp)) - 1.5;
+        if (gain > 0) ws.push({ t: 'wall', o: w.o, r: w.r, c: w.c, sc: gain });
+      }
+      ws.sort(function (a, b) { return b.sc - a.sc; });
+      for (i = 0; i < ws.length && i < wallLimit; i++) out.push(ws[i]);
+    }
+    out.sort(function (a, b) { return b.sc - a.sc; });
+    return out;
+  }
+  function make(s, a) { return a.t === 'move' ? R.doMove(s, a.r, a.c) : R.doWall(s, a.o, a.r, a.c); }
+  function plain(a) { return a.t === 'move' ? { t: 'move', r: a.r, c: a.c } : { t: 'wall', o: a.o, r: a.r, c: a.c }; }
+
+  function search(s, cfg, avoid, budget) {
+    var start = now(), deadline = start + budget, timeUp = false, nodes = 0;
+    function nm(depth, alpha, beta, ply) {
+      if ((++nodes & 127) === 0 && now() > deadline) timeUp = true;
+      if (timeUp) return 0;
+      if (depth === 0) return evaluate(s, s.turn, cfg);
+      var kids = children(s, cfg.walls), best = -Infinity;
+      for (var i = 0; i < kids.length; i++) {
+        var a = kids[i], v, u = make(s, a);
+        if (s.winner >= 0) v = WIN - ply; else v = -nm(depth - 1, -beta, -alpha, ply + 1);
+        R.undo(s, u);
+        if (timeUp) return 0;
+        if (v > best) best = v;
+        if (v > alpha) alpha = v;
+        if (alpha >= beta) break;
+      }
+      return best === -Infinity ? evaluate(s, s.turn, cfg) : best;
+    }
+
+    var root = children(s, cfg.walls + 4);
+    if (!root.length) return null;
+    // avoid positions that have already happened twice, when there is another choice
+    if (avoid && avoid.size) {
+      var keep = root.filter(function (a) { var u = make(s, a); var k = R.positionKey(s); R.undo(s, u); return !avoid.has(k); });
+      if (keep.length) root = keep;
+    }
+    var best = root[0], bestVal = -Infinity, doneDepth = 0, vals = root.map(function () { return 0; });
+    for (var d = 1; d <= cfg.maxDepth; d++) {
+      var iterBest = null, iterVal = -Infinity, alpha = -Infinity, iterVals = [];
+      for (var i = 0; i < root.length; i++) {
+        var a = root[i], v, u = make(s, a);
+        if (s.winner >= 0) v = WIN; else v = -nm(d - 1, -Infinity, -alpha, 1);
+        R.undo(s, u);
+        if (timeUp) break;
+        v += cfg.noise ? (cfg.rand() - 0.5) * cfg.noise : 0;
+        iterVals[i] = v;
+        if (v > iterVal) { iterVal = v; iterBest = a; }
+        if (v > alpha) alpha = v;
+      }
+      if (timeUp || !iterBest) break;
+      best = iterBest; bestVal = iterVal; doneDepth = d;
+      // best-first ordering for the next iteration
+      var order = root.map(function (a, idx) { return { a: a, v: iterVals[idx] }; });
+      order.sort(function (x, y) { return y.v - x.v; });
+      root = order.map(function (o) { return o.a; });
+      if (bestVal >= WIN - 50) break;
+      if (now() > deadline) break;
+    }
+    return { action: plain(best), info: { depth: doneDepth, nodes: nodes, value: bestVal, ms: Math.round(now() - start) } };
+  }
+
+  function easy(s, opts, rand) {
+    var p = s.turn, q = 1 - p, n = s.n, F = fields(s);
+    var mv = R.legalMoves(s, p);
+    var recent = opts.recent || []; // cells this player stood on recently, "r,c"
+    function key(m) { return m.r + ',' + m.c; }
+    mv.sort(function (a, b) { return F[p][a.r * n + a.c] - F[p][b.r * n + b.c] || (rand() - 0.5); });
+    for (var i = 0; i < mv.length; i++) if (mv[i].r === s.goal[p]) return { t: 'move', r: mv[i].r, c: mv[i].c };
+    var fresh = mv.filter(function (m) { return recent.indexOf(key(m)) < 0; });
+    var pool = fresh.length ? fresh : mv;
+    var bestStep = pool[0];
+    var dq = F[q][s.pr[q] * n + s.pc[q]];
+    var roll = rand();
+    var wallChance = dq <= 3 ? 0.4 : 0.14;
+    if (s.inv[p] > 0 && roll < wallChance) {
+      var cands = candidateWalls(s, F, q).filter(function (w) { return !R.wallError(s, w.o, w.r, w.c); });
+      if (cands.length) { var w = cands[Math.floor(rand() * cands.length)]; return { t: 'wall', o: w.o, r: w.r, c: w.c }; }
+    }
+    if (roll > 0.86 && pool.length > 1) { var m = pool[1 + Math.floor(rand() * (pool.length - 1))]; return { t: 'move', r: m.r, c: m.c }; }
+    return { t: 'move', r: bestStep.r, c: bestStep.c };
+  }
+
+  // Always returns a legal action. opts: { level, seed, avoid: [positionKey], recent: ["r,c"], clockMs }
+  function choose(state, opts) {
+    opts = opts || {};
+    var s = R.clone(state), level = LEVELS[opts.level] ? opts.level : 'medium', cfg = LEVELS[level];
+    var rand = rng(opts.seed || (Date.now() & 0xffff));
+    var t0 = now(), action = null, info = { level: level };
+    if (level === 'easy') {
+      action = easy(s, opts, rand);
+    } else {
+      var budget = cfg.budget;
+      if (opts.clockMs != null) budget = Math.max(60, Math.min(budget, opts.clockMs / 25));
+      var c2 = { maxDepth: cfg.maxDepth, walls: cfg.walls, flex: !!cfg.flex, noise: level === 'medium' ? 4 : 0, rand: rand };
+      var r = search(s, c2, opts.avoid && opts.avoid.length ? new Set(opts.avoid) : null, budget);
+      if (r) { action = r.action; info = Object.assign(info, r.info); }
+    }
+    // safety net: the answer must be legal, otherwise fall back to the best legal step
+    var check = R.clone(state);
+    if (!action || !R.apply(check, action).ok) {
+      var F = fields(state), p = state.turn, n = state.n;
+      var mv = R.legalMoves(state, p).sort(function (a, b) { return F[p][a.r * n + a.c] - F[p][b.r * n + b.c]; });
+      action = { t: 'move', r: mv[0].r, c: mv[0].c };
+      info.fallback = true;
+    }
+    info.ms = Math.round(now() - t0);
+    return { action: action, info: info };
+  }
+
+  return { LEVELS: LEVELS, choose: choose };
+});
+
+</script>
+<script id="src-app">
+/* Wall Hurdle game page. Rules come from HurdleRules, the computer from HurdleAI (in a worker),
+   and online play talks to the authoritative server in server.js. */
+(function () {
+  'use strict';
+  var R = window.HurdleRules, AI = window.HurdleAI;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function lget(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lset(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage may be blocked */ } }
+  function sget(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+  function sset(k, v) { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  function now() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- constants ----------
+  var PRESETS = {
+    standard: { label: 'Standard', n: 9, walls: 10, note: '9 by 9 board, 10 walls each' },
+    quick: { label: 'Quick Race', n: 7, walls: 6, note: '7 by 7 board, 6 walls each' },
+    grand: { label: 'Grand Strategy', n: 11, walls: 14, note: '11 by 11 board, 14 walls each' },
+    limited: { label: 'Limited Resources', n: 9, walls: 5, note: '9 by 9 board, only 5 walls each' }
+  };
+  var TIMES = {
+    none: { label: 'Untimed', ms: 0, inc: 0 }, '3m': { label: '3 min', ms: 180000, inc: 0 }, '5m': { label: '5 min', ms: 300000, inc: 0 },
+    '3m2': { label: '3 min + 2 s', ms: 180000, inc: 2000 }, blitz: { label: 'Blitz 1 min + 2 s', ms: 60000, inc: 2000 }
+  };
+  var LEVELS = [['easy', 'Easy'], ['medium', 'Medium'], ['hard', 'Hard'], ['expert', 'Expert']];
+  var SYM = ['▲', '▼'], COLORS = ['Cyan', 'Magenta'];
+  var FILES = 'abcdefghijklmnopqrstuvwxyz';
+
+  var cfg = { preset: 'standard', time: 'none', level: 'medium', side: 'random', rotate: false, name: '' };
+  try { var saved = JSON.parse(lget('hurdle-cfg') || '{}'); for (var k in saved) if (k in cfg) cfg[k] = saved[k]; } catch (e) { /* ignore */ }
+  if (!PRESETS[cfg.preset]) cfg.preset = 'standard';
+  if (!TIMES[cfg.time]) cfg.time = 'none';
+  function saveCfg() { lset('hurdle-cfg', JSON.stringify(cfg)); }
+
+  var G = null, gameSeq = 0;
+  var V = { n: 9, cell: 40, gap: 8, bs: 400, flip: false };
+  var B = { key: '', gid: -1, cells: [], pawns: [], walls: {}, dests: [], rts: [], anc: [], ghost: null, mark: null, cursor: null, ancOn: false };
+
+  // ---------- sound ----------
+  var soundOn = lget('hurdle-sound') === '1', actx = null;
+  function tone(f, d, type, delay, vol) {
+    if (!soundOn) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      var t = actx.currentTime + (delay || 0), o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine'; o.frequency.value = f; g.gain.setValueAtTime(vol || 0.08, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + d + 0.02);
+    } catch (e) { /* sound is optional */ }
+  }
+  function sound(kind) {
+    if (kind === 'move') tone(520, 0.09, 'triangle'); else if (kind === 'wall') { tone(180, 0.14, 'square', 0, 0.06); tone(120, 0.18, 'sine', 0.02, 0.1); }
+    else if (kind === 'bad') tone(150, 0.2, 'sawtooth', 0, 0.05); else if (kind === 'turn') tone(760, 0.08, 'sine');
+    else if (kind === 'win') { tone(523, 0.14, 'triangle'); tone(659, 0.14, 'triangle', 0.14); tone(784, 0.26, 'triangle', 0.28); }
+    else if (kind === 'lose') { tone(392, 0.2, 'triangle'); tone(294, 0.34, 'triangle', 0.2); }
+  }
+  function syncSoundButtons() {
+    ['soundMenu', 'btnSound'].forEach(function (id) { var b = $(id); if (b) { b.textContent = 'Sound: ' + (soundOn ? 'on' : 'off'); b.setAttribute('aria-pressed', soundOn ? 'true' : 'false'); } });
+  }
+  function toggleSound() { soundOn = !soundOn; lset('hurdle-sound', soundOn ? '1' : '0'); syncSoundButtons(); sound('move'); }
+
+  // ---------- small ui helpers ----------
+  var toastTimer = null;
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, 2600); }
+  function live(msg) { $('live').textContent = ''; setTimeout(function () { $('live').textContent = msg; }, 30); }
+  function fmtClock(ms) {
+    if (ms == null) return '';
+    ms = Math.max(0, ms); var s = Math.ceil(ms / 1000);
+    if (ms < 10000 && ms > 0) return '0:0' + (Math.floor(ms / 100) / 10).toFixed(1);
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+  var lastFocus = null, dialogActs = {};
+  function openDialog(html, cls, acts) {
+    lastFocus = document.activeElement; dialogActs = acts || {};
+    var d = $('dialog'); d.className = 'dialog ' + (cls || ''); d.innerHTML = html; $('modal').hidden = false;
+    var b = d.querySelector('button'); if (b) b.focus();
+  }
+  function closeDialog() { $('modal').hidden = true; dialogActs = {}; if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) { /* ignore */ } }
+  function confirmDialog(title, text, yes, onYes, no) {
+    openDialog('<h2 id="dlgTitle">' + esc(title) + '</h2><p class="muted">' + esc(text) + '</p><div class="btns two"><button class="btn" data-act="no" type="button">' + esc(no || 'Cancel') + '</button><button class="btn primary" data-act="yes" type="button">' + esc(yes) + '</button></div>', '',
+      { no: closeDialog, yes: function () { closeDialog(); onYes(); } });
+  }
+  $('dialog').addEventListener('click', function (e) { var b = e.target.closest('[data-act]'); if (b && dialogActs[b.dataset.act]) dialogActs[b.dataset.act](); });
+
+  function show(id) {
+    ['menu', 'setup', 'game'].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- game model ----------
+  function newGame(mode, o) {
+    var p = PRESETS[o.preset] || PRESETS.standard, t = TIMES[o.time] || TIMES.none;
+    var starter = o.starter != null ? o.starter : Math.floor(Math.random() * 2);
+    G = {
+      id: ++gameSeq, mode: mode, preset: o.preset, timeKey: o.time, n: p.n, walls: p.walls, tc: t, timed: t.ms > 0,
+      s: R.create({ n: p.n, walls: p.walls, turn: starter }), starter: starter, names: o.names || ['Cyan', 'Magenta'],
+      human: o.human == null ? 0 : o.human, me: o.me == null ? 0 : o.me, level: o.level || 'medium', rotate: !!o.rotate,
+      clocks: t.ms ? [t.ms, t.ms] : null, turnAt: now(), history: [], moves: [], owners: [], keys: [], recent: [[], []],
+      result: null, busy: false, shown: false, code: o.code || null, lastStatus: null,
+      ui: { sel: false, tool: null, anchor: null, hover: null, cur: { r: p.n - 1, c: (p.n - 1) >> 1 }, curA: { r: 0, c: 0 }, note: '', kind: 'info', thinking: false, routes: false, hint: null },
+      tut: null, net: null, drawOffer: -1, grace: [null, null], players: null, rev: 0
+    };
+    G.keys = [R.positionKey(G.s)];
+    G.ui.curA = { r: (p.n - 2) >> 1, c: (p.n - 2) >> 1 };
+    return G;
+  }
+  function actor() {
+    if (!G) return -1;
+    if (G.mode === 'online') return G.me;
+    if (G.mode === 'computer') return G.human;
+    if (G.mode === 'tutorial') return 0;
+    return G.s.turn;
+  }
+  function canAct() {
+    return !!G && !G.result && !G.busy && !G.ui.thinking && G.s.turn === actor() && !(G.tut && G.tut.done) && $('modal').hidden;
+  }
+  function flipNow() {
+    if (!G) return false;
+    if (G.mode === 'local') return G.rotate && G.s.turn === 1;
+    if (G.mode === 'computer') return G.human === 1;
+    if (G.mode === 'online') return G.me === 1;
+    return false;
+  }
+  function note(msg, kind) { if (!G) return; G.ui.note = msg; G.ui.kind = kind || 'info'; if (msg) live(msg); }
+  function nm(seat) { return G.names[seat]; }
+  function cellName(r, c) { return FILES[c] + (G.n - r); }
+  function remaining(seat) {
+    if (!G || !G.timed) return null;
+    if (G.mode === 'online') {
+      var nt = G.net; if (!nt || !nt.ms) return null;
+      var left = nt.ms[seat];
+      if (nt.running && seat === G.s.turn && !G.result) left -= (Date.now() + net.offset - nt.at);
+      return left;
+    }
+    var l = G.clocks[seat];
+    if (seat === G.s.turn && !G.result) l -= now() - G.turnAt;
+    return l;
+  }
+
+  // ---------- committing actions (local, computer, tutorial) ----------
+  function explain(a, before, after, p) {
+    var who = p === G.human && G.mode === 'computer' ? 'You' : (G.mode === 'computer' ? 'The computer' : nm(p));
+    if (a.t === 'move') {
+      var kind = R.moveKind(before, p, a.r, a.c), d0 = R.dist(before, p), d1 = R.dist(after, p);
+      var verb = kind === 'jump' ? 'jumped to' : kind === 'diagonal' ? 'stepped aside to' : 'moved to';
+      var tail = d1 < d0 ? ' Its route is ' + d1 + (d1 === 1 ? ' step' : ' steps') + ' from the goal.' : d1 === d0 ? ' It still needs ' + d1 + ' steps.' : ' It takes a detour: ' + d1 + ' steps to go.';
+      if (p === G.human && G.mode === 'computer') tail = tail.replace('Its route is', 'Your route is').replace('It still needs', 'You still need').replace('It takes a detour', 'That is a detour');
+      return who + ' ' + verb + ' ' + cellName(a.r, a.c) + '.' + tail;
+    }
+    var q = 1 - p, o0 = R.dist(before, q), o1 = R.dist(after, q);
+    var target = G.mode === 'computer' ? (q === G.human ? 'Your' : 'Its') : nm(q) + "'s";
+    return who + ' placed a wall near ' + cellName(a.r, a.c) + '. ' + target + ' route ' + (o1 > o0 ? 'grew from ' + o0 + ' to ' + o1 + ' steps.' : 'is still ' + o1 + ' steps.');
+  }
+
+  function commit(a, seat) {
+    var s = G.s;
+    if (G.timed && remaining(seat) <= 0) { finish(1 - seat, 'timeout'); return false; }
+    var rem = G.timed ? remaining(seat) : 0;
+    var before = R.clone(s), hist = { s: R.clone(s), clocks: G.clocks && G.clocks.slice(), moves: G.moves.length, owners: G.owners.length, keys: G.keys.length };
+    var res = R.apply(s, a);
+    if (!res.ok) { if (seat === actor()) { note(wallText(res.error, seat), 'bad'); sound('bad'); } return false; }
+    G.history.push(hist);
+    if (G.timed) { G.clocks[seat] = rem + G.tc.inc; G.turnAt = now(); }
+    G.moves.push(a.t === 'move' ? cellName(a.r, a.c) : a.o + cellName(a.r, a.c));
+    if (a.t === 'wall') G.owners.push(seat); else { G.recent[seat].push(a.r + ',' + a.c); if (G.recent[seat].length > 4) G.recent[seat].shift(); }
+    var ui = G.ui; ui.sel = false; ui.anchor = null; ui.hover = null; ui.tool = null; ui.hint = null; ui.note = '';
+    sound(a.t === 'wall' ? 'wall' : 'move');
+    if (G.mode === 'tutorial') { tutAfter(a, before); return true; }
+    G.keys.push(R.positionKey(s));
+    var cnt = G.keys.filter(function (k) { return k === G.keys[G.keys.length - 1]; }).length;
+    if (s.winner >= 0) finish(s.winner, 'goal');
+    else if (cnt >= 3) finish(-1, 'repetition');
+    else if (G.mode === 'computer' && seat !== G.human) note(explain(a, before, s, seat), 'info');
+    return true;
+  }
+  function doAction(a) {
+    if (!canAct()) return;
+    if (G.mode === 'online') { G.busy = true; G.ui.sel = false; G.ui.anchor = null; G.ui.hover = null; G.ui.tool = null; netSend({ t: 'action', rev: G.rev, action: a }); render(); return; }
+    var ok = commit(a, actor());
+    render();
+    if (ok) afterCommit();
+  }
+  function afterCommit() {
+    if (!G || G.result) return;
+    if (G.mode === 'computer' && G.s.turn !== G.human) requestAI('move');
+    else if (G.mode === 'local' && G.rotate) { /* board flips on the next render */ }
+  }
+  function finish(winner, reason) {
+    if (!G || G.result) return;
+    G.result = { winner: winner, reason: reason }; aiId++; G.ui.thinking = false; G.busy = false;
+    var mine = G.mode === 'computer' ? G.human : G.mode === 'online' ? G.me : -1;
+    sound(winner < 0 ? 'turn' : (mine < 0 || winner === mine) ? 'win' : 'lose');
+    render();
+    var gid = G.id;
+    setTimeout(function () { if (G && G.id === gid && G.result && !G.shown) showResult(); }, reduceMotion ? 50 : 650);
+  }
+
+  function restore(h) {
+    G.s = R.clone(h.s); if (h.clocks) G.clocks = h.clocks.slice();
+    G.moves.length = h.moves; G.owners.length = h.owners; G.keys.length = h.keys; G.turnAt = now(); G.result = null; G.shown = false;
+    var ui = G.ui; ui.sel = false; ui.anchor = null; ui.hover = null; ui.tool = null; ui.hint = null; ui.note = ''; ui.thinking = false;
+  }
+  function undoLast() {
+    if (!G || !G.history.length || G.mode === 'online' || G.mode === 'tutorial') return;
+    var idx = G.history.length - 1;
+    if (G.mode === 'computer') { while (idx >= 0 && G.history[idx].s.turn !== G.human) idx--; if (idx < 0) return; }
+    aiId++; var h = G.history[idx]; G.history.length = idx; restore(h); note('Move taken back.', 'info'); render(); afterCommit();
+  }
+
+  // ---------- computer opponent ----------
+  var worker = null, aiId = 0, jobs = {};
+  function getWorker() {
+    if (worker !== null) return worker || null;
+    try {
+      var src = $('src-rules').textContent + '\n' + $('src-ai').textContent +
+        '\nself.onmessage=function(e){var d=e.data;var s=self.HurdleRules.fromSnapshot(d.state);var out=self.HurdleAI.choose(s,{level:d.level,seed:d.seed,avoid:d.avoid,recent:d.recent,clockMs:d.clockMs});self.postMessage({id:d.id,action:out.action,info:out.info});};';
+      var url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+      worker = new Worker(url);
+      worker.onmessage = function (e) { deliverAI(e.data); };
+      worker.onerror = function () { worker = false; };
+    } catch (e) { worker = false; }
+    return worker || null;
+  }
+  function requestAI(kind) {
+    if (!G) return;
+    var id = ++aiId, seat = G.s.turn, hint = kind === 'hint';
+    jobs[id] = { kind: kind, t0: now(), gid: G.id, seat: seat };
+    if (!hint) { G.ui.thinking = true; render(); }
+    var counts = {}, avoid = [];
+    G.keys.forEach(function (k) { counts[k] = (counts[k] || 0) + 1; });
+    Object.keys(counts).forEach(function (k) { if (counts[k] >= 2) avoid.push(k); });
+    var payload = { id: id, state: R.snapshot(G.s), level: hint ? 'medium' : G.level, seed: (Math.random() * 1e9) | 0, avoid: hint ? [] : avoid, recent: G.recent[seat], clockMs: G.timed && !hint ? remaining(seat) : null };
+    var w = getWorker();
+    if (w) { w.postMessage(payload); return; }
+    setTimeout(function () { // no worker available: compute on the main thread with the same code
+      var out = AI.choose(R.fromSnapshot(payload.state), payload);
+      deliverAI({ id: id, action: out.action, info: out.info });
+    }, 40);
+  }
+  function deliverAI(m) {
+    var job = jobs[m.id]; delete jobs[m.id];
+    if (!job || m.id !== aiId || !G || G.id !== job.gid || G.result) return;
+    if (job.kind === 'hint') { showHint(m.action, job.seat); return; }
+    var wait = Math.max(0, 450 - (now() - job.t0));
+    setTimeout(function () {
+      if (!G || G.id !== job.gid || m.id !== aiId || G.result) return;
+      G.ui.thinking = false;
+      var ok = commit(m.action, job.seat);
+      if (!ok) { // the answer is always legal; this is only a guard
+        var mv = R.legalMoves(G.s, job.seat)[0]; commit({ t: 'move', r: mv.r, c: mv.c }, job.seat);
+      }
+      render(); afterCommit();
+    }, wait);
+  }
+  function showHint(a, seat) {
+    var after = R.clone(G.s); R.apply(after, a);
+    G.ui.hint = a;
+    if (a.t === 'move') {
+      var d1 = R.dist(after, seat);
+      note('Hint: move to ' + cellName(a.r, a.c) + (R.moveKind(G.s, seat, a.r, a.c) === 'step' ? '' : ' (' + R.moveKind(G.s, seat, a.r, a.c) + ')') + '. That leaves you ' + d1 + (d1 === 1 ? ' step' : ' steps') + ' from the goal.', 'info');
+    } else {
+      var q = 1 - seat, o0 = R.dist(G.s, q), o1 = R.dist(after, q);
+      note('Hint: a ' + (a.o === 'H' ? 'flat' : 'upright') + ' wall near ' + cellName(a.r, a.c) + ' makes your rival\'s route ' + (o1 - o0) + (o1 - o0 === 1 ? ' step' : ' steps') + ' longer.', 'info');
+    }
+    render();
+  }
+  function askHint() { if (canAct() && G.mode !== 'online') requestAI('hint'); }
+
+  // ---------- online ----------
+  var net = { ws: null, token: null, code: null, seat: null, snap: null, want: false, tries: 0, timer: null, ping: null, offset: 0, error: '', connecting: false };
+  function serverUrl() {
+    var q = ''; try { q = new URLSearchParams(location.search).get('server') || ''; } catch (e) { /* ignore */ }
+    if (q) return q;
+    if (window.HURDLE_SERVER) return window.HURDLE_SERVER;
+    if ((location.protocol === 'https:' || location.protocol === 'http:') && location.host) return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+    return '';
+  }
+  function netSend(o) { if (net.ws && net.ws.readyState === 1) net.ws.send(JSON.stringify(o)); }
+  function netOpen(onOpen) {
+    clearTimeout(net.timer); clearInterval(net.ping);
+    if (net.ws) { try { net.ws.onclose = null; net.ws.close(); } catch (e) { /* ignore */ } }
+    var url = serverUrl();
+    if (!url) return netFail('Online play needs the game server, and this page has no server address. Open the setup guide for the one-line fix.');
+    var ws;
+    try { ws = new WebSocket(url); } catch (e) { return netFail('Could not start an online connection from this page. Try opening the game in its own browser tab.'); }
+    net.ws = ws; net.connecting = true;
+    ws.onopen = function () { net.connecting = false; net.error = ''; net.ping = setInterval(function () { netSend({ t: 'ping' }); }, 20000); onOpen(); };
+    ws.onmessage = function (e) { var m; try { m = JSON.parse(e.data); } catch (x) { return; } onNet(m); };
+    ws.onclose = function () {
+      clearInterval(net.ping); net.connecting = false;
+      if (!net.want) return;
+      if (net.token && net.code && net.tries < 40) {
+        net.tries++; if (G && G.mode === 'online') { G.busy = true; note('Connection lost. Reconnecting...', 'bad'); render(); } else renderSetup();
+        net.timer = setTimeout(function () { netOpen(function () { netSend({ t: 'join', code: net.code, token: net.token, name: cfg.name }); }); }, Math.min(1000 * net.tries, 6000));
+      } else netFail('Could not reach the online server. Check that it is running and that the address is right.');
+    };
+    ws.onerror = function () { /* onclose follows */ };
+  }
+  function netFail(msg) {
+    net.want = false; net.error = msg; net.connecting = false;
+    if (G && G.mode === 'online') { G.busy = false; note(msg, 'bad'); render(); }
+    else if (setupKind === 'online' || setupKind === 'lobby') { setupKind = 'online'; renderSetup(); show('setup'); }
+  }
+  function netLeave() {
+    net.want = false; clearTimeout(net.timer); clearInterval(net.ping);
+    if (net.ws) { try { netSend({ t: 'leave' }); net.ws.onclose = null; net.ws.close(); } catch (e) { /* ignore */ } }
+    net.ws = null; net.token = null; net.code = null; net.snap = null; sset('hurdle-session', null);
+  }
+  function onNet(m) {
+    if (m.t === 'joined') {
+      net.token = m.token; net.code = m.code; net.seat = m.seat; net.want = true;
+      sset('hurdle-session', JSON.stringify({ code: m.code, token: m.token }));
+    } else if (m.t === 'state') onNetState(m);
+    else if (m.t === 'pong') net.offset = m.now - Date.now();
+    else if (m.t === 'closed') { var gid = G && G.mode === 'online'; netLeave(); G = null; setupKind = 'online'; net.error = m.msg || 'The room was closed.'; renderSetup(); show('setup'); if (gid) closeDialog(); }
+    else if (m.t === 'error') {
+      if (G && G.mode === 'online') { G.busy = false; note(wallText(m, G.me) || m.msg, 'bad'); sound('bad'); render(); }
+      else {
+        if (m.code === 'no-room' && net.token) { netLeave(); }
+        net.error = m.msg; net.connecting = false; if (!net.token) { net.want = false; } renderSetup(); show('setup');
+      }
+    }
+  }
+  function onNetState(m) {
+    net.snap = m; net.tries = 0; net.seat = m.you;
+    if (m.clocks) net.offset = m.clocks.now - Date.now();
+    if (m.status === 'lobby') { G = null; setupKind = 'lobby'; renderSetup(); show('setup'); return; }
+    var fresh = !G || G.mode !== 'online' || G.code !== m.code || (G.lastStatus === 'over' && m.status === 'playing');
+    if (fresh) {
+      closeDialog();
+      var pr = PRESETS[m.settings.preset] || PRESETS.standard;
+      newGame('online', { preset: m.settings.preset, time: m.settings.time, names: [m.players[0].name, m.players[1].name], me: m.you, code: m.code, starter: m.starter });
+      G.n = pr.n; G.walls = pr.walls;
+    }
+    var prevTurn = G.s.turn, prevMoves = G.moves.length;
+    G.s = R.fromSnapshot(m.board); G.rev = m.rev; G.owners = m.board.owners || []; G.moves = m.moves || [];
+    G.names = [m.players[0].name, m.players[1] ? m.players[1].name : 'Waiting'];
+    G.players = m.players; G.drawOffer = m.drawOffer; G.grace = m.grace || [null, null];
+    G.net = m.clocks ? { ms: m.clocks.ms, at: m.clocks.at, running: m.clocks.running } : null;
+    G.timed = !!m.clocks; G.busy = false; G.lastStatus = m.status; G.ui.sel = false;
+    if (G.ui.note === 'Connection lost. Reconnecting...') G.ui.note = '';
+    if (!fresh) {
+      if (m.moves.length > prevMoves) sound(m.board.walls.length && /^[HV]/.test(m.moves[m.moves.length - 1]) ? 'wall' : 'move');
+      if (m.board.turn === G.me && prevTurn !== G.me && m.status === 'playing') sound('turn');
+    }
+    var rmSig = m.players.map(function (p) { return p && p.rematch ? '1' : '0'; }).join('');
+    if (m.status === 'over' && G.result && G.shown && rmSig !== G.rmSig && !$('modal').hidden && $('dialog').querySelector('[data-act="rematch"]')) { G.rmSig = rmSig; showResult(); }
+    G.rmSig = rmSig;
+    if (m.status === 'over' && m.result) { if (!G.result) { G.result = m.result; G.shown = false; var gid = G.id; sound(m.result.winner < 0 ? 'turn' : m.result.winner === G.me ? 'win' : 'lose'); setTimeout(function () { if (G && G.id === gid && G.result && !G.shown) showResult(); }, reduceMotion ? 50 : 650); } }
+    else if (m.status === 'playing') G.result = null;
+    if ($('game').hidden) show('game');
+    render();
+  }
+  function onlineCreate() {
+    cfg.name = ($('nameIn') ? $('nameIn').value : cfg.name).trim() || 'Player'; saveCfg();
+    net.want = true; net.error = ''; net.tries = 0; net.token = null; net.code = null; renderSetup();
+    netOpen(function () { netSend({ t: 'create', name: cfg.name, settings: { preset: cfg.preset, time: cfg.time } }); });
+  }
+  function onlineJoin(code) {
+    cfg.name = ($('nameIn') ? $('nameIn').value : cfg.name).trim() || 'Player'; saveCfg();
+    code = String(code || '').trim().toUpperCase();
+    if (code.length < 4) { net.error = 'Type the room code from your friend.'; renderSetup(); return; }
+    net.want = true; net.error = ''; net.tries = 0; net.token = null; net.code = null; renderSetup();
+    netOpen(function () { netSend({ t: 'join', code: code, name: cfg.name }); });
+  }
+  function shareLink() {
+    var base = location.href.split('#')[0].split('?')[0];
+    try { var sh = new URLSearchParams(location.search).get('share'); if (sh) base = sh; } catch (e) { /* ignore */ }
+    var link = base + '?room=' + encodeURIComponent(net.code || '');
+    try { var sv = new URLSearchParams(location.search).get('server'); if (sv) link += '&server=' + encodeURIComponent(sv); } catch (e) { /* ignore */ }
+    return link;
+  }
+  function copyText(text, what) {
+    function fallback() { toast('Could not copy. Select the ' + what + ' and copy it by hand.'); }
+    try { navigator.clipboard.writeText(text).then(function () { toast('Copied the ' + what + '.'); }, fallback); } catch (e) { fallback(); }
+  }
+
+  // ---------- board geometry ----------
+  function vcell(gr, gc) { return { r: V.flip ? V.n - 1 - gr : gr, c: V.flip ? V.n - 1 - gc : gc }; }
+  function px(vr, vc) { var st = V.cell + V.gap; return { x: vc * st, y: vr * st }; }
+  function wallRect(o, gr, gc) {
+    var m = V.n - 2, r = V.flip ? m - gr : gr, c = V.flip ? m - gc : gc, st = V.cell + V.gap;
+    return o === 'H' ? { x: c * st, y: r * st + V.cell, w: 2 * V.cell + V.gap, h: V.gap } : { x: c * st + V.cell, y: r * st, w: V.gap, h: 2 * V.cell + V.gap };
+  }
+  function boardRect() { return $('board').getBoundingClientRect(); }
+  function cellFromEvent(e) {
+    var rc = boardRect(), st = V.cell + V.gap, n = V.n;
+    var vc = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - rc.left) / st))), vr = Math.max(0, Math.min(n - 1, Math.floor((e.clientY - rc.top) / st)));
+    return { r: V.flip ? n - 1 - vr : vr, c: V.flip ? n - 1 - vc : vc };
+  }
+  function anchorFromEvent(e) {
+    var rc = boardRect(), st = V.cell + V.gap, m = V.n - 2;
+    var ac = Math.max(0, Math.min(m, Math.round((e.clientX - rc.left + V.gap / 2) / st) - 1)), ar = Math.max(0, Math.min(m, Math.round((e.clientY - rc.top + V.gap / 2) / st) - 1));
+    return { r: V.flip ? m - ar : ar, c: V.flip ? m - ac : ac };
+  }
+  function setBox(el, x, y, w, h) { var s = el.style; s.left = x + 'px'; s.top = y + 'px'; s.width = w + 'px'; s.height = h + 'px'; }
+  function div(cls, parent) { var d = document.createElement('div'); d.className = cls; if (parent) parent.appendChild(d); return d; }
+
+  function fitBoard() {
+    var stage = $('stage'), n = G.n, wide = window.innerWidth >= 900;
+    var availW = Math.min(stage.clientWidth || 340, 640) - 22;
+    var chrome = $('cardTop').offsetHeight + $('cardBottom').offsetHeight + $('status').offsetHeight + 96;
+    var availH = wide ? window.innerHeight - chrome - 30 : 99999;
+    var bs = Math.max(220, Math.min(availW, availH));
+    var cell = Math.max(18, Math.floor(bs / (n + 0.22 * (n - 1)))), gap = Math.max(4, Math.round(cell * 0.22));
+    V.n = n; V.cell = cell; V.gap = gap; V.bs = n * cell + (n - 1) * gap; V.flip = flipNow();
+  }
+  function buildBoard() {
+    var board = $('board'), n = V.n, st = V.cell + V.gap, i, r, c;
+    board.innerHTML = ''; B.cells = []; B.walls = {}; B.dests = []; B.rts = []; B.anc = []; B.ancOn = false;
+    board.style.width = V.bs + 'px'; board.style.height = V.bs + 'px';
+    $('frame').style.width = (V.bs + 22) + 'px';
+    for (r = 0; r < n; r++) for (c = 0; c < n; c++) {
+      var gr = V.flip ? n - 1 - r : r, e = div('cellb' + (gr === 0 ? ' g0' : gr === n - 1 ? ' g1' : ''), board);
+      setBox(e, c * st, r * st, V.cell, V.cell);
+    }
+    for (i = 0; i < n; i++) {
+      var gr2 = V.flip ? n - 1 - i : i, gc2 = V.flip ? n - 1 - i : i;
+      var l = div('lbl', board); l.textContent = n - gr2; setBox(l, -20, i * st, 16, V.cell);
+      var f = div('lbl', board); f.textContent = FILES[gc2]; setBox(f, i * st, V.bs + 4, V.cell, 16);
+    }
+    B.ghost = div('wall ghost', board); B.ghost.hidden = true;
+    B.mark = div('wall ghost mark', board); B.mark.hidden = true;
+    B.pawns = [0, 1].map(function (p) {
+      var e = div('pawn p' + p, board); e.style.width = e.style.height = Math.round(V.cell * 0.78) + 'px'; e.style.fontSize = Math.round(V.cell * 0.36) + 'px';
+      e.innerHTML = '<span>' + SYM[p] + '</span>'; e.dataset.nomove = '1'; return e;
+    });
+    B.cursor = div('cursor', board);
+    B.key = [V.n, V.cell, V.flip, G.id].join('|');
+    B.built = false;
+    board.classList.add('nomotion'); setTimeout(function () { board.classList.remove('nomotion'); }, 40);
+  }
+
+  // ---------- rendering ----------
+  function preview() {
+    var ui = G.ui, a = ui.anchor || ui.hover;
+    if (!ui.tool || !a) return null;
+    return { o: ui.tool, r: a.r, c: a.c, err: R.wallError(G.s, ui.tool, a.r, a.c), locked: !!ui.anchor };
+  }
+  function wallText(err, seat) {
+    if (!err) return '';
+    if (err.code === 'route') {
+      var who = err.who; if (who == null) return err.msg;
+      if (G && G.mode === 'computer') return who === G.human ? 'This wall would block every route to your goal.' : 'This wall would block every route for the computer.';
+      return who === seat ? 'This wall would block every route to your goal.' : 'This wall would block every route for ' + (G ? nm(who) : 'your rival') + '.';
+    }
+    return err.msg;
+  }
+  function turnText() {
+    var s = G.s;
+    if (G.mode === 'tutorial') return G.tut && G.tut.done ? 'Step complete. Press Next.' : 'Your move. Tap your pawn, or pick a wall tool.';
+    if (G.mode === 'online') {
+      if (G.lastStatus === 'over') return 'Game over.';
+      return s.turn === G.me ? 'Your turn. Tap your pawn to move, or pick a wall tool.' : 'Waiting for ' + nm(s.turn) + '.';
+    }
+    if (G.mode === 'computer') return G.ui.thinking ? 'The computer is thinking...' : s.turn === G.human ? 'Your turn. Tap your pawn to move, or pick a wall tool.' : '';
+    return COLORS[s.turn] + ', your turn. Tap your pawn to move, or pick a wall tool.';
+  }
+  function render() {
+    if (!G) return;
+    fitBoard();
+    var key = [V.n, V.cell, V.flip, G.id].join('|');
+    if (B.key !== key) buildBoard();
+    if (G.mode !== 'online') $('banner').hidden = true;
+    renderCards(); renderBoard(); renderSide(); updateClocks();
+    $('modeLab').textContent = G.mode === 'computer' ? 'Versus the computer (' + (LEVELS.filter(function (l) { return l[0] === G.level; })[0] || ['', ''])[1] + ')' : G.mode === 'online' ? 'Online room ' + G.code : G.mode === 'tutorial' ? 'Tutorial' : 'Two players, one device';
+  }
+  function cardHTML(seat) {
+    var s = G.s, you = (G.mode === 'online' && seat === G.me) || (G.mode === 'computer' && seat === G.human) || G.mode === 'tutorial' && seat === 0;
+    var pips = '', total = G.walls;
+    for (var i = 0; i < total; i++) pips += '<i class="' + (i < s.inv[seat] ? '' : 'used') + '"></i>';
+    var chip = '';
+    if (G.result) chip = G.result.winner === seat ? '<span class="chip on">Winner</span>' : '';
+    else if (G.ui.thinking && seat === s.turn) chip = '<span class="chip on">Thinking...</span>';
+    else if (G.mode === 'online' && G.players && G.players[seat] && !G.players[seat].connected) chip = '<span class="chip off">Disconnected</span>';
+    else if (G.mode === 'online' && G.drawOffer === seat) chip = '<span class="chip on">Offers a draw</span>';
+    else if (seat === s.turn) chip = '<span class="chip on">' + (you ? 'Your turn' : 'To move') + '</span>';
+    return '<div class="sym" aria-hidden="true">' + SYM[seat] + '</div><div class="who"><div class="nm">' + esc(nm(seat)) + (you && G.mode !== 'tutorial' ? ' (you)' : '') + ' <span class="sr">' + COLORS[seat] + '</span></div>' +
+      '<div class="sub"><span class="pips" role="img" aria-label="' + s.inv[seat] + ' walls left">' + pips + '</span><span>' + s.inv[seat] + ' walls</span>' + chip + '</div></div><div class="clock mono" id="clk' + seat + '"></div>';
+  }
+  function renderCards() {
+    var bottom = V.flip ? 1 : 0, top = 1 - bottom, ct = $('cardTop'), cb = $('cardBottom');
+    ct.className = 'card p' + top + (G.s.turn === top && !G.result ? ' active' : '');
+    cb.className = 'card p' + bottom + (G.s.turn === bottom && !G.result ? ' active' : '');
+    ct.innerHTML = cardHTML(top); cb.innerHTML = cardHTML(bottom);
+  }
+  function updateClocks() {
+    if (!G) return;
+    [0, 1].forEach(function (p) {
+      var e = $('clk' + p); if (!e) return;
+      var r = remaining(p);
+      if (r == null) { e.textContent = G.timed ? '' : 'No clock'; e.className = 'clock mono off'; return; }
+      e.textContent = fmtClock(r); e.className = 'clock mono' + (r < 10000 ? ' low' : '');
+    });
+    if (G.mode === 'online') renderBanner();
+  }
+  function renderBoard() {
+    var s = G.s, n = V.n, ui = G.ui, act = canAct(), me = actor(), i;
+    // pawns
+    for (var p = 0; p < 2; p++) {
+      var vc = vcell(s.pr[p], s.pc[p]), q = px(vc.r, vc.c), off = Math.round((V.cell - parseFloat(B.pawns[p].style.width)) / 2);
+      B.pawns[p].style.transform = 'translate(' + (q.x + off) + 'px,' + (q.y + off) + 'px)';
+      B.pawns[p].className = 'pawn p' + p + (ui.sel && p === me ? ' sel' : '') + (p === me && act ? ' mine' : '');
+      B.pawns[p].setAttribute('aria-label', COLORS[p] + ' pawn at ' + cellName(s.pr[p], s.pc[p]));
+    }
+    // walls
+    var seen = {};
+    s.wl.forEach(function (w, idx) {
+      var k = w.o + w.r + ',' + w.c; seen[k] = 1;
+      if (!B.walls[k]) {
+        var e = div('wall o' + (G.owners[idx] == null ? 9 : G.owners[idx]) + (B.built ? ' fresh' : ''), $('board'));
+        var rc = wallRect(w.o, w.r, w.c); setBox(e, rc.x, rc.y, rc.w, rc.h); B.walls[k] = e;
+        $('board').insertBefore(e, B.ghost);
+      }
+    });
+    Object.keys(B.walls).forEach(function (k) { if (!seen[k]) { B.walls[k].remove(); delete B.walls[k]; } });
+    B.built = true;
+    // destination dots
+    B.dests.forEach(function (e) { e.remove(); }); B.dests = [];
+    var hint = ui.hint && ui.hint.t === 'move' ? ui.hint : null;
+    if ((ui.sel && act) || hint) {
+      var mv = R.legalMoves(s, s.turn);
+      mv.forEach(function (m) {
+        var isHint = hint && hint.r === m.r && hint.c === m.c;
+        if (!(ui.sel && act) && !isHint) return;
+        var v = vcell(m.r, m.c), q2 = px(v.r, v.c), d = div('dest p' + s.turn + (isHint ? ' hint' : ''), $('board'));
+        setBox(d, q2.x, q2.y, V.cell, V.cell); d.dataset.r = m.r; d.dataset.c = m.c;
+        d.setAttribute('aria-label', 'Move to ' + cellName(m.r, m.c)); B.dests.push(d);
+      });
+    }
+    // routes
+    B.rts.forEach(function (e) { e.remove(); }); B.rts = [];
+    if (ui.routes && G.mode !== 'online') {
+      [0, 1].forEach(function (pl) {
+        R.shortestPath(s, pl).forEach(function (c2, idx, arr) {
+          var v = vcell(c2.r, c2.c), q3 = px(v.r, v.c), sz = Math.round(V.cell * 0.22), e = div('rt p' + pl, $('board'));
+          var o2 = pl === 0 ? 0 : Math.round(V.cell * 0.2); void idx; void arr;
+          setBox(e, q3.x + (V.cell - sz) / 2 + (pl ? sz : -sz) * 0.6, q3.y + (V.cell - sz) / 2 + o2 * 0, sz, sz); B.rts.push(e);
+        });
+      });
+    }
+    // wall anchors while a wall tool is active
+    var wantAnc = !!ui.tool && act;
+    if (wantAnc !== B.ancOn) {
+      B.anc.forEach(function (e) { e.remove(); }); B.anc = [];
+      if (wantAnc) {
+        var st = V.cell + V.gap, sz2 = Math.max(4, Math.round(V.gap * 0.9));
+        for (var ar = 0; ar < n - 1; ar++) for (var ac = 0; ac < n - 1; ac++) {
+          var a = div('anc', $('board')); setBox(a, (ac + 1) * st - V.gap / 2 - sz2 / 2, (ar + 1) * st - V.gap / 2 - sz2 / 2, sz2, sz2); B.anc.push(a);
+        }
+      }
+      B.ancOn = wantAnc;
+    }
+    $('board').classList.toggle('walling', !!ui.tool);
+    $('board').style.touchAction = ui.tool ? 'none' : 'manipulation';
+    // ghost wall (preview) and mark (hint or tutorial target)
+    var pv = preview();
+    if (pv && act) {
+      var rc2 = wallRect(pv.o, pv.r, pv.c); setBox(B.ghost, rc2.x, rc2.y, rc2.w, rc2.h);
+      B.ghost.className = 'wall ghost ' + (pv.err ? 'bad' : 'ok'); B.ghost.hidden = false;
+    } else B.ghost.hidden = true;
+    var mk = ui.hint && ui.hint.t === 'wall' ? ui.hint : (G.tut && G.tut.mark && !G.tut.done ? G.tut.mark : null);
+    if (mk) { var rc3 = wallRect(mk.o, mk.r, mk.c); setBox(B.mark, rc3.x, rc3.y, rc3.w, rc3.h); B.mark.hidden = false; } else B.mark.hidden = true;
+    // keyboard cursor
+    var cu = ui.cur, q4 = px(cu.r, cu.c); setBox(B.cursor, q4.x, q4.y, V.cell, V.cell);
+  }
+  function renderBanner() {
+    var b = $('banner'), html = '', o = 1 - G.me;
+    if (G.mode === 'online' && G.players && G.lastStatus === 'playing') {
+      var g = G.grace && G.grace[o];
+      if (G.players[o] && !G.players[o].connected && g) {
+        var left = Math.max(0, g - (Date.now() + net.offset));
+        html = '<div><b>' + esc(nm(o)) + '</b> lost connection. If they do not return in <span class="mono">' + fmtClock(left) + '</span> you win by forfeit. The clock keeps running.</div>';
+      } else if (G.drawOffer === o) {
+        html = '<div><b>' + esc(nm(o)) + '</b> offers a draw.</div><div class="row"><button class="btn small primary" data-b="accept" type="button">Accept draw</button><button class="btn small" data-b="decline" type="button">Decline</button></div>';
+      } else if (G.drawOffer === G.me) {
+        html = '<div>Draw offer sent. Waiting for ' + esc(nm(o)) + '.</div><div class="row"><button class="btn small" data-b="cancel" type="button">Withdraw offer</button></div>';
+      }
+    }
+    if (b.dataset.sig !== html) { b.dataset.sig = html; b.innerHTML = html; b.hidden = !html; }
+  }
+  function renderSide() {
+    var ui = G.ui, s = G.s, st = $('status'), pv = preview(), act = canAct();
+    var msg = '', kind = '';
+    if (pv && act) { if (pv.err) { msg = wallText(pv.err, s.turn); kind = 'bad'; } else { msg = pv.locked ? 'This wall fits. Press Place wall to confirm.' : 'This wall fits. Click to lock it in, then confirm.'; kind = 'good'; } }
+    else if (ui.note) { msg = ui.note; kind = ui.kind; }
+    else msg = turnText();
+    st.className = 'status ' + kind; st.textContent = msg;
+    var me = actor();
+    $('wnum').textContent = s.inv[me < 0 ? s.turn : me];
+    var noWalls = s.inv[me < 0 ? s.turn : me] <= 0;
+    ['H', 'V'].forEach(function (o) { var b = $('tool' + o); b.setAttribute('aria-pressed', ui.tool === o ? 'true' : 'false'); b.disabled = !act || noWalls; });
+    $('wallAct').hidden = !ui.tool;
+    $('btnConfirm').disabled = !(pv && pv.locked && !pv.err && act);
+    // actions
+    var acts = $('actions'), html = '', over = !!G.result;
+    if (G.mode === 'computer' || G.mode === 'local') {
+      html += '<button class="btn small" data-a="undo" type="button"' + (G.history.length && !G.ui.thinking ? '' : ' disabled') + '>Undo</button>';
+      html += '<button class="btn small" data-a="hint" type="button"' + (act ? '' : ' disabled') + '>Hint</button>';
+      html += '<button class="btn small" data-a="routes" type="button" aria-pressed="' + (ui.routes ? 'true' : 'false') + '">Routes: ' + (ui.routes ? 'on' : 'off') + '</button>';
+      if (G.mode === 'local') html += '<button class="btn small" data-a="draw" type="button"' + (over ? ' disabled' : '') + '>Draw</button>';
+      html += '<button class="btn small danger" data-a="resign" type="button"' + (over ? ' disabled' : '') + '>Resign</button>';
+    } else if (G.mode === 'online') {
+      html += '<button class="btn small" data-a="draw" type="button"' + (over || G.drawOffer >= 0 || G.lastStatus !== 'playing' ? ' disabled' : '') + '>Offer draw</button>';
+      html += '<button class="btn small danger" data-a="resign" type="button"' + (over ? ' disabled' : '') + '>Resign</button>';
+    } else if (G.mode === 'tutorial') {
+      html += '<button class="btn small" data-a="reset" type="button">Reset this step</button>';
+    }
+    if (over && G.mode !== 'tutorial') html += '<button class="btn small primary" data-a="result" type="button">Show result</button>';
+    if (acts.dataset.sig !== html) { acts.dataset.sig = html; acts.innerHTML = html; }
+    // moves list
+    var ol = $('movesList'), items = '';
+    if (!G.moves.length) items = '<li class="none">No moves yet.</li>';
+    else {
+      var first = G.starter;
+      G.moves.forEach(function (m, i) { var seat = (first + i) % 2; items += '<li class="p' + seat + '">' + (i + 1) + '. ' + esc(m) + '</li>'; });
+    }
+    if (ol.dataset.sig !== items) { ol.dataset.sig = items; ol.innerHTML = items; ol.scrollTop = ol.scrollHeight; }
+    // tutorial box
+    var tb = $('tutBox');
+    if (G.tut) {
+      var step = TUT[G.tut.i];
+      tb.hidden = false;
+      tb.innerHTML = '<div class="step">Step ' + (G.tut.i + 1) + ' of ' + TUT.length + '</div><h3>' + esc(step.title) + '</h3><p>' + esc(G.tut.done ? step.win : step.text) + '</p><div class="row">' +
+        (G.tut.i === TUT.length - 1 ? '<button class="btn primary" data-t="computer" type="button">Play the computer</button><button class="btn" data-t="menu" type="button">Menu</button>' :
+          (G.tut.done ? '<button class="btn primary" data-t="next" type="button">Next step</button>' : '<button class="btn small" data-t="skip" type="button">Skip tutorial</button>')) + '</div>';
+    } else tb.hidden = true;
+  }
+
+  // ---------- results ----------
+  function showResult() {
+    if (!G || !G.result) return;
+    G.shown = true;
+    var r = G.result, w = r.winner, mine = G.mode === 'computer' ? G.human : G.mode === 'online' ? G.me : -1;
+    var title, cls = '', icon = '';
+    if (w < 0) { title = 'Draw'; icon = '='; }
+    else if (mine >= 0) { title = w === mine ? 'You win!' : (G.mode === 'computer' ? 'The computer wins' : nm(w) + ' wins'); cls = w === mine ? 'win' : 'lose'; icon = SYM[w]; }
+    else { title = COLORS[w] + ' wins!'; cls = 'win'; icon = SYM[w]; }
+    var loser = w < 0 ? -1 : 1 - w, reasonTxt;
+    if (r.reason === 'goal') reasonTxt = (mine >= 0 ? (w === mine ? 'You' : nm(w)) : nm(w)) + ' reached the ' + (w === 0 ? 'top' : 'bottom') + ' row.';
+    else if (r.reason === 'resign') reasonTxt = (loser === mine ? 'You' : nm(loser)) + ' resigned.';
+    else if (r.reason === 'timeout') reasonTxt = (loser === mine ? 'You' : nm(loser)) + ' ran out of time.';
+    else if (r.reason === 'disconnect') reasonTxt = (loser === mine ? 'You' : nm(loser)) + ' did not return in time.';
+    else if (r.reason === 'agreement') reasonTxt = 'Both players agreed to a draw.';
+    else reasonTxt = 'The same position appeared three times.';
+    var online = G.mode === 'online', rem = online && G.players && G.players[1 - G.me] && G.players[1 - G.me].rematch, mineReq = online && G.players && G.players[G.me] && G.players[G.me].rematch;
+    var rematchLabel = online ? (mineReq ? 'Waiting for ' + nm(1 - G.me) + '...' : rem ? nm(1 - G.me) + ' wants a rematch. Accept' : 'Ask for a rematch') : 'Rematch';
+    openDialog('<div class="big' + (w >= 0 ? ' p' + w : '') + '" aria-hidden="true">' + icon + '</div><h2 id="dlgTitle">' + esc(title) + '</h2><p class="muted">' + esc(reasonTxt) + '</p><div class="btns"><button class="btn primary" data-act="rematch" type="button">' + esc(rematchLabel) + '</button><button class="btn" data-act="view" type="button">Look at the board</button><button class="btn" data-act="menu" type="button">Back to menu</button></div>', cls,
+      { rematch: function () { if (online) netSend({ t: 'rematch', on: !mineReq }); else { closeDialog(); startAgain(); } }, view: closeDialog, menu: function () { closeDialog(); toMenu(true); } });
+  }
+  function startAgain() {
+    if (!G) return;
+    var o = { preset: G.preset, time: G.timeKey, names: G.names.slice(), human: G.human, level: G.level, rotate: G.rotate, starter: 1 - G.starter };
+    var mode = G.mode; newGame(mode, o); show('game'); render(); afterCommit();
+  }
+  function toMenu(force) {
+    function go() { if (G && G.mode === 'online') netLeave(); aiId++; G = null; B.key = ''; setupKind = null; show('menu'); closeDialog(); }
+    if (!G || force || G.result || G.mode === 'tutorial' || !G.moves.length) return go();
+    confirmDialog('Leave this game?', G.mode === 'online' ? 'Leaving counts as a resignation.' : 'Your game will be lost.', 'Leave game', go, 'Keep playing');
+  }
+
+  // ---------- input ----------
+  function activateCell(gr, gc) {
+    if (!canAct()) return;
+    var ui = G.ui, s = G.s, me = actor();
+    if (ui.tool) return;
+    if (s.pr[me] === gr && s.pc[me] === gc) { ui.sel = !ui.sel; ui.note = ''; ui.hint = null; render(); return; }
+    if (ui.sel && R.isLegalMove(s, s.turn, gr, gc)) { doAction({ t: 'move', r: gr, c: gc }); return; }
+    note(ui.sel ? 'That square is not a legal move. Pick one of the glowing squares.' : 'Tap your pawn first, then a glowing square.', 'info'); render();
+  }
+  function setTool(o) {
+    if (!canAct()) return;
+    var ui = G.ui;
+    ui.tool = ui.tool === o ? null : o; ui.sel = false; ui.anchor = null; ui.hover = null; ui.hint = null; ui.note = '';
+    render();
+  }
+  function confirmWall() {
+    var pv = preview();
+    if (!pv || !pv.locked || pv.err || !canAct()) return;
+    var a = { t: 'wall', o: pv.o, r: pv.r, c: pv.c };
+    doAction(a);
+  }
+  function cancelTool() { if (!G) return; var ui = G.ui; if (ui.anchor) ui.anchor = null; else { ui.tool = null; ui.sel = false; } ui.hint = null; render(); }
+  function pickAnchor(a, lock) {
+    var ui = G.ui; if (!ui.tool || !canAct()) return;
+    if (lock) ui.anchor = a; else ui.hover = a;
+    if (lock && G.tut && G.tut.step().onPreview) { var done = G.tut.step().onPreview({ o: ui.tool, r: a.r, c: a.c, err: R.wallError(G.s, ui.tool, a.r, a.c) }); if (done) { G.tut.done = true; note('Right. The game refuses a wall that would trap a pawn.', 'good'); sound('win'); } }
+    render();
+  }
+
+  var dragging = false;
+  var boardEl = $('board');
+  boardEl.addEventListener('pointerdown', function (e) {
+    if (!G || !G.ui.tool || !canAct() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    dragging = true; try { boardEl.setPointerCapture(e.pointerId); } catch (x) { /* ignore */ }
+    pickAnchor(anchorFromEvent(e), true);
+  });
+  boardEl.addEventListener('pointermove', function (e) {
+    if (!G || !G.ui.tool || !canAct()) return;
+    var a = anchorFromEvent(e);
+    if (dragging) { if (!G.ui.anchor || G.ui.anchor.r !== a.r || G.ui.anchor.c !== a.c) pickAnchor(a, true); }
+    else if (e.pointerType === 'mouse' && !G.ui.anchor) { var h = G.ui.hover; if (!h || h.r !== a.r || h.c !== a.c) pickAnchor(a, false); }
+  });
+  function endDrag() { dragging = false; }
+  boardEl.addEventListener('pointerup', endDrag); boardEl.addEventListener('pointercancel', endDrag);
+  boardEl.addEventListener('pointerleave', function () { if (G && G.ui.hover && !G.ui.anchor) { G.ui.hover = null; render(); } });
+  boardEl.addEventListener('click', function (e) {
+    if (!G) return;
+    if (G.ui.tool) { return; } // wall selection is handled on pointer down so a tap and a drag behave the same
+    var dest = e.target.closest ? e.target.closest('.dest') : null;
+    if (dest) { activateCell(+dest.dataset.r, +dest.dataset.c); return; }
+    var c = cellFromEvent(e); activateCell(c.r, c.c);
+  });
+  boardEl.addEventListener('keydown', function (e) {
+    if (!G) return;
+    var ui = G.ui, n = V.n, k = e.key, d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[k];
+    if (d) {
+      e.preventDefault();
+      if (ui.tool) { ui.curA = { r: Math.max(0, Math.min(n - 2, ui.curA.r + d[0])), c: Math.max(0, Math.min(n - 2, ui.curA.c + d[1])) }; var m = n - 2; ui.anchor = null; ui.hover = V.flip ? { r: m - ui.curA.r, c: m - ui.curA.c } : { r: ui.curA.r, c: ui.curA.c }; }
+      else ui.cur = { r: Math.max(0, Math.min(n - 1, ui.cur.r + d[0])), c: Math.max(0, Math.min(n - 1, ui.cur.c + d[1])) };
+      render(); return;
+    }
+    if (k === 'Enter' || k === ' ') {
+      e.preventDefault();
+      if (ui.tool) {
+        if (!ui.hover && !ui.anchor) { var mm = n - 2; ui.hover = V.flip ? { r: mm - ui.curA.r, c: mm - ui.curA.c } : { r: ui.curA.r, c: ui.curA.c }; }
+        if (ui.anchor) confirmWall(); else pickAnchor(ui.hover, true);
+      } else activateCell(V.flip ? n - 1 - ui.cur.r : ui.cur.r, V.flip ? n - 1 - ui.cur.c : ui.cur.c);
+    } else if (k === 'w' || k === 'W') { setTool(ui.tool ? null : 'H'); }
+    else if (k === 'r' || k === 'R') { if (ui.tool) { ui.tool = ui.tool === 'H' ? 'V' : 'H'; render(); } else setTool('H'); }
+    else if (k === 'p' || k === 'P') { ui.tool = null; ui.anchor = null; ui.hover = null; render(); }
+    else if (k === 'Escape') cancelTool();
+  });
+  $('toolH').addEventListener('click', function () { setTool('H'); });
+  $('toolV').addEventListener('click', function () { setTool('V'); });
+  $('btnConfirm').addEventListener('click', confirmWall);
+  $('btnCancel').addEventListener('click', cancelTool);
+  $('btnMenu').addEventListener('click', function () { toMenu(false); });
+  $('btnSound').addEventListener('click', toggleSound); $('soundMenu').addEventListener('click', toggleSound);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !$('modal').hidden && !(G && G.result && !G.shown)) closeDialog();
+  });
+
+  $('actions').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-a]'); if (!b || !G) return;
+    var a = b.dataset.a;
+    if (a === 'undo') {
+      if (G.mode === 'local') confirmDialog('Take back the last move?', 'Both players need to agree.', 'We both agree', undoLast, 'Keep it');
+      else undoLast();
+    } else if (a === 'hint') askHint();
+    else if (a === 'routes') { G.ui.routes = !G.ui.routes; render(); }
+    else if (a === 'resign') {
+      confirmDialog('Resign this game?', G.mode === 'local' ? COLORS[G.s.turn] + ' resigns and ' + COLORS[1 - G.s.turn] + ' wins.' : 'Your rival wins the game.', 'Resign', function () {
+        if (G.mode === 'online') netSend({ t: 'resign' }); else finish(1 - actor(), 'resign');
+      });
+    } else if (a === 'draw') {
+      if (G.mode === 'online') netSend({ t: 'draw_offer' });
+      else confirmDialog('Agree a draw?', 'Both players need to agree.', 'We both agree', function () { finish(-1, 'agreement'); }, 'Keep playing');
+    } else if (a === 'result') { G.shown = false; showResult(); }
+    else if (a === 'reset') tutSetup(G.tut.i);
+  });
+  $('banner').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-b]'); if (!b) return;
+    netSend({ t: { accept: 'draw_accept', decline: 'draw_decline', cancel: 'draw_cancel' }[b.dataset.b] });
+  });
+  $('tutBox').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-t]'); if (!b || !G || !G.tut) return;
+    var t = b.dataset.t;
+    if (t === 'next') tutSetup(G.tut.i + 1);
+    else if (t === 'skip') toMenu(true);
+    else if (t === 'menu') toMenu(true);
+    else if (t === 'computer') { toMenu(true); openSetup('computer'); }
+  });
+  window.addEventListener('resize', function () { if (G && !$('game').hidden) render(); });
+  setInterval(function () {
+    if (!G || $('game').hidden) return;
+    if (G.timed && !G.result && G.mode !== 'online' && G.mode !== 'tutorial') {
+      var t = G.s.turn; if (remaining(t) <= 0) { G.clocks[t] = 0; finish(1 - t, 'timeout'); return; }
+    }
+    updateClocks();
+  }, 200);
+
+  // ---------- tutorial ----------
+  function force(o, r, c) { var u = R.doWall(G.s, o, r, c); G.s.inv[u.p]++; G.s.turn = u.p; G.owners.push(1); }
+  var TUT = [
+    { title: 'Race to the other side', text: 'You are cyan, at the bottom. Reach any square on the top row before your rival reaches the bottom row.\n\nEach turn you do one thing. First, move: tap your pawn, then tap a glowing square.',
+      win: 'That is a move. You can step one square up, down, left or right.', setup: function () { }, done: function (a) { return a.t === 'move'; }, retry: 'Move your pawn one step.' },
+    { title: 'Place a wall', text: 'Instead of moving, you can place a wall to slow your rival down. Tap the flat wall button, move over the board, click or tap to lock a spot, then press Place wall.',
+      win: 'Walls cover two squares of edge, stay for the whole game, and use up one of your walls. Moving and placing a wall in the same turn is not allowed.', setup: function () { }, done: function (a) { return a.t === 'wall'; }, retry: 'Place any wall.' },
+    { title: 'Jump over your rival', text: 'Your rival stands right in front of you. Tap your pawn and jump straight over them.',
+      win: 'A jump counts as one move. It only works when no wall sits between the two pawns.',
+      setup: function () { G.s.pr[0] = 5; G.s.pc[0] = 4; G.s.pr[1] = 4; G.s.pc[1] = 4; }, done: function (a) { return a.t === 'move' && a.r === 3 && a.c === 4; }, retry: 'Jump over the rival to the square behind them.' },
+    { title: 'Step around a wall', text: 'There is a wall behind your rival, so you cannot jump. Instead you may step to either side of them. Tap your pawn and pick a diagonal square.',
+      win: 'When a wall or the board edge blocks the jump, you can move to a square beside the rival.',
+      setup: function () { G.s.pr[0] = 5; G.s.pc[0] = 4; G.s.pr[1] = 4; G.s.pc[1] = 4; force('H', 3, 4); }, done: function (a) { return a.t === 'move' && a.r === 4 && (a.c === 3 || a.c === 5); }, retry: 'Step to one of the squares beside the rival.' },
+    { title: 'Always leave a way through', text: 'The magenta pawn is boxed into a corner with one gap left. Pick the upright wall tool and lock in the glowing spot. The game will not allow a wall that closes the last route.',
+      win: 'Every pawn must always have a route to its goal row. The game checks this before a wall is placed.',
+      setup: function () { G.s.pr[0] = 6; G.s.pc[0] = 4; G.s.pr[1] = 0; G.s.pc[1] = 0; force('H', 0, 0); G.tut.mark = { o: 'V', r: 0, c: 1 }; },
+      onPreview: function (pv) { return pv.o === 'V' && pv.r === 0 && pv.c === 1 && pv.err && pv.err.code === 'route'; }, done: function () { return false; }, retry: 'Try the upright wall at the glowing spot.' },
+    { title: 'You know the rules', text: 'Race, jump, sidestep and wall, but never trap a pawn completely. Keep an eye on both routes: the shorter route is usually winning.\n\nIn the computer and two-player games you can turn on Routes to see each pawn\'s shortest path.',
+      win: '', setup: function () { }, done: function () { return false; }, retry: '' }
+  ];
+  function tutSetup(i) {
+    if (i >= TUT.length) return toMenu(true);
+    newGame('tutorial', { preset: 'standard', time: 'none', names: ['You', 'Rival'], starter: 0 });
+    show('game');
+    G.tut = { i: i, done: false, mark: null, step: function () { return TUT[this.i]; } };
+    TUT[i].setup(); G.keys = [R.positionKey(G.s)];
+    if (i === TUT.length - 1) G.tut.done = false;
+    note('', 'info'); render(); $('board').focus({ preventScroll: true });
+  }
+  function tutAfter(a, before) {
+    var st = G.tut.step(); G.s.turn = 0; G.s.winner = -1;
+    if (st.done(a, before, G.s)) { G.tut.done = true; note('Nice work.', 'good'); sound('win'); }
+    else { note(st.retry + ' Setting the board up again.', 'bad'); var i = G.tut.i; setTimeout(function () { if (G && G.tut && G.tut.i === i && !G.tut.done) tutSetup(i); }, 1300); }
+    render();
+  }
+
+  // ---------- menu and setup screens ----------
+  var setupKind = null;
+  function seg(name, opts, cur, disabled) {
+    return '<div class="seg" role="radiogroup" data-seg="' + name + '">' + opts.map(function (o) {
+      return '<button type="button" role="radio" data-v="' + o[0] + '" aria-checked="' + (o[0] === cur ? 'true' : 'false') + '"' + (disabled ? ' disabled' : '') + '>' + esc(o[1]) + '</button>';
+    }).join('') + '</div>';
+  }
+  var presetOpts = Object.keys(PRESETS).map(function (k) { return [k, PRESETS[k].label]; });
+  var timeOpts = Object.keys(TIMES).map(function (k) { return [k, TIMES[k].label]; });
+  function boardField(disabled, cur) {
+    return '<div class="field"><div class="lab">Board</div>' + seg('preset', presetOpts, cur || cfg.preset, disabled) + '<p class="hint">' + esc(PRESETS[cur || cfg.preset].note) + '</p></div>';
+  }
+  function timeField(disabled, cur) { return '<div class="field"><div class="lab">Clock</div>' + seg('time', timeOpts, cur || cfg.time, disabled) + '</div>'; }
+  function openSetup(kind) { setupKind = kind; net.error = ''; renderSetup(); show('setup'); }
+  function renderSetup() {
+    var el = $('setup'), h = '';
+    var top = '<div class="topbar"><button class="btn small" data-s="back" type="button">Back</button><div class="brand"><i></i><i></i> WALL HURDLE</div></div>';
+    if (setupKind === 'computer') {
+      h = top + '<div class="panel"><h2>Play the computer</h2>' +
+        '<div class="field"><div class="lab">Difficulty</div>' + seg('level', LEVELS, cfg.level) + '<p class="hint">' + ({ easy: 'Walks toward the goal and makes understandable mistakes.', medium: 'Compares both routes and looks two moves ahead.', hard: 'Searches several moves ahead with careful wall choices.', expert: 'The deepest search and the longest thinking time. Strong, but not unbeatable.' }[cfg.level]) + '</p></div>' +
+        '<div class="field"><div class="lab">Your side</div>' + seg('side', [['random', 'Random'], ['bottom', 'Bottom, cyan ▲'], ['top', 'Top, magenta ▼']], cfg.side) + '<p class="hint">The player who moves first is chosen at random.</p></div>' +
+        boardField(false) + timeField(false) + '<button class="btn primary" data-s="startComputer" type="button">Start game</button></div>';
+    } else if (setupKind === 'local') {
+      h = top + '<div class="panel"><h2>Two players, one device</h2>' + boardField(false) + timeField(false) +
+        '<div class="field"><div class="lab">Board view</div>' + seg('rotate', [['0', 'Keep fixed'], ['1', 'Turn between moves']], cfg.rotate ? '1' : '0') + '<p class="hint">Turning the board puts the player to move at the bottom, handy when you sit on opposite sides.</p></div>' +
+        '<button class="btn primary" data-s="startLocal" type="button">Start game</button></div>';
+    } else if (setupKind === 'online') {
+      h = top + '<div class="panel"><h2>Play online</h2>' +
+        (net.error ? '<div class="errbox" role="alert">' + esc(net.error) + '</div>' : '') +
+        '<div class="field"><label for="nameIn">Your name</label><input class="txt" id="nameIn" maxlength="16" autocomplete="nickname" value="' + esc(cfg.name) + '" placeholder="Player"></div>' +
+        '<div class="field"><div class="lab">Create a room</div><p class="hint">You pick the settings. Your friend sees them and must accept before the game starts.</p></div>' +
+        boardField(false) + timeField(false) +
+        '<button class="btn primary" data-s="create" type="button"' + (net.connecting ? ' disabled' : '') + '>' + (net.connecting ? 'Connecting...' : 'Create room') + '</button>' +
+        '<div class="or">or join a friend</div>' +
+        '<div class="row"><input class="txt code grow" id="codeIn" maxlength="5" aria-label="Room code" placeholder="CODE" value="' + esc(new URLSearchParams(location.search).get('room') || '') + '"><button class="btn" data-s="join" type="button"' + (net.connecting ? ' disabled' : '') + '>Join room</button></div>' +
+        '<p class="hint">Online games use a private room and a real second player. There is no matchmaking or ranking.</p></div>';
+    } else if (setupKind === 'lobby' && net.snap) {
+      var sn = net.snap, host = sn.you === 0, st = sn.settings, p = sn.players, other = p[1 - sn.you];
+      h = top + '<div class="panel"><h2>Room ' + esc(sn.code) + '</h2><div class="codebig" aria-label="Room code">' + esc(sn.code) + '</div>' +
+        '<div class="row"><button class="btn grow" data-s="copyCode" type="button">Copy code</button><button class="btn grow" data-s="copyLink" type="button">Copy invite link</button></div>' +
+        '<div class="plist">' + p.map(function (pl, i) {
+          if (!pl) return '<div class="pl"><div class="sym p' + i + '" style="width:36px;height:36px">' + SYM[i] + '</div><div class="nm muted">Waiting for a friend to join...</div></div>';
+          return '<div class="pl"><div class="sym p' + i + '" style="width:36px;height:36px">' + SYM[i] + '</div><div class="nm">' + esc(pl.name) + (i === sn.you ? ' (you)' : '') + '</div>' +
+            (pl.connected ? '' : '<span class="chip off">Offline</span>') + '<span class="chip ' + (pl.ready ? 'on' : '') + '">' + (pl.ready ? 'Ready' : 'Not ready') + '</span></div>';
+        }).join('') + '</div>' +
+        boardField(!host, st.preset) + timeField(!host, st.time) +
+        (host ? '' : '<p class="hint">The host chooses the settings. Press Ready to accept them.</p>') +
+        '<button class="btn primary" data-s="ready" type="button"' + (!p[1] ? ' disabled' : '') + '>' + (p[sn.you].ready ? 'Not ready yet' : 'I accept these settings. Ready') + '</button>' +
+        '<p class="hint">' + (p[1] ? 'The game starts when both players are ready. The first move is chosen at random.' : 'Share the code or the invite link. The game cannot start until a second player joins.') + '</p></div>';
+      void other;
+    }
+    el.innerHTML = h;
+  }
+  $('setup').addEventListener('click', function (e) {
+    var sb = e.target.closest('[data-seg] button');
+    if (sb) {
+      var g = sb.parentNode.dataset.seg, v = sb.dataset.v;
+      if (setupKind === 'lobby') { if (net.snap && net.snap.you === 0) { var st = { preset: net.snap.settings.preset, time: net.snap.settings.time }; st[g] = v; netSend({ t: 'settings', settings: st }); } return; }
+      if (g === 'rotate') cfg.rotate = v === '1'; else cfg[g] = v;
+      saveCfg(); var nm0 = $('nameIn') ? $('nameIn').value : null; renderSetup(); if (nm0 != null && $('nameIn')) $('nameIn').value = nm0; return;
+    }
+    var b = e.target.closest('[data-s]'); if (!b) return;
+    var a = b.dataset.s;
+    if (a === 'back') { if (setupKind === 'lobby') { netLeave(); } setupKind = null; show('menu'); }
+    else if (a === 'startComputer') {
+      var human = cfg.side === 'bottom' ? 0 : cfg.side === 'top' ? 1 : Math.floor(Math.random() * 2);
+      var lv = LEVELS.filter(function (l) { return l[0] === cfg.level; })[0][1];
+      newGame('computer', { preset: cfg.preset, time: cfg.time, human: human, level: cfg.level, names: human === 0 ? ['You', 'Computer (' + lv + ')'] : ['Computer (' + lv + ')', 'You'] });
+      show('game'); render(); afterCommit();
+    } else if (a === 'startLocal') { newGame('local', { preset: cfg.preset, time: cfg.time, rotate: cfg.rotate, names: ['Cyan', 'Magenta'] }); show('game'); render(); }
+    else if (a === 'create') onlineCreate();
+    else if (a === 'join') onlineJoin($('codeIn').value);
+    else if (a === 'ready') netSend({ t: 'ready', ready: !net.snap.players[net.snap.you].ready });
+    else if (a === 'copyCode') copyText(net.code, 'room code');
+    else if (a === 'copyLink') copyText(shareLink(), 'invite link');
+  });
+  $('setup').addEventListener('input', function (e) { if (e.target.id === 'nameIn') { cfg.name = e.target.value; } if (e.target.id === 'codeIn') e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
+
+  $('goComputer').addEventListener('click', function () { openSetup('computer'); });
+  $('goLocal').addEventListener('click', function () { openSetup('local'); });
+  $('goOnline').addEventListener('click', function () { openSetup('online'); });
+  $('goTutorial').addEventListener('click', function () { G = null; tutSetup(0); });
+
+  // ---------- start up ----------
+  syncSoundButtons();
+  window.__hurdle = { game: function () { return G; }, net: net, view: function () { return V; } };
+  (function boot() {
+    var room = '';
+    try { room = new URLSearchParams(location.search).get('room') || ''; } catch (e) { /* ignore */ }
+    var sess = null; try { sess = JSON.parse(sget('hurdle-session') || 'null'); } catch (e) { /* ignore */ }
+    if (sess && sess.code && sess.token && (!room || room.toUpperCase() === sess.code)) {
+      net.want = true; net.code = sess.code; net.token = sess.token; setupKind = 'online';
+      netOpen(function () { netSend({ t: 'join', code: sess.code, token: sess.token, name: cfg.name }); });
+      return;
+    }
+    if (room) openSetup('online');
+  })();
+})();
+
+</script>
+</body>
+</html>
