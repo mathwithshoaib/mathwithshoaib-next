@@ -66,6 +66,21 @@ const DEGREES = [
     image: '/images/gcu.jpg',
     imageAlt: 'GCU Lahore aerial view',
   },
+  {
+    // Timeline-only stop: no "Each Chapter" detail section
+    id: 'bsc',
+    timelineOnly: true,
+    period: '2015 – 2017',
+    degree: 'BSc',
+    institution: 'Govt. Farid Bux Gousia Degree Science College',
+    note: 'Pir Mahal · affiliated with GCU Faisalabad',
+    country: 'Pakistan 🇵🇰',
+    flag: '🇵🇰',
+    color: 'var(--blue, #5b8def)',
+    tags: ['Bachelor of Science'],
+    image: '/images/33clg.jpg',
+    imageAlt: 'Govt. Farid Bux Gousia Degree Science College, 333GB Pir Mahal',
+  },
 ];
 
 
@@ -111,68 +126,58 @@ export default function Education() {
         </div>
       </section>
 
-      {/* ── TIMELINE ── */}
-      <section className="sk-section">
+      {/* ── TIMELINE: horizontal wave ── */}
+      <section className="sk-section" style={{ overflow: 'hidden' }}>
         <div className="container">
           <span className="eyebrow reveal">Chronological</span>
-          <h2 className="reveal" style={{ marginBottom: '48px' }}>The Path</h2>
+          <h2 className="reveal" style={{ marginBottom: '8px' }}>The Path</h2>
+          <p className="reveal" style={{ color: 'var(--text2)', marginBottom: '40px' }}>
+            From college in Pir Mahal to a year in France — tap a stop to jump to its chapter.
+          </p>
 
-          <div style={{ position: 'relative' }}>
+          <div className="wave reveal">
+            {/* Wavy path (desktop) */}
+            <svg className="wave-svg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="var(--blue, #5b8def)" />
+                  <stop offset="35%" stopColor="var(--violet)" />
+                  <stop offset="68%" stopColor="var(--teal)" />
+                  <stop offset="100%" stopColor="var(--amber)" />
+                </linearGradient>
+              </defs>
+              <path className="wave-bg"
+                d="M0,100 C60,100 60,50 125,50 C250,50 250,150 375,150 C500,150 500,50 625,50 C750,50 750,150 875,150 C940,150 940,100 1000,100"
+                fill="none" vectorEffect="non-scaling-stroke" />
+              <path className="wave-line" pathLength="1"
+                d="M0,100 C60,100 60,50 125,50 C250,50 250,150 375,150 C500,150 500,50 625,50 C750,50 750,150 875,150 C940,150 940,100 1000,100"
+                fill="none" stroke="url(#waveGrad)" vectorEffect="non-scaling-stroke" />
+            </svg>
 
-            {/* Vertical timeline line — desktop only */}
-            <div style={{
-              position: 'absolute', left: '50%', top: '0', bottom: '0',
-              width: '2px', background: 'var(--border)',
-              transform: 'translateX(-50%)',
-            }} className="tl-line" />
-
-            {DEGREES.map((deg, idx) => {
-              const isLeft = idx % 2 === 0;
-              return (
-                <div key={deg.id} className="reveal tl-row" style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 60px 1fr',
-                  gap: '0',
-                  marginBottom: '64px',
-                  alignItems: 'start',
-                }}>
-                  {/* Left content or spacer */}
-                  {isLeft ? (
-                    <DegreeCard deg={deg} align="right" />
-                  ) : (
-                    <div /> /* spacer */
-                  )}
-
-                  {/* Centre dot */}
-                  <div style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '20px',
-                  }}>
-                    <div style={{
-                      width: '48px', height: '48px', borderRadius: '50%',
-                      background: 'var(--bg2)', border: `3px solid ${deg.color}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '1.2rem', flexShrink: 0, zIndex: 1, position: 'relative',
-                      boxShadow: `0 0 0 6px var(--bg)`,
-                    }}>
-                      {deg.flag}
-                    </div>
-                    <div style={{
-                      fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)',
-                      letterSpacing: '.06em', marginTop: '10px', textAlign: 'center', whiteSpace: 'nowrap',
-                    }}>
-                      {deg.period}
-                    </div>
+            <div className="wave-stops">
+              {[...DEGREES].reverse().map((deg, i) => (
+                <a key={deg.id} href={deg.timelineOnly ? undefined : `#${deg.id}`}
+                  className={`wave-stop wave-stop-${i}`} style={{ '--c': deg.color, cursor: deg.timelineOnly ? 'default' : 'pointer' }}>
+                  <div className="wave-node">
+                    <span>{deg.flag}</span>
+                    {deg.image && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={deg.image} alt={deg.imageAlt} className="wave-img"
+                        onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    )}
+                    <i className="wave-flag">{deg.flag}</i>
                   </div>
-
-                  {/* Right content or spacer */}
-                  {!isLeft ? (
-                    <DegreeCard deg={deg} align="left" />
-                  ) : (
-                    <div /> /* spacer */
-                  )}
-                </div>
-              );
-            })}
+                  <div className="wave-stem" />
+                  <div className="wave-card">
+                    <div className="wave-period">{deg.period}</div>
+                    <h3>{deg.degree}</h3>
+                    <div className="wave-inst">{deg.institution}</div>
+                    {deg.note && <div className="wave-inst" style={{ marginTop: '-6px' }}>{deg.note}</div>}
+                    <span className="tag tag-amber" style={{ fontSize: '.6rem' }}>{deg.tags[0]}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -186,7 +191,7 @@ export default function Education() {
             Every degree shaped a different facet — foundation, depth, and international breadth.
           </p>
 
-          {DEGREES.map((deg, idx) => (
+          {DEGREES.filter(d => !d.timelineOnly).map((deg, idx) => (
             <DetailCard key={deg.id} deg={deg} idx={idx} />
           ))}
         </div>
@@ -211,52 +216,42 @@ export default function Education() {
 
       {/* Responsive styles scoped to this page */}
       <style>{`
+        .wave { position: relative; }
+        .wave-svg { position: absolute; left: 0; top: 0; width: 100%; height: 200px; overflow: visible; }
+        .wave-bg { stroke: var(--border); stroke-width: 2; stroke-dasharray: 3 7; }
+        .wave-line { stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.2s ease; }
+        .wave.visible .wave-line { stroke-dashoffset: 0; }
+        .wave-stops { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); }
+        .wave-stop { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; }
+        .wave-stop-0, .wave-stop-2 { padding-top: 18px; }
+        .wave-stop-1, .wave-stop-3 { padding-top: 118px; }
+        .wave-node { position: relative; width: 84px; height: 84px; border-radius: 50%; border: 4px solid var(--c);
+          background: var(--bg2); box-shadow: 0 0 0 7px var(--bg), 0 8px 24px rgba(0,0,0,.18);
+          display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+          transition: transform .3s ease; }
+        .wave-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .wave-flag { position: absolute; right: -8px; bottom: -6px; font-style: normal; font-size: 1rem;
+          background: var(--bg2); border: 2px solid var(--c); border-radius: 50%; width: 30px; height: 30px;
+          display: flex; align-items: center; justify-content: center; }
+        .wave-stop:hover .wave-node { transform: scale(1.1) rotate(-3deg); }
+        .wave-stem { width: 0; height: 28px; border-left: 2px dotted var(--c); }
+        .wave-stop-1 .wave-stem { height: 28px; }
+        .wave-card { text-align: center; max-width: 250px; padding: 14px 16px; background: var(--surface);
+          border: 1px solid var(--border); border-bottom: 3px solid var(--c); border-radius: var(--radius);
+          box-shadow: var(--shadow-sm); transition: transform .3s ease, box-shadow .3s ease; }
+        .wave-stop:hover .wave-card { transform: translateY(-4px); box-shadow: var(--shadow); }
+        .wave-period { font-family: var(--fm); font-size: .68rem; letter-spacing: .1em; color: var(--c); margin-bottom: 4px; }
+        .wave-card h3 { font-size: 1rem; margin: 0 0 4px; color: var(--text); }
+        .wave-inst { font-family: var(--fm); font-size: .7rem; color: var(--text3); margin-bottom: 10px; }
         @media (max-width: 760px) {
-          .tl-line { display: none !important; }
-          .tl-row {
-            grid-template-columns: 1fr !important;
-            gap: 0 !important;
-          }
-          .tl-row > div:nth-child(2) { margin: 0 auto 16px !important; }
-          .tl-row > div:nth-child(3) { display: none !important; }
+          .wave-svg { display: none; }
+          .wave-stops { grid-template-columns: 1fr; gap: 28px; padding-left: 0; }
+          .wave-stop-0, .wave-stop-1, .wave-stop-2, .wave-stop-3 { padding-top: 0; }
+          .wave-card { max-width: 100%; width: 100%; }
         }
+        @media (prefers-reduced-motion: reduce) { .wave-line { transition: none; } }
       `}</style>
     </>
-  );
-}
-
-/* ── Timeline dot card (compact, used in timeline section) ── */
-function DegreeCard({ deg, align }) {
-  return (
-    <div style={{
-      textAlign: align,
-      padding: align === 'right' ? '16px 32px 16px 0' : '16px 0 16px 32px',
-    }}>
-      <div style={{
-        display: 'inline-block',
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderTop: `3px solid ${deg.color}`,
-        borderRadius: 'var(--radius)',
-        padding: '20px 24px',
-        maxWidth: '380px',
-        boxShadow: 'var(--shadow-sm)',
-        textAlign: 'left',
-      }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '10px' }}>
-          {deg.tags.slice(0, 2).map(t => (
-            <span key={t} className="tag tag-amber" style={{ fontSize: '.6rem' }}>{t}</span>
-          ))}
-        </div>
-        <h3 style={{ fontSize: '1.1rem', marginBottom: '4px', color: 'var(--text)' }}>{deg.degree}</h3>
-        <div style={{ fontFamily: 'var(--fm)', fontSize: '.75rem', color: 'var(--text3)', marginBottom: '6px' }}>
-          {deg.institution} · {deg.country}
-        </div>
-        <p style={{ fontSize: '.86rem', color: 'var(--text2)', margin: 0, lineHeight: 1.6 }}>
-          {deg.description.slice(0, 120)}…
-        </p>
-      </div>
-    </div>
   );
 }
 
@@ -264,7 +259,8 @@ function DegreeCard({ deg, align }) {
 function DetailCard({ deg, idx }) {
   const isEven = idx % 2 === 0;
   return (
-    <div className="reveal" style={{
+    <div id={deg.id} className="reveal" style={{
+      scrollMarginTop: '90px',
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
       gap: '48px',
