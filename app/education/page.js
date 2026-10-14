@@ -24,7 +24,7 @@ const DEGREES = [
       { icon: '🌍', text: 'Cross-cultural academic environment, Lille, France' },
       { icon: '📐', text: 'Advanced topics in pure and applied mathematics' },
     ],
-    image: null, // Add path like '/images/lille.jpg' when available
+    image: '/images/lille.jpg',
     imageAlt: 'University of Lille campus',
   },
   {
@@ -44,7 +44,7 @@ const DEGREES = [
       { icon: '📗', text: 'Thesis: The Fundamental Group and Classification of Covering Spaces' },
       { icon: '👨‍🏫', text: 'Supervisors: Pavel Putrov (ICTP Italy) & Hani Shaker (COMSATS)' },
     ],
-    image: null, // Add '/images/comsats.jpg' when available
+    image: '/images/comsats.jpg',
     imageAlt: 'COMSATS University Lahore campus entrance',
   },
   {
@@ -63,7 +63,7 @@ const DEGREES = [
       { icon: '🏛️', text: 'GCU Lahore — founded 1864, one of Pakistan\'s oldest universities' },
       { icon: '📚', text: '24 subjects across 2 years: analysis, algebra, topology, statistics & more' },
     ],
-    image: null, // Add '/images/gcu.jpg' when available
+    image: '/images/gcu.jpg',
     imageAlt: 'GCU Lahore aerial view',
   },
 ];
