@@ -17,6 +17,10 @@ export const ACTIVITY_CONTENT = {
     howToPlay: 'Drag a piece from the tray onto the board, or tap a piece and then tap the square where its top-left corner should go. Pieces always stay the same way up. Use Check to see which placed pieces are right, and Hint if you get stuck — five puzzles are available as tabs, each a little harder than the last.',
     whyItWorks: 'Every piece is a fixed shape cut from a 10×10 grid of consecutive numbers, so getting one right constrains its neighbors — the puzzle is really about reading the arithmetic pattern in the grid (rows add 10 going down, columns add 1 going right) rather than brute-force trial and error. The later puzzles flip that direction, start the count at 0 instead of 1, or hide some of the numbers entirely, so the same grid pattern has to be tracked mentally instead of read off directly.',
   },
+  'root-rush': {
+    howToPlay: 'Starting from the number shown, press operation buttons to reach the target exactly — but the number on screen can never go over 60. Undo is free (it doesn’t cost you a step); Restart begins a fresh attempt. Three levels per difficulty, each starting where the last one left off.',
+    whyItWorks: 'This is a shortest-path search problem in disguise: every reachable number is a node, every button press is an edge, and the fewest-possible-steps shown after you solve a level is the length of the shortest path between start and target, found by searching the whole reachable space breadth-first. √ is the interesting operation — it only ever helps when the number on screen is a perfect square (1, 4, 9, 16, 25, 36, 49), since taking the root of anything else produces an irrational decimal that can never become a whole number again no matter what you do to it afterward.',
+  },
 };
 
 export function getActivityContent(slug) {

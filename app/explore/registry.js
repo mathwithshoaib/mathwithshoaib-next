@@ -11,4 +11,5 @@ export const REGISTRY = {
   'paper-folding': dynamic(() => import('./activities/PaperFolding'), { ssr: false }),
   '100-square-jigsaw': dynamic(() => import('./activities/HundredSquareJigsaw'), { ssr: false }),
   'wall-hurdle': dynamic(() => import('./activities/WallHurdle'), { ssr: false }),
+  'root-rush': dynamic(() => import('./activities/RootRush'), { ssr: false }),
 };

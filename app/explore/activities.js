@@ -72,6 +72,18 @@ export const ACTIVITIES = [
     minimalChrome: true,
   },
   {
+    slug: 'root-rush',
+    title: 'Root Rush',
+    hook: 'Push, multiply and root your way to the target — but never go over 60.',
+    category: 'games',
+    minutes: 8,
+    difficulty: 'medium',
+    status: 'live',
+    addedOn: '2026-10-15',
+    badge: null,
+    course: null,
+  },
+  {
     slug: 'birthday-paradox',
     title: 'Birthday Paradox',
     hook: 'How few people need to be in a room before two share a birthday?',

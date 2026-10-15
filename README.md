@@ -52,3 +52,16 @@ One-time setup, before this route works:
 3. **Populate the page.** The database ships empty on purpose — log into `/courses/calc1-fa26/schedule/admin` with `ADMIN_SECRET` and add lectures, instructor office hours, TF recitations, the 8 tutorial slots, and the TA roster (each TA gets an auto-generated passcode, shown once — copy it before dismissing).
 
 TAs and students use the public page directly; no login is needed to view it, only to book a tutorial seat or an office-hour block.
+
+## Root Rush leaderboard (`/explore/root-rush`)
+
+The game itself needs no setup — only the shared leaderboard does:
+
+1. **Run the migration.** Open the Supabase project's SQL editor (same project as `course_reviews` and the schedule tables) and run [supabase/015_root_rush_scores.sql](supabase/015_root_rush_scores.sql) once. Unlike the schedule tables, this one has public insert/select policies (the game posts scores straight from the browser with the publishable key, the same way `course_reviews` does) but no public update/delete — only the service-role key can remove a row.
+2. **Set one more environment variable**, alongside the `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` the schedule feature already needs:
+
+   | Variable | Where to get it |
+   |---|---|
+   | `ROOT_RUSH_ADMIN_SECRET` | Any passcode you choose — type it into the "Owner tools" box at the bottom of the in-game leaderboard to clear test entries from one difficulty/level board |
+
+Until the migration runs, the game still plays normally end to end — the leaderboard screen just shows nothing (score submissions and reads fail quietly rather than breaking the page).
