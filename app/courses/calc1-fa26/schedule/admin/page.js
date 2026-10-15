@@ -1276,6 +1276,7 @@ function ExamResultsSection({ flash }) {
   const [manageRoll, setManageRoll] = useState('');
   const [manageRow, setManageRow] = useState(undefined); // undefined = not searched; null = not found; object = found
   const [managePin, setManagePin] = useState(null);
+  const [newPin, setNewPin] = useState('');
   const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
   const [manageBusy, setManageBusy] = useState(false);
 
@@ -1331,6 +1332,7 @@ function ExamResultsSection({ flash }) {
 
   const lookupOne = async (e) => {
     e.preventDefault();
+    setNewPin('');
     try {
       const res = await api(`/api/schedule/admin/exam-results/rows?exam=${encodeURIComponent(manageExam)}&roll=${encodeURIComponent(manageRoll)}`);
       setManageRow(res.row || null);
@@ -1385,6 +1387,17 @@ function ExamResultsSection({ flash }) {
     try {
       await api('/api/schedule/admin/exam-results/reset-pin', { method: 'POST', body: { studentId: manageRoll } });
       flash('PIN cleared — student can verify and set a new one.', 'ok');
+      lookupOne({ preventDefault: () => {} });
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  const setPinForStudent = async (e) => {
+    e.preventDefault();
+    setManageBusy(true);
+    try {
+      await api('/api/schedule/admin/exam-results/set-pin', { method: 'POST', body: { studentId: manageRoll, pin: newPin } });
+      flash('PIN set — they can sign in with it right away.', 'ok');
+      setNewPin('');
       lookupOne({ preventDefault: () => {} });
     } catch (err) { flash(err.message); } finally { setManageBusy(false); }
   };
@@ -1462,7 +1475,8 @@ function ExamResultsSection({ flash }) {
 
       <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Manage one student</h4>
       <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
-        Look up a roll number to edit/delete their result, or reset their verification attempts / PIN.
+        Look up a roll number to edit/delete their result, reset their verification attempts/PIN, or set a PIN
+        for them directly (PINs are hashed in the database and never shown — this is the only way to see or change one).
       </p>
       <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
         <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
@@ -1471,15 +1485,28 @@ function ExamResultsSection({ flash }) {
       </form>
 
       {managePin && (
-        <div style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <span>PIN status: {managePin.pin_set_at ? `set ${new Date(managePin.pin_set_at).toLocaleDateString()}` : 'not set'}</span>
-          <span>Verify attempts: {managePin.verify_attempts ?? 0}/3</span>
-          <span>PIN fail attempts: {managePin.pin_fail_attempts ?? 0}</span>
-          {managePin.pin_locked_until && new Date(managePin.pin_locked_until) > new Date() && (
-            <span style={{ color: 'var(--rose)' }}>Locked until {new Date(managePin.pin_locked_until).toLocaleTimeString()}</span>
-          )}
-          <button type="button" onClick={resetVerification} disabled={manageBusy} style={smallBtn('var(--amber)')}>reset verify attempts</button>
-          <button type="button" onClick={resetPin} disabled={manageBusy} style={smallBtn('var(--rose)')}>reset PIN</button>
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '10px', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span>PIN status: {managePin.pin_set_at ? `set ${new Date(managePin.pin_set_at).toLocaleDateString()}` : 'not set'}</span>
+            <span>Verify attempts: {managePin.verify_attempts ?? 0}/3</span>
+            <span>PIN fail attempts: {managePin.pin_fail_attempts ?? 0}</span>
+            {managePin.pin_locked_until && new Date(managePin.pin_locked_until) > new Date() && (
+              <span style={{ color: 'var(--rose)' }}>Locked until {new Date(managePin.pin_locked_until).toLocaleTimeString()}</span>
+            )}
+            <button type="button" onClick={resetVerification} disabled={manageBusy} style={smallBtn('var(--amber)')}>reset verify attempts</button>
+            <button type="button" onClick={resetPin} disabled={manageBusy} style={smallBtn('var(--rose)')}>clear PIN (let them re-verify)</button>
+          </div>
+          <form onSubmit={setPinForStudent} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <Field label="Set their PIN directly">
+              <input
+                value={newPin} onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="6 digits" inputMode="numeric" style={{ ...inputStyle, width: '110px' }} required
+              />
+            </Field>
+            <button className="btn btn-outline" type="submit" disabled={manageBusy || !/^\d{6}$/.test(newPin)} style={{ padding: '7px 16px', fontSize: '.75rem' }}>
+              Set PIN
+            </button>
+          </form>
         </div>
       )}
 
