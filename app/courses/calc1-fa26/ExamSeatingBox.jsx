@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 
 /* ═════════════════════════════════════════════════════════════════
    Standalone "Find Your Seat" box — the main content of /exams.
-   Always rendered as a live, interactive search (never hidden), so
-   students always see it and understand what it's for. If the admin
-   hasn't switched on the seating search yet (or hasn't loaded a roster
-   for the current exam), submitting simply reports that plainly rather
-   than pretending nothing exists here.
+   Hidden entirely until the admin flips "Search button is live" on
+   in the Exam Seating admin section — nothing renders while loading
+   or while switched off, so unchecking that box is all it takes to
+   pull this off the page.
 
    Two-step reveal: typing an ID and searching only shows the matched
    NAME first, with a "Yes, that's me / No" check — catches a mistyped ID
@@ -68,6 +67,8 @@ export default function ExamSeatingBox() {
     }
   };
 
+  if (!status?.active) return null;
+
   return (
     <div className="seatbox">
       <style>{`
@@ -103,11 +104,7 @@ export default function ExamSeatingBox() {
         @media (max-width: 480px) { .seatbox-grid { grid-template-columns: 1fr; } }
       `}</style>
       <h4>🔍 Find Your Seat</h4>
-      <p className="seatbox-sub">
-        {status?.active
-          ? `Enter your LUMS ID to see your venue, section & seat for ${status.exam}.`
-          : 'Enter your LUMS ID below.'}
-      </p>
+      <p className="seatbox-sub">Enter your LUMS ID to see your venue, section & seat for {status.exam}.</p>
 
       {stage === 'idle' && (
         <form onSubmit={submit} className="seatbox-form">
