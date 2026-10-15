@@ -1,10 +1,13 @@
 // app/api/schedule/admin/exam-results/route.js
 // GET   -> current settings (active/exam/instructions) plus how many rows
-//          are loaded for that exam.
+//          are loaded for that exam, and searchCount — a running total of
+//          every public results lookup, incremented server-side by the
+//          lookup-start route itself.
 // PATCH -> update settings. Switch `active` on once marks are ready to
 //          release; change `exam` and re-import rows for the next one —
 //          old rows for a past exam are left alone (a different exam
 //          string), so nothing needs to be deleted between exams.
+//          Pass `resetSearchCount: true` to zero the counter back out.
 
 import { cookies } from 'next/headers';
 import { readAdminSession } from '../../../../../lib/scheduleAuth';
@@ -18,8 +21,8 @@ export async function GET() {
   }
 
   try {
-    const settingsRows = await sbSelect('exam_results_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions`);
-    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '' };
+    const settingsRows = await sbSelect('exam_results_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions,search_count`);
+    const s = settingsRows?.[0] || { active: false, exam: '', instructions: '', search_count: 0 };
 
     let count = 0;
     if (s.exam) {
@@ -30,6 +33,7 @@ export async function GET() {
     return Response.json({
       settings: { active: !!s.active, exam: s.exam || '', instructions: s.instructions || '' },
       count,
+      searchCount: s.search_count || 0,
     });
   } catch (err) {
     console.error('admin/exam-results GET error:', err);
@@ -44,13 +48,15 @@ export async function PATCH(req) {
   }
 
   try {
-    const { active, exam, instructions } = await req.json();
-    await sbUpsert('exam_results_settings', {
+    const { active, exam, instructions, resetSearchCount } = await req.json();
+    const patch = {
       course_code: COURSE_CODE,
       active: !!active,
       exam: exam && exam.trim() ? exam.trim() : null,
       instructions: instructions && instructions.trim() ? instructions.trim() : null,
-    }, 'course_code');
+    };
+    if (resetSearchCount) patch.search_count = 0;
+    await sbUpsert('exam_results_settings', patch, 'course_code');
     return Response.json({ ok: true });
   } catch (err) {
     console.error('admin/exam-results PATCH error:', err);

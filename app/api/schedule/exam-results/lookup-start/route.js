@@ -8,7 +8,7 @@
 // else's data. Rejects once Stage-1 attempts are exhausted (see
 // MAX_VERIFY_ATTEMPTS) — admin can reset that counter from the admin panel.
 
-import { sbSelect, sbUpsert } from '../../../../../lib/supabaseAdmin';
+import { sbSelect, sbUpsert, sbRpc } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
 import { normalizeId, maskName, MAX_VERIFY_ATTEMPTS } from '../../../../../lib/examResultsAuth';
 
@@ -34,6 +34,13 @@ export async function POST(req) {
     if (!settings || !settings.active || !settings.exam) {
       return Response.json({ found: false, error: "Results haven't been released yet — check back later." }, { status: 400 });
     }
+
+    // Best-effort usage counter for the admin panel — every real attempted
+    // results lookup, found or not. Never let a hiccup here fail the
+    // actual lookup the student is waiting on.
+    sbRpc('increment_exam_results_search_count', { p_course_code: COURSE_CODE }).catch((err) => {
+      console.error('exam-results search count increment failed:', err);
+    });
 
     const resultRows = await sbSelect(
       'exam_results',

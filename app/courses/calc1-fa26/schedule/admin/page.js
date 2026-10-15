@@ -1260,7 +1260,9 @@ function ExamSeatingSection({ flash }) {
 function ExamResultsSection({ flash }) {
   const [settings, setSettings] = useState(null); // { active, exam, instructions }
   const [count, setCount] = useState(0);
+  const [searchCount, setSearchCount] = useState(0);
   const [savingSettings, setSavingSettings] = useState(false);
+  const [resettingCount, setResettingCount] = useState(false);
 
   const [importExam, setImportExam] = useState('');
   const [importFile, setImportFile] = useState(null);
@@ -1282,6 +1284,7 @@ function ExamResultsSection({ flash }) {
       const res = await api('/api/schedule/admin/exam-results');
       setSettings(res.settings);
       setCount(res.count);
+      setSearchCount(res.searchCount || 0);
       setImportExam((e) => e || res.settings.exam);
       setManageExam((e) => e || res.settings.exam);
     } catch (err) { flash(err.message); }
@@ -1297,6 +1300,15 @@ function ExamResultsSection({ flash }) {
       flash('Saved.', 'ok');
       fetchAll();
     } catch (err) { flash(err.message); } finally { setSavingSettings(false); }
+  };
+
+  const resetSearchCount = async () => {
+    setResettingCount(true);
+    try {
+      await api('/api/schedule/admin/exam-results', { method: 'PATCH', body: { ...settings, resetSearchCount: true } });
+      flash('Search count reset.', 'ok');
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setResettingCount(false); }
   };
 
   const runImport = async (e) => {
@@ -1395,6 +1407,15 @@ function ExamResultsSection({ flash }) {
         That same PIN keeps working for Mid-2 and Final, no re-verification needed.
         {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
       </p>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ fontFamily: 'var(--fm)', fontSize: '.78rem', color: 'var(--text2)' }}>
+          <strong style={{ color: 'var(--teal)', fontSize: '1.1rem' }}>{searchCount}</strong> total search{searchCount === 1 ? '' : 'es'} so far
+        </div>
+        <button type="button" onClick={resetSearchCount} disabled={resettingCount} style={smallBtn('var(--text3)')}>
+          {resettingCount ? 'resetting…' : 'reset count'}
+        </button>
+      </div>
 
       <form onSubmit={saveSettings} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '20px', paddingBottom: '18px', borderBottom: '1px solid var(--border)' }}>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
