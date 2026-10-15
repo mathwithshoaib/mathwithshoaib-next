@@ -31,6 +31,7 @@ const ADMIN_TOC = [
   { id: 'sec-ta-assignments', label: 'TA Assignments' },
   { id: 'sec-announcements', label: 'Announcements' },
   { id: 'sec-exam-seating', label: 'Exam Seating' },
+  { id: 'sec-exam-results', label: 'Exam Results' },
 ];
 
 async function api(path, opts) {
@@ -183,6 +184,7 @@ export default function ScheduleAdmin() {
             <div id="sec-ta-assignments" className="admin-anchor"><TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} /></div>
             <div id="sec-announcements" className="admin-anchor"><AnnouncementsSection flash={flash} /></div>
             <div id="sec-exam-seating" className="admin-anchor"><ExamSeatingSection flash={flash} /></div>
+            <div id="sec-exam-results" className="admin-anchor"><ExamResultsSection flash={flash} /></div>
           </>
         )}
       </div>
@@ -1242,6 +1244,240 @@ function ExamSeatingSection({ flash }) {
             <Field label="Section"><input value={manageForm.section} onChange={(e) => setManageForm((f) => ({ ...f, section: e.target.value }))} placeholder="3, 4, or 5" style={{ ...inputStyle, width: '90px' }} required /></Field>
             <Field label="Venue"><input value={manageForm.venue} onChange={(e) => setManageForm((f) => ({ ...f, venue: e.target.value }))} style={{ ...inputStyle, width: '110px' }} required /></Field>
             <Field label="Seat #"><input value={manageForm.seatNumber} onChange={(e) => setManageForm((f) => ({ ...f, seatNumber: e.target.value }))} style={{ ...inputStyle, width: '90px' }} required /></Field>
+            <button className="btn" type="submit" disabled={manageBusy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{manageRow ? 'Save changes' : 'Add'}</button>
+            {manageRow && <button type="button" onClick={deleteManaged} disabled={manageBusy} style={smallBtn('var(--rose)')}>delete</button>}
+          </form>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ─── Exam Results — "Check Your Results" self-service for students, gated
+   by a one-time name+venue identity check and a 6-digit PIN they then
+   reuse for Mid-2/Final. See lib/examResultsAuth.js for the verification
+   rules and app/api/schedule/exam-results/** for the routes. ─── */
+function ExamResultsSection({ flash }) {
+  const [settings, setSettings] = useState(null); // { active, exam, instructions }
+  const [count, setCount] = useState(0);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  const [importExam, setImportExam] = useState('');
+  const [importFile, setImportFile] = useState(null);
+  const [importBusy, setImportBusy] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+
+  // "Manage one student": look up by exam+roll, then edit/delete the
+  // result, plus reset their verification attempts or PIN if they're
+  // locked out or forgot it — never lists the full class.
+  const [manageExam, setManageExam] = useState('');
+  const [manageRoll, setManageRoll] = useState('');
+  const [manageRow, setManageRow] = useState(undefined); // undefined = not searched; null = not found; object = found
+  const [managePin, setManagePin] = useState(null);
+  const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+  const [manageBusy, setManageBusy] = useState(false);
+
+  const fetchAll = useCallback(async () => {
+    try {
+      const res = await api('/api/schedule/admin/exam-results');
+      setSettings(res.settings);
+      setCount(res.count);
+      setImportExam((e) => e || res.settings.exam);
+      setManageExam((e) => e || res.settings.exam);
+    } catch (err) { flash(err.message); }
+  }, [flash]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const saveSettings = async (e) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      await api('/api/schedule/admin/exam-results', { method: 'PATCH', body: settings });
+      flash('Saved.', 'ok');
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setSavingSettings(false); }
+  };
+
+  const runImport = async (e) => {
+    e.preventDefault();
+    if (!importFile) return;
+    setImportBusy(true);
+    setImportResult(null);
+    try {
+      const csv = await importFile.text();
+      const res = await api('/api/schedule/admin/exam-results/import', { method: 'POST', body: { exam: importExam, csv } });
+      const parts = [`${res.added} new`, `${res.updated} already loaded (updated)`];
+      if (res.duplicateInFile) parts.push(`${res.duplicateInFile} duplicate row${res.duplicateInFile === 1 ? '' : 's'} in the file (merged)`);
+      if (res.skipped) parts.push(`${res.skipped} row${res.skipped === 1 ? '' : 's'} skipped — missing a field`);
+      setImportResult(`${res.imported} student${res.imported === 1 ? '' : 's'} in file — ${parts.join(', ')}.`);
+      flash('Results imported.', 'ok');
+      setImportFile(null);
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setImportBusy(false); }
+  };
+
+  const lookupOne = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api(`/api/schedule/admin/exam-results/rows?exam=${encodeURIComponent(manageExam)}&roll=${encodeURIComponent(manageRoll)}`);
+      setManageRow(res.row || null);
+      setManagePin(res.pin || null);
+      setManageForm(res.row
+        ? {
+          name: res.row.student_name, section: res.row.section, venue: res.row.venue,
+          mcqsMarks: res.row.mcqs_marks || '', q2: res.row.q2 || '', q3: res.row.q3 || '', q4: res.row.q4 || '',
+          bonus: res.row.bonus || '', bonusTotal: res.row.bonus_total || '', total: res.row.total || '',
+        }
+        : { name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+    } catch (err) { flash(err.message); }
+  };
+
+  const saveManaged = async (e) => {
+    e.preventDefault();
+    setManageBusy(true);
+    try {
+      await api('/api/schedule/admin/exam-results/rows', {
+        method: 'POST',
+        body: { exam: manageExam, rollNumber: manageRoll, ...manageForm },
+      });
+      flash(manageRow ? 'Updated.' : 'Added.', 'ok');
+      lookupOne(e);
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  const deleteManaged = async () => {
+    if (!manageRow) return;
+    setManageBusy(true);
+    try {
+      await api(`/api/schedule/admin/exam-results/rows/${manageRow.id}`, { method: 'DELETE' });
+      flash('Deleted.', 'ok');
+      setManageRow(null);
+      setManageForm({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+      fetchAll();
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  const resetVerification = async () => {
+    setManageBusy(true);
+    try {
+      await api('/api/schedule/admin/exam-results/reset-verification', { method: 'POST', body: { studentId: manageRoll } });
+      flash('Verification attempts reset.', 'ok');
+      lookupOne({ preventDefault: () => {} });
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  const resetPin = async () => {
+    setManageBusy(true);
+    try {
+      await api('/api/schedule/admin/exam-results/reset-pin', { method: 'POST', body: { studentId: manageRoll } });
+      flash('PIN cleared — student can verify and set a new one.', 'ok');
+      lookupOne({ preventDefault: () => {} });
+    } catch (err) { flash(err.message); } finally { setManageBusy(false); }
+  };
+
+  if (!settings) {
+    return (
+      <section className="card" style={{ marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '1.05rem' }}>Exam results</h3>
+        <div style={{ color: 'var(--text3)', fontSize: '.85rem' }}>Loading…</div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="card" style={{ marginBottom: '20px' }}>
+      <h3 style={{ fontSize: '1.05rem', marginBottom: '4px' }}>Exam results</h3>
+      <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '16px' }}>
+        Students check their own marks by LUMS ID — first time, they complete a masked name and pick their venue
+        from a dropdown (built automatically from this exam's venues) to prove who they are, then set a 6-digit PIN.
+        That same PIN keeps working for Mid-2 and Final, no re-verification needed.
+        {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
+      </p>
+
+      <form onSubmit={saveSettings} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '20px', paddingBottom: '18px', borderBottom: '1px solid var(--border)' }}>
+        <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
+          <input type="checkbox" checked={settings.active} onChange={(e) => setSettings((s) => ({ ...s, active: e.target.checked }))} />
+          Results are live
+        </label>
+        <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <div style={{ width: '100%' }}>
+          <Field label="Instructions shown with every result">
+            <textarea
+              value={settings.instructions || ''}
+              onChange={(e) => setSettings((s) => ({ ...s, instructions: e.target.value }))}
+              rows={2} placeholder="e.g. Contestations open until Friday — email your TF."
+              style={{ ...inputStyle, width: '100%', resize: 'vertical' }}
+            />
+          </Field>
+        </div>
+        <button className="btn" type="submit" disabled={savingSettings} style={{ padding: '7px 16px', fontSize: '.75rem' }}>Save settings</button>
+      </form>
+
+      <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Import results</h4>
+      <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        CSV file with columns Name, ID, Section, Venue, MCQs Marks, Question 2, Question 3, Question 4, Bonus,
+        Bonus Total, Total — any header wording/order is fine, they're matched automatically ("Number" and "Seat No.",
+        if present, are ignored). The Name column may be "Actual Name, 26100123" — only the part before the comma is kept.
+      </p>
+      <form onSubmit={runImport} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '8px' }}>
+        <Field label="Exam"><input value={importExam} onChange={(e) => setImportExam(e.target.value)} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} required /></Field>
+        <Field label="CSV file">
+          <input
+            type="file" accept=".csv,text/csv"
+            onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            style={{ ...inputStyle, width: '230px', padding: '5px 8px' }}
+            required
+          />
+        </Field>
+        <button className="btn" type="submit" disabled={importBusy || !importFile || !importExam.trim()} style={{ padding: '7px 16px', fontSize: '.75rem' }}>
+          {importBusy ? 'Importing…' : 'Import results'}
+        </button>
+      </form>
+      {importResult && <div style={{ fontSize: '.8rem', color: 'var(--teal)', marginBottom: '10px' }}>{importResult}</div>}
+
+      <div style={{ borderBottom: '1px solid var(--border)', margin: '10px 0 20px' }} />
+
+      <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Manage one student</h4>
+      <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        Look up a roll number to edit/delete their result, or reset their verification attempts / PIN.
+      </p>
+      <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
+        <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
+        <Field label="LUMS ID"><input value={manageRoll} onChange={(e) => setManageRoll(e.target.value)} placeholder="8 digits or 20XX-XX-XXXX" style={{ ...inputStyle, width: '160px' }} required /></Field>
+        <button className="btn btn-outline" type="submit" style={{ padding: '7px 16px', fontSize: '.75rem' }}>Look up</button>
+      </form>
+
+      {managePin && (
+        <div style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px', display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span>PIN status: {managePin.pin_set_at ? `set ${new Date(managePin.pin_set_at).toLocaleDateString()}` : 'not set'}</span>
+          <span>Verify attempts: {managePin.verify_attempts ?? 0}/3</span>
+          <span>PIN fail attempts: {managePin.pin_fail_attempts ?? 0}</span>
+          {managePin.pin_locked_until && new Date(managePin.pin_locked_until) > new Date() && (
+            <span style={{ color: 'var(--rose)' }}>Locked until {new Date(managePin.pin_locked_until).toLocaleTimeString()}</span>
+          )}
+          <button type="button" onClick={resetVerification} disabled={manageBusy} style={smallBtn('var(--amber)')}>reset verify attempts</button>
+          <button type="button" onClick={resetPin} disabled={manageBusy} style={smallBtn('var(--rose)')}>reset PIN</button>
+        </div>
+      )}
+
+      {manageRow !== undefined && (
+        <div style={{ padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg2)' }}>
+          {manageRow === null && (
+            <div style={{ fontSize: '.8rem', color: 'var(--text3)', marginBottom: '10px' }}>No entry found for that roll number — fill in the fields below to add one.</div>
+          )}
+          <form onSubmit={saveManaged} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <Field label="Name"><input value={manageForm.name} onChange={(e) => setManageForm((f) => ({ ...f, name: e.target.value }))} style={{ ...inputStyle, width: '160px' }} required /></Field>
+            <Field label="Section"><input value={manageForm.section} onChange={(e) => setManageForm((f) => ({ ...f, section: e.target.value }))} placeholder="3, 4, or 5" style={{ ...inputStyle, width: '80px' }} required /></Field>
+            <Field label="Venue"><input value={manageForm.venue} onChange={(e) => setManageForm((f) => ({ ...f, venue: e.target.value }))} style={{ ...inputStyle, width: '110px' }} required /></Field>
+            <Field label="MCQs"><input value={manageForm.mcqsMarks} onChange={(e) => setManageForm((f) => ({ ...f, mcqsMarks: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q2"><input value={manageForm.q2} onChange={(e) => setManageForm((f) => ({ ...f, q2: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q3"><input value={manageForm.q3} onChange={(e) => setManageForm((f) => ({ ...f, q3: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q4"><input value={manageForm.q4} onChange={(e) => setManageForm((f) => ({ ...f, q4: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Bonus"><input value={manageForm.bonus} onChange={(e) => setManageForm((f) => ({ ...f, bonus: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Bonus Total"><input value={manageForm.bonusTotal} onChange={(e) => setManageForm((f) => ({ ...f, bonusTotal: e.target.value }))} style={{ ...inputStyle, width: '80px' }} /></Field>
+            <Field label="Total"><input value={manageForm.total} onChange={(e) => setManageForm((f) => ({ ...f, total: e.target.value }))} style={{ ...inputStyle, width: '70px' }} required /></Field>
             <button className="btn" type="submit" disabled={manageBusy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{manageRow ? 'Save changes' : 'Add'}</button>
             {manageRow && <button type="button" onClick={deleteManaged} disabled={manageBusy} style={smallBtn('var(--rose)')}>delete</button>}
           </form>

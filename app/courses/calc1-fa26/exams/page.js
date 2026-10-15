@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Navbar from '../../../components/Navbar';
 import Footer from '../../../components/Footer';
 import ExamSeatingBox from '../ExamSeatingBox';
+import ExamResultsBox from '../ExamResultsBox';
 import CourseSidebar from '../CourseSidebar';
 import CourseTopBar from '../CourseTopBar';
 
@@ -143,6 +144,11 @@ export default function ExamsPage() {
         {/* SEATING SEARCH */}
         <div className="exm-section">
           <ExamSeatingBox />
+        </div>
+
+        {/* RESULTS */}
+        <div className="exm-section">
+          <ExamResultsBox />
         </div>
 
         {/* UP NEXT */}
