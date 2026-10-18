@@ -28,35 +28,31 @@ const EXAM_SCHEDULE = [
   {
     key: 'mid1', label: 'Midterm I', date: 'Oct 4, 2026', time: '6:30 PM', tentative: false,
     duration: null, spec: 'No notes · No books · No AI',
-    syllabus: {
-      note: 'Everything through Section 2.4 The Chain Rule (inclusive).',
-      chapters: [
-        {
-          title: 'Chapter 1: Functions, Graphs, and Limits',
-          sections: [
-            '1.1 Functions',
-            '1.2 The Graph of a Function',
-            '1.3 Lines and Linear Functions',
-            '1.4 Functional Models',
-            '1.5 Limits',
-            '1.6 One-Sided Limits and Continuity',
-          ],
-        },
-        {
-          title: 'Chapter 2: Differentiation: Basic Concepts',
-          sections: [
-            '2.1 The Derivative',
-            '2.2 Techniques of Differentiation',
-            '2.3 Product and Quotient Rules; Higher-Order Derivatives',
-            '2.4 The Chain Rule',
-          ],
-        },
-      ],
-    },
   },
   {
     key: 'mid2', label: 'Midterm II', date: 'Oct 31, 2026', time: null, tentative: false,
     duration: '120 minutes', spec: 'No notes · No books · No AI',
+    syllabus: {
+      note: 'Sections 2.5 through 3.4 (inclusive) — the material covered since Midterm I.',
+      chapters: [
+        {
+          title: 'Chapter 2: Differentiation: Basic Concepts (continued)',
+          sections: [
+            '2.5 Marginal Analysis and Approximations, Using Increments — Linear Approximation',
+            '2.6 Implicit Differentiation and Related Rates',
+          ],
+        },
+        {
+          title: 'Chapter 3: Additional Applications of the Derivative',
+          sections: [
+            '3.1 Relative Extrema',
+            '3.2 Concavity and Points of Inflection',
+            '3.3 Optimization: Elasticity of Demand',
+            '3.4 Applied Optimization',
+          ],
+        },
+      ],
+    },
   },
   {
     key: 'final', label: 'Final Exam', date: 'TBA', time: null, tentative: false,
@@ -65,7 +61,7 @@ const EXAM_SCHEDULE = [
 ];
 
 // Change this one line as the term moves from exam to exam.
-const CURRENT_EXAM_KEY = 'mid1';
+const CURRENT_EXAM_KEY = 'mid2';
 
 export default function ExamsPage() {
   const currentIndex = EXAM_SCHEDULE.findIndex((e) => e.key === CURRENT_EXAM_KEY);
