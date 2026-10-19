@@ -1261,6 +1261,8 @@ function ExamResultsSection({ flash }) {
   const [settings, setSettings] = useState(null); // { active, exam, instructions }
   const [count, setCount] = useState(0);
   const [searchCount, setSearchCount] = useState(0);
+  const [pinsSetCount, setPinsSetCount] = useState(0);
+  const [stats, setStats] = useState(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [resettingCount, setResettingCount] = useState(false);
 
@@ -1268,6 +1270,8 @@ function ExamResultsSection({ flash }) {
   const [importFile, setImportFile] = useState(null);
   const [importBusy, setImportBusy] = useState(false);
   const [importResult, setImportResult] = useState(null);
+
+  const [exportExam, setExportExam] = useState('');
 
   // "Manage one student": look up by exam+roll, then edit/delete the
   // result, plus reset their verification attempts or PIN if they're
@@ -1286,8 +1290,11 @@ function ExamResultsSection({ flash }) {
       setSettings(res.settings);
       setCount(res.count);
       setSearchCount(res.searchCount || 0);
+      setPinsSetCount(res.pinsSetCount || 0);
+      setStats(res.stats || null);
       setImportExam((e) => e || res.settings.exam);
       setManageExam((e) => e || res.settings.exam);
+      setExportExam((e) => e || res.settings.exam);
     } catch (err) { flash(err.message); }
   }, [flash]);
 
@@ -1421,7 +1428,7 @@ function ExamResultsSection({ flash }) {
         {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
       </p>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
         <div style={{ fontFamily: 'var(--fm)', fontSize: '.78rem', color: 'var(--text2)' }}>
           <strong style={{ color: 'var(--teal)', fontSize: '1.1rem' }}>{searchCount}</strong> total search{searchCount === 1 ? '' : 'es'} so far
         </div>
@@ -1429,6 +1436,30 @@ function ExamResultsSection({ flash }) {
           {resettingCount ? 'resetting…' : 'reset count'}
         </button>
       </div>
+
+      <div style={{ fontFamily: 'var(--fm)', fontSize: '.78rem', color: 'var(--text2)', marginBottom: '16px' }}>
+        <strong style={{ color: 'var(--teal)', fontSize: '1.1rem' }}>{pinsSetCount}</strong> student{pinsSetCount === 1 ? '' : 's'} ha{pinsSetCount === 1 ? 's' : 've'} set a PIN so far (course-wide — carries across Mid-1/Mid-2/Final)
+      </div>
+
+      {stats && stats.total.count > 0 && (
+        <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg2)' }}>
+          <h4 style={{ fontSize: '.82rem', marginBottom: '10px' }}>Statistics for "{settings.exam}" ({stats.total.count} grade{stats.total.count === 1 ? '' : 's'})</h4>
+          <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', fontSize: '.76rem', color: 'var(--text2)', marginBottom: '12px' }}>
+            <span>Mean: <strong style={{ color: 'var(--text)' }}>{stats.total.mean}</strong></span>
+            <span>Median: <strong style={{ color: 'var(--text)' }}>{stats.total.median}</strong></span>
+            <span>Std dev: <strong style={{ color: 'var(--text)' }}>{stats.total.stdDev}</strong></span>
+            <span>Min: <strong style={{ color: 'var(--text)' }}>{stats.total.min}</strong></span>
+            <span>Max: <strong style={{ color: 'var(--text)' }}>{stats.total.max}</strong></span>
+          </div>
+          <div style={{ fontSize: '.72rem', color: 'var(--text3)' }}>
+            Per-question average — MCQs: <strong>{stats.mcqsMarks.mean ?? '—'}</strong>,
+            {' '}Q2: <strong>{stats.q2.mean ?? '—'}</strong>,
+            {' '}Q3: <strong>{stats.q3.mean ?? '—'}</strong>,
+            {' '}Q4: <strong>{stats.q4.mean ?? '—'}</strong>,
+            {' '}Bonus Total: <strong>{stats.bonusTotal.mean ?? '—'}</strong>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={saveSettings} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '20px', paddingBottom: '18px', borderBottom: '1px solid var(--border)' }}>
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', color: 'var(--text2)', paddingBottom: '8px', cursor: 'pointer' }}>
@@ -1470,6 +1501,24 @@ function ExamResultsSection({ flash }) {
         </button>
       </form>
       {importResult && <div style={{ fontSize: '.8rem', color: 'var(--teal)', marginBottom: '10px' }}>{importResult}</div>}
+
+      <div style={{ borderBottom: '1px solid var(--border)', margin: '10px 0 20px' }} />
+
+      <h4 style={{ fontSize: '.88rem', marginBottom: '4px' }}>Export results</h4>
+      <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
+        Downloads every row for the exam below as a CSV — same columns as the importer, plus a trailing
+        "PIN Set" column, so it opens cleanly in Excel/Sheets and can be re-imported as-is after edits there.
+      </p>
+      <form style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '20px' }}>
+        <Field label="Exam"><input value={exportExam} onChange={(e) => setExportExam(e.target.value)} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <a
+          href={`/api/schedule/admin/exam-results/export?exam=${encodeURIComponent(exportExam)}`}
+          className="btn btn-outline"
+          style={{ padding: '7px 16px', fontSize: '.75rem', textDecoration: 'none', opacity: exportExam.trim() ? 1 : 0.5, pointerEvents: exportExam.trim() ? 'auto' : 'none' }}
+        >
+          Export CSV
+        </a>
+      </form>
 
       <div style={{ borderBottom: '1px solid var(--border)', margin: '10px 0 20px' }} />
 
