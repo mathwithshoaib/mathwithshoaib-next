@@ -65,6 +65,13 @@ export default function ScheduleAdmin() {
   const [loginError, setLoginError] = useState('');
   const [data, setData] = useState(null);
   const [msg, setMsg] = useState(null); // { text, tone }
+  const [openSections, setOpenSections] = useState(() => new Set());
+  const toggleSection = (id) => setOpenSections((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const openSection = (id) => setOpenSections((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
 
   const flash = (text, tone = 'error') => { setMsg({ text, tone }); setTimeout(() => setMsg(null), 6000); };
 
@@ -133,6 +140,15 @@ export default function ScheduleAdmin() {
           color: var(--text3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; flex-shrink: 0;
         }
         .admin-toc-row a:hover { color: var(--amber); border-color: var(--amber); }
+        .admin-accordion-head {
+          display: flex; align-items: center; justify-content: space-between; width: 100%;
+          background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+          padding: 13px 16px; cursor: pointer; font-family: var(--fm); font-size: .88rem;
+          color: var(--text); text-align: left;
+        }
+        .admin-accordion-head:hover { border-color: var(--amber); }
+        .admin-accordion-arrow { color: var(--text3); font-size: .78rem; flex-shrink: 0; margin-left: 10px; }
+        .admin-accordion-body { margin-top: 10px; }
       `}</style>
       <Navbar activePage="courses" />
       <div style={{ maxWidth: '980px', margin: '0 auto', padding: 'calc(var(--nav-h) + 3px + 32px) 24px 72px' }}>
@@ -171,25 +187,61 @@ export default function ScheduleAdmin() {
 
             <nav className="admin-toc">
               <div className="admin-toc-row">
-                {ADMIN_TOC.map((t) => <a key={t.id} href={`#${t.id}`}>{t.label}</a>)}
+                {ADMIN_TOC.map((t) => <a key={t.id} href={`#${t.id}`} onClick={() => openSection(t.id)}>{t.label}</a>)}
               </div>
             </nav>
 
-            <div id="sec-settings" className="admin-anchor"><SettingsSection settings={data.settings} onSaved={fetchState} flash={flash} /></div>
-            <div id="sec-team" className="admin-anchor"><TeachingTeamSection instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} /></div>
-            <div id="sec-fixed" className="admin-anchor"><FixedEventsSection events={data.fixedEvents} instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} /></div>
-            <div id="sec-tutorial-slots" className="admin-anchor"><TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} /></div>
-            <div id="sec-tutorial-venues" className="admin-anchor"><TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} /></div>
-            <div id="sec-tas" className="admin-anchor"><TasSection tas={data.tas} onChanged={fetchState} flash={flash} /></div>
-            <div id="sec-ta-assignments" className="admin-anchor"><TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} /></div>
-            <div id="sec-announcements" className="admin-anchor"><AnnouncementsSection flash={flash} /></div>
-            <div id="sec-exam-seating" className="admin-anchor"><ExamSeatingSection flash={flash} /></div>
-            <div id="sec-exam-results" className="admin-anchor"><ExamResultsSection flash={flash} /></div>
+            <AccordionSection id="sec-settings" title="Settings" open={openSections.has('sec-settings')} onToggle={() => toggleSection('sec-settings')}>
+              <SettingsSection settings={data.settings} onSaved={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-team" title="Teaching Team" open={openSections.has('sec-team')} onToggle={() => toggleSection('sec-team')}>
+              <TeachingTeamSection instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-fixed" title="Lectures/OH/Recitations" open={openSections.has('sec-fixed')} onToggle={() => toggleSection('sec-fixed')}>
+              <FixedEventsSection events={data.fixedEvents} instructors={data.instructors} tfs={data.tfs} onChanged={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-tutorial-slots" title="Tutorial Slots" open={openSections.has('sec-tutorial-slots')} onToggle={() => toggleSection('sec-tutorial-slots')}>
+              <TutorialSlotsSection slots={data.tutorialSlots} onChanged={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-tutorial-venues" title="Tutorial Venues" open={openSections.has('sec-tutorial-venues')} onToggle={() => toggleSection('sec-tutorial-venues')}>
+              <TutorialVenuesSection slots={data.tutorialSlots} venues={data.tutorialVenues} onChanged={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-tas" title="TA Roster" open={openSections.has('sec-tas')} onToggle={() => toggleSection('sec-tas')}>
+              <TasSection tas={data.tas} onChanged={fetchState} flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-ta-assignments" title="TA Assignments" open={openSections.has('sec-ta-assignments')} onToggle={() => toggleSection('sec-ta-assignments')}>
+              <TaAssignmentsSection tas={data.tas} tutorialSlots={data.tutorialSlots} taOfficeHours={data.taOfficeHours} />
+            </AccordionSection>
+            <AccordionSection id="sec-announcements" title="Announcements" open={openSections.has('sec-announcements')} onToggle={() => toggleSection('sec-announcements')}>
+              <AnnouncementsSection flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-exam-seating" title="Exam Seating" open={openSections.has('sec-exam-seating')} onToggle={() => toggleSection('sec-exam-seating')}>
+              <ExamSeatingSection flash={flash} />
+            </AccordionSection>
+            <AccordionSection id="sec-exam-results" title="Exam Results" open={openSections.has('sec-exam-results')} onToggle={() => toggleSection('sec-exam-results')}>
+              <ExamResultsSection flash={flash} />
+            </AccordionSection>
           </>
         )}
       </div>
       <Footer />
     </>
+  );
+}
+
+// Collapsed by default so the page doesn't load 10 sections' worth of
+// content/requests at once — each section's own component only mounts (and
+// fetches its data) once its accordion is opened. Clicking a TOC link above
+// opens its section before the browser does the anchor scroll.
+function AccordionSection({ id, title, open, onToggle, children }) {
+  return (
+    <div id={id} className="admin-anchor" style={{ marginBottom: '14px' }}>
+      <button type="button" className="admin-accordion-head" onClick={onToggle} aria-expanded={open}>
+        <span>{title}</span>
+        <span className="admin-accordion-arrow">{open ? '▾ hide' : '▸ show'}</span>
+      </button>
+      {open && <div className="admin-accordion-body">{children}</div>}
+    </div>
   );
 }
 
