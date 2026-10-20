@@ -1336,6 +1336,24 @@ function ExamResultsSection({ flash }) {
   const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
   const [manageBusy, setManageBusy] = useState(false);
 
+  // Editing any of MCQs/Q2/Q3/Q4/Bonus re-sums Total (capped at 50 — the
+  // paper's max — since Bonus is what's allowed to push a student past it)
+  // and Bonus Total (Total + Bonus, uncapped) right there in the form, so
+  // a contestation-driven mark change doesn't need the total re-added by
+  // hand. Both fields stay directly editable too, for the rare case the
+  // total isn't a plain sum of the parts — touching one of the mark fields
+  // again will recompute and overwrite whatever was typed there.
+  const updateMark = (field, value) => setManageForm((f) => {
+    const next = { ...f, [field]: value };
+    const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
+    const round2 = (n) => Math.round(n * 100) / 100;
+    const rawSum = num(next.mcqsMarks) + num(next.q2) + num(next.q3) + num(next.q4);
+    const cappedTotal = round2(Math.min(rawSum, 50));
+    next.total = String(cappedTotal);
+    next.bonusTotal = String(round2(cappedTotal + num(next.bonus)));
+    return next;
+  });
+
   const fetchAll = useCallback(async () => {
     try {
       const res = await api('/api/schedule/admin/exam-results');
@@ -1578,6 +1596,7 @@ function ExamResultsSection({ flash }) {
       <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
         Look up a roll number to edit/delete their result, reset their verification attempts/PIN, or set a PIN
         for them directly (PINs are hashed in the database and never shown — this is the only way to see or change one).
+        Editing MCQs/Q2/Q3/Q4/Bonus re-sums Total (capped at 50) and Bonus Total automatically — handy for contestations.
       </p>
       <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
         <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
@@ -1620,13 +1639,13 @@ function ExamResultsSection({ flash }) {
             <Field label="Name"><input value={manageForm.name} onChange={(e) => setManageForm((f) => ({ ...f, name: e.target.value }))} style={{ ...inputStyle, width: '160px' }} required /></Field>
             <Field label="Section"><input value={manageForm.section} onChange={(e) => setManageForm((f) => ({ ...f, section: e.target.value }))} placeholder="3, 4, or 5" style={{ ...inputStyle, width: '80px' }} required /></Field>
             <Field label="Venue"><input value={manageForm.venue} onChange={(e) => setManageForm((f) => ({ ...f, venue: e.target.value }))} style={{ ...inputStyle, width: '110px' }} required /></Field>
-            <Field label="MCQs"><input value={manageForm.mcqsMarks} onChange={(e) => setManageForm((f) => ({ ...f, mcqsMarks: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
-            <Field label="Q2"><input value={manageForm.q2} onChange={(e) => setManageForm((f) => ({ ...f, q2: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
-            <Field label="Q3"><input value={manageForm.q3} onChange={(e) => setManageForm((f) => ({ ...f, q3: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
-            <Field label="Q4"><input value={manageForm.q4} onChange={(e) => setManageForm((f) => ({ ...f, q4: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
-            <Field label="Bonus"><input value={manageForm.bonus} onChange={(e) => setManageForm((f) => ({ ...f, bonus: e.target.value }))} style={{ ...inputStyle, width: '60px' }} /></Field>
-            <Field label="Bonus Total"><input value={manageForm.bonusTotal} onChange={(e) => setManageForm((f) => ({ ...f, bonusTotal: e.target.value }))} style={{ ...inputStyle, width: '80px' }} /></Field>
-            <Field label="Total"><input value={manageForm.total} onChange={(e) => setManageForm((f) => ({ ...f, total: e.target.value }))} style={{ ...inputStyle, width: '70px' }} required /></Field>
+            <Field label="MCQs"><input value={manageForm.mcqsMarks} onChange={(e) => updateMark('mcqsMarks', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q2"><input value={manageForm.q2} onChange={(e) => updateMark('q2', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q3"><input value={manageForm.q3} onChange={(e) => updateMark('q3', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q4"><input value={manageForm.q4} onChange={(e) => updateMark('q4', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Bonus"><input value={manageForm.bonus} onChange={(e) => updateMark('bonus', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Bonus Total (auto)"><input value={manageForm.bonusTotal} onChange={(e) => setManageForm((f) => ({ ...f, bonusTotal: e.target.value }))} style={{ ...inputStyle, width: '80px' }} /></Field>
+            <Field label="Total (auto, cap 50)"><input value={manageForm.total} onChange={(e) => setManageForm((f) => ({ ...f, total: e.target.value }))} style={{ ...inputStyle, width: '70px' }} required /></Field>
             <button className="btn" type="submit" disabled={manageBusy} style={{ padding: '7px 16px', fontSize: '.75rem' }}>{manageRow ? 'Save changes' : 'Add'}</button>
             {manageRow && <button type="button" onClick={deleteManaged} disabled={manageBusy} style={smallBtn('var(--rose)')}>delete</button>}
           </form>
