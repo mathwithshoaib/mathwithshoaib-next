@@ -51,6 +51,9 @@ const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => {
   if (i === 1) return { href: 'https://drive.google.com/file/d/1qgu2XqNboGUSsrQ6keDTPfhlHNlJIu6q/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1Z0bBDoN3PF5cGTGP5fYilOJsAhrLJpMa/view?usp=sharing' };
   if (i === 2) return { href: 'https://drive.google.com/file/d/1QrV-U0M0-6sVOPULRXVGPICD1ZVN7CUY/view?usp=sharing', solutionHref: null };
   if (i === 3) return { href: 'https://drive.google.com/file/d/1HFqmGQfbLQKql7iI-Dob5lK12ETgmU_i/view?usp=sharing', solutionHref: null };
+  if (i === 4) return { href: null, solutionHref: null, missed: true };
+  if (i === 5) return { href: null, solutionHref: null, missed: true };
+  if (i === 6) return { href: 'https://drive.google.com/file/d/1C0YNv5jaMBqZWH1eHAzbEGCGfRkiYpAX/view?usp=sharing', solutionHref: null };
   return { href: null, solutionHref: null };
 });
 
@@ -147,6 +150,7 @@ const HIDDEN_LECTURE_NOTE_INSTRUCTORS = ['Dr. Omer Khawar Malik'];
 function ProblemSetCell({ week }) {
   const linkStyle = { color: 'var(--violet)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' };
   const ps = PROBLEM_SETS[week - 1] || {};
+  if (ps.missed) return <span className="c26-soon">Missed</span>;
   return (
     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
       {ps.href
@@ -169,7 +173,8 @@ RECITATIONS[2] = { slides: 'https://canva.link/fa26-w3-cal-1-recitation', notes:
 RECITATIONS[3] = { slides: 'https://canva.link/fa26-w4-cal-1-recitation', notes: '/courses/calc1-fa26/video-resources', notesLabel: 'Videos →' };
 RECITATIONS[4] = { slides: 'https://canva.link/1m9oe4zocopurvm', notes: null };
 RECITATIONS[5] = { slides: 'https://canva.link/6ydl8jztadynubm', notes: null };
-RECITATIONS[6] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
+RECITATIONS[6] = { slides: null, notes: null, slidesMissed: true };
+RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
 
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
@@ -465,7 +470,7 @@ export default function Calc1Fa26() {
                           <td>
                             {r.slides
                               ? <Link href={r.slides} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--rose)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.72rem' }}>Slides →</Link>
-                              : <span className="c26-soon">Coming soon</span>}
+                              : <span className="c26-soon">{r.slidesMissed ? 'Missed' : 'Coming soon'}</span>}
                           </td>
                           <td>
                             {r.notes
