@@ -414,9 +414,6 @@ export default function Calc1Fa26() {
               <TeamSplitCard title="TAs" accent="var(--teal)" people={tas} details />
             </div>
           )}
-          <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginTop: '12px' }}>
-            This list is managed in one place (schedule admin panel → Teaching team) and shared with the schedule page, so it's always in sync.
-          </p>
         </div>
 
         {/* RESOURCES — lecture notes + problem sets (per instructor / by week) + recitation slides/notes (shared across sections) */}
