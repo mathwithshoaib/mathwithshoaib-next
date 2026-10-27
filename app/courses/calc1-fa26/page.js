@@ -180,6 +180,14 @@ RECITATIONS[5] = { slides: 'https://canva.link/6ydl8jztadynubm', notes: null };
 RECITATIONS[6] = { slides: null, notes: null, slidesMissed: true };
 RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
 
+// Supplementary topic notes that don't belong to any specific week or
+// instructor's column — an extra topic covered outside the normal weekly
+// pace (e.g. Newton's Method). Add a new { title, href } entry here as
+// each one comes up; shows as its own small card in Resources.
+const EXTRA_NOTES = [
+  { title: "Newton's Method", href: 'https://drive.google.com/file/d/1Qc4sHc1mneDkNHhmtWHJLLrtT1qPMrPi/view?usp=sharing' },
+];
+
 // 14-week outline, straight from the syllabus's Course Overview table.
 // `mid` marks the banner shown right after that week.
 const COURSE_OUTLINE = [
@@ -499,6 +507,29 @@ export default function Calc1Fa26() {
               </div>
             </div>
           </div>
+
+          {EXTRA_NOTES.length > 0 && (
+            <div className="card" style={{ padding: '20px 22px', marginTop: '20px', borderTop: '3px solid var(--violet)' }}>
+              <h4 style={{ fontSize: '1rem', marginBottom: '2px' }}>Extra topic notes</h4>
+              <p style={{ fontSize: '.74rem', color: 'var(--text3)', marginBottom: '12px' }}>Supplementary notes for topics outside the regular weekly schedule.</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {EXTRA_NOTES.map((n) => (
+                  <Link
+                    key={n.title}
+                    href={n.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: 'var(--violet)', textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.78rem',
+                      border: '1px solid var(--border2)', borderRadius: '8px', padding: '8px 14px',
+                    }}
+                  >
+                    {n.title} →
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 14-WEEK COURSE OUTLINE */}
