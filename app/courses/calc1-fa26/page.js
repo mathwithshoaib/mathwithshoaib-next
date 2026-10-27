@@ -40,6 +40,10 @@ async function api(path) {
 const WEEK_COUNT = 14;
 const WEEKS = Array.from({ length: WEEK_COUNT }, (_, i) => i + 1);
 
+// Scanned copy of the course textbook — linked from the Textbook quick-fact
+// below and from the Mid-2 syllabus panel on the Exams page.
+const TEXTBOOK_PDF_URL = 'https://drive.google.com/file/d/1PmtGq0ybYqNtEFf68rVasmQv3e6d_xYN/view?usp=sharing';
+
 // Weekly problem sets — lives as its own column in the Lecture Notes table
 // (see ProblemSetCell below), one row per week, 16 total to cover the full
 // term beyond the 14 syllabus weeks. Add { href, solutionHref } as each set
@@ -314,7 +318,11 @@ export default function Calc1Fa26() {
             ].map(([k, v]) => (
               <div key={k}>
                 <div style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', letterSpacing: '.1em', textTransform: 'uppercase' }}>{k}</div>
-                <div style={{ fontSize: '.88rem', color: 'var(--text)', marginTop: '3px', maxWidth: '220px' }}>{v}</div>
+                <div style={{ fontSize: '.88rem', color: 'var(--text)', marginTop: '3px', maxWidth: '220px' }}>
+                  {k === 'Textbook'
+                    ? <Link href={TEXTBOOK_PDF_URL} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)', textDecoration: 'none' }}>{v} (PDF →)</Link>
+                    : v}
+                </div>
               </div>
             ))}
           </div>

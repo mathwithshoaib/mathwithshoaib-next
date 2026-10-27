@@ -33,25 +33,30 @@ const EXAM_SCHEDULE = [
     key: 'mid2', label: 'Midterm II', date: 'Oct 31, 2026', time: null, tentative: false,
     duration: '120 minutes', spec: 'No notes · No books · No AI',
     syllabus: {
-      note: 'Sections 2.5 through 3.4 (inclusive) — the material covered since Midterm I.',
+      note: 'Sections 2.5, 2.6, 3.1, 3.2, 3.4, and the Newton\'s Method topic — the material covered since Midterm I.',
+      textbook: {
+        label: 'Textbook: Calculus for Business, Economics, and the Social and Life Sciences — Hoffmann & Bradley',
+        href: 'https://drive.google.com/file/d/1PmtGq0ybYqNtEFf68rVasmQv3e6d_xYN/view?usp=sharing',
+      },
       chapters: [
         {
           title: 'Chapter 2: Differentiation: Basic Concepts (continued)',
           sections: [
-            '2.5 Marginal Analysis and Approximations, Using Increments — Linear Approximation',
-            '2.6 Implicit Differentiation and Related Rates',
+            '2.5 Marginal Analysis and Approximations Using Increments (p. 160)',
+            '2.6 Implicit Differentiation and Related Rates (p. 172)',
+            { text: "Topic: Newton's Method (p. 171)", href: 'https://drive.google.com/file/d/1Qc4sHc1mneDkNHhmtWHJLLrtT1qPMrPi/view?usp=sharing', linkLabel: 'Notes →' },
           ],
         },
         {
           title: 'Chapter 3: Additional Applications of the Derivative',
           sections: [
-            '3.1 Relative Extrema',
-            '3.2 Concavity and Points of Inflection',
-            '3.3 Optimization: Elasticity of Demand',
-            '3.4 Applied Optimization',
+            '3.1 Increasing and Decreasing Functions; Relative Extrema (p. 198)',
+            '3.2 Concavity and Points of Inflection (p. 215)',
+            '3.4 Optimization; Elasticity of Demand (p. 248)',
           ],
         },
       ],
+      excluded: 'Section 3.3 Curve Sketching (p. 233) is NOT included.',
     },
   },
   {
@@ -127,12 +132,39 @@ export default function ExamsPage() {
           {current.syllabus && syllabusOpen && (
             <div className="exm-syllabus-panel">
               <p className="exm-syllabus-note">{current.syllabus.note}</p>
+              {current.syllabus.textbook && (
+                <p className="exm-syllabus-note">
+                  📖{' '}
+                  <Link href={current.syllabus.textbook.href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)' }}>
+                    {current.syllabus.textbook.label}
+                  </Link>
+                </p>
+              )}
               {current.syllabus.chapters.map((c) => (
                 <div key={c.title} className="exm-syllabus-chapter">
                   <h5>{c.title}</h5>
-                  <ul>{c.sections.map((s) => <li key={s}>{s}</li>)}</ul>
+                  <ul>
+                    {c.sections.map((s, i) => {
+                      const text = typeof s === 'string' ? s : s.text;
+                      const href = typeof s === 'string' ? null : s.href;
+                      return (
+                        <li key={i}>
+                          {text}
+                          {href && (
+                            <>
+                              {' — '}
+                              <Link href={href} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--teal)' }}>{s.linkLabel || 'Notes →'}</Link>
+                            </>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               ))}
+              {current.syllabus.excluded && (
+                <p className="exm-syllabus-note" style={{ marginTop: '10px', marginBottom: 0, opacity: .7 }}>{current.syllabus.excluded}</p>
+              )}
             </div>
           )}
         </div>
