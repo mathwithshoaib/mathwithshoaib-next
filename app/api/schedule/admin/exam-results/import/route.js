@@ -6,6 +6,14 @@
 // rows for the same course+exam+roll are overwritten (upsert), so
 // re-uploading a corrected sheet is safe to do as many times as needed.
 //
+// Reports a real diff, not just "existed before vs. new": each row is
+// compared field-by-field against whatever was already in the database
+// (added / changed / unchanged), since a plain upsert-count can't tell a
+// contestation-driven correction apart from re-saving identical marks.
+// Rows that got skipped (missing a required field) are named individually
+// — roll/name as typed and which field was missing — rather than left as
+// a bare count, so a bad row in the sheet doesn't silently vanish.
+//
 // Same "Name, 26100123" comma-joined format as the seating roster — only
 // the part before the comma is kept as the display name.
 
@@ -102,16 +110,26 @@ export async function POST(req) {
     const bonusTotalColIdx = headers.findIndex((h) => h.trim().toLowerCase() === 'bonus total');
 
     const byRoll = new Map();
-    let skipped = 0;
+    const skippedRows = [];
     let duplicateInFile = 0;
-    for (const r of rows.slice(1)) {
+    rows.slice(1).forEach((r, i) => {
+      const fileRow = i + 2; // +1 for the header row, +1 for 1-based numbering
       const roll = normalizeId(r[rollIdx]);
       const nameRaw = (r[nameIdx] || '').trim();
       const name = nameRaw.includes(',') ? nameRaw.split(',')[0].trim() : nameRaw;
       const section = (r[sectionIdx] || '').trim();
       const venue = (r[venueIdx] || '').trim();
       const total = (r[totalIdx] || '').trim();
-      if (!roll || !name || !section || !venue || !total) { skipped++; continue; }
+      if (!roll || !name || !section || !venue || !total) {
+        const missing = [];
+        if (!roll) missing.push('ID');
+        if (!name) missing.push('Name');
+        if (!section) missing.push('Section');
+        if (!venue) missing.push('Venue');
+        if (!total) missing.push('Total');
+        skippedRows.push({ row: fileRow, roll: r[rollIdx] || '', name: nameRaw || '', missing: missing.join(', ') });
+        return;
+      }
       if (byRoll.has(roll)) duplicateInFile++;
       byRoll.set(roll, {
         course_code: COURSE_CODE,
@@ -128,7 +146,7 @@ export async function POST(req) {
         bonus_total: bonusTotalColIdx !== -1 ? (r[bonusTotalColIdx] || '').trim() || null : null,
         total,
       });
-    }
+    });
     const payload = [...byRoll.values()];
 
     if (payload.length === 0) {
@@ -137,15 +155,27 @@ export async function POST(req) {
 
     const existingRows = await sbSelect(
       'exam_results',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam.trim())}&select=roll_number`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam.trim())}&select=roll_number,student_name,section,venue,mcqs_marks,q2,q3,q4,bonus,bonus_total,total`
     );
-    const existingRolls = new Set(existingRows.map((r) => r.roll_number));
-    const added = payload.filter((p) => !existingRolls.has(p.roll_number)).length;
-    const updated = payload.length - added;
+    const existingByRoll = new Map(existingRows.map((r) => [r.roll_number, r]));
+
+    const FIELDS = ['student_name', 'section', 'venue', 'mcqs_marks', 'q2', 'q3', 'q4', 'bonus', 'bonus_total', 'total'];
+    let added = 0;
+    let changed = 0;
+    let unchanged = 0;
+    for (const p of payload) {
+      const existing = existingByRoll.get(p.roll_number);
+      if (!existing) { added++; continue; }
+      const differs = FIELDS.some((f) => (existing[f] ?? null) !== (p[f] ?? null));
+      if (differs) changed++; else unchanged++;
+    }
 
     await sbUpsert('exam_results', payload, 'course_code,exam,roll_number');
 
-    return Response.json({ ok: true, imported: payload.length, added, updated, duplicateInFile, skipped });
+    return Response.json({
+      ok: true, imported: payload.length, added, changed, unchanged, duplicateInFile,
+      skipped: skippedRows.length, skippedRows,
+    });
   } catch (err) {
     console.error('admin/exam-results/import error:', err);
     return Response.json({ error: 'Server error.' }, { status: 500 });

@@ -1397,10 +1397,7 @@ function ExamResultsSection({ flash }) {
     try {
       const csv = await importFile.text();
       const res = await api('/api/schedule/admin/exam-results/import', { method: 'POST', body: { exam: importExam, csv } });
-      const parts = [`${res.added} new`, `${res.updated} already loaded (updated)`];
-      if (res.duplicateInFile) parts.push(`${res.duplicateInFile} duplicate row${res.duplicateInFile === 1 ? '' : 's'} in the file (merged)`);
-      if (res.skipped) parts.push(`${res.skipped} row${res.skipped === 1 ? '' : 's'} skipped — missing a field`);
-      setImportResult(`${res.imported} student${res.imported === 1 ? '' : 's'} in file — ${parts.join(', ')}.`);
+      setImportResult(res);
       flash('Results imported.', 'ok');
       setImportFile(null);
       fetchAll();
@@ -1570,7 +1567,26 @@ function ExamResultsSection({ flash }) {
           {importBusy ? 'Importing…' : 'Import results'}
         </button>
       </form>
-      {importResult && <div style={{ fontSize: '.8rem', color: 'var(--teal)', marginBottom: '10px' }}>{importResult}</div>}
+      {importResult && (
+        <div style={{ marginBottom: '10px' }}>
+          <div style={{ fontSize: '.8rem', color: 'var(--teal)' }}>
+            {importResult.imported} student{importResult.imported === 1 ? '' : 's'} in file — {importResult.added} new,
+            {' '}{importResult.changed} changed, {importResult.unchanged} unchanged (re-saved identical)
+            {importResult.duplicateInFile ? `, ${importResult.duplicateInFile} duplicate row${importResult.duplicateInFile === 1 ? '' : 's'} in the file (merged)` : ''}
+            {importResult.skipped ? `, ${importResult.skipped} skipped` : ''}.
+          </div>
+          {importResult.skippedRows?.length > 0 && (
+            <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rose)', background: 'rgba(224,107,107,.08)' }}>
+              <div style={{ fontSize: '.74rem', color: 'var(--rose)', fontWeight: 700, marginBottom: '6px' }}>Skipped rows — fix these in the sheet and re-upload:</div>
+              {importResult.skippedRows.map((s) => (
+                <div key={s.row} style={{ fontSize: '.74rem', color: 'var(--text2)' }}>
+                  Row {s.row}: {s.name || s.roll || '(blank)'} — missing {s.missing}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div style={{ borderBottom: '1px solid var(--border)', margin: '10px 0 20px' }} />
 
