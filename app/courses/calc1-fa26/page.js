@@ -58,6 +58,7 @@ const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => {
   if (i === 4) return { href: null, solutionHref: null, missed: true };
   if (i === 5) return { href: null, solutionHref: null, missed: true };
   if (i === 6) return { href: 'https://drive.google.com/file/d/1C0YNv5jaMBqZWH1eHAzbEGCGfRkiYpAX/view?usp=sharing', solutionHref: null };
+  if (i === 7) return { href: 'https://drive.google.com/file/d/1Jp5J3tUviQ_qDso6e2UxKQPXPfb4pCoO/view?usp=sharing', solutionHref: null };
   return { href: null, solutionHref: null };
 });
 
