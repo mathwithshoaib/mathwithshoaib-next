@@ -180,6 +180,7 @@ RECITATIONS[4] = { slides: 'https://canva.link/1m9oe4zocopurvm', notes: null };
 RECITATIONS[5] = { slides: 'https://canva.link/6ydl8jztadynubm', notes: null };
 RECITATIONS[6] = { slides: null, notes: null, slidesMissed: true };
 RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
+RECITATIONS[8] = { slides: 'https://canva.link/qw2w19w6fo2vojz', notes: null };
 
 // Supplementary topic notes that don't belong to any specific week or
 // instructor's column — an extra topic covered outside the normal weekly
@@ -187,6 +188,7 @@ RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
 // each one comes up; shows as its own small card in Resources.
 const EXTRA_NOTES = [
   { title: "Newton's Method", href: 'https://drive.google.com/file/d/1Qc4sHc1mneDkNHhmtWHJLLrtT1qPMrPi/view?usp=sharing' },
+  { title: 'Quick Revision: Sections 2.5, 2.6, 3.1, 3.2', href: 'https://canva.link/i8axqfyup749qcm' },
 ];
 
 // 14-week outline, straight from the syllabus's Course Overview table.
