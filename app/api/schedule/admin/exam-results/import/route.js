@@ -106,8 +106,16 @@ export async function POST(req) {
     // "Bonus" and "Bonus Total" are two different columns — resolve them
     // independently rather than via the shared findCol helper above, since
     // "bonus" is a substring of "bonus total" and would otherwise collide.
-    const plainBonusIdx = headers.findIndex((h) => h.trim().toLowerCase() === 'bonus');
+    // Falls back to any other "bonus"-containing header (e.g. "Bonus Marks")
+    // as long as it doesn't also contain "total" — an exact-only match once
+    // silently sent every row's Bonus to null when a sheet used a slightly
+    // different header, wiping real data on something that looked like a
+    // successful import (no skipped rows, no warning).
     const bonusTotalColIdx = headers.findIndex((h) => h.trim().toLowerCase() === 'bonus total');
+    let plainBonusIdx = headers.findIndex((h) => h.trim().toLowerCase() === 'bonus');
+    if (plainBonusIdx === -1) {
+      plainBonusIdx = headers.findIndex((h, idx) => idx !== bonusTotalColIdx && h.trim().toLowerCase().includes('bonus') && !h.trim().toLowerCase().includes('total'));
+    }
 
     const byRoll = new Map();
     const skippedRows = [];
@@ -175,6 +183,7 @@ export async function POST(req) {
     return Response.json({
       ok: true, imported: payload.length, added, changed, unchanged, duplicateInFile,
       skipped: skippedRows.length, skippedRows,
+      bonusColumnMissing: plainBonusIdx === -1,
     });
   } catch (err) {
     console.error('admin/exam-results/import error:', err);

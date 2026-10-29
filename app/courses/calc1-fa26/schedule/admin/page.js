@@ -1336,21 +1336,25 @@ function ExamResultsSection({ flash }) {
   const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
   const [manageBusy, setManageBusy] = useState(false);
 
-  // Editing any of MCQs/Q2/Q3/Q4/Bonus re-sums Total (capped at 50 — the
-  // paper's max — since Bonus is what's allowed to push a student past it)
-  // and Bonus Total (Total + Bonus, uncapped) right there in the form, so
-  // a contestation-driven mark change doesn't need the total re-added by
-  // hand. Both fields stay directly editable too, for the rare case the
-  // total isn't a plain sum of the parts — touching one of the mark fields
-  // again will recompute and overwrite whatever was typed there.
+  // Editing any of MCQs/Q2/Q3/Q4/Bonus re-sums Total and Bonus Total right
+  // there in the form, so a contestation-driven mark change doesn't need
+  // the total re-added by hand. Bonus Total is the plain uncapped sum of
+  // all five; Total is that same sum capped at 50 (the paper's max) — the
+  // cap applies AFTER adding Bonus, not before, since Bonus counts toward
+  // Total same as any other field up to the cap and only "overflows" into
+  // Bonus Total once the sum would exceed 50 (confirmed against the
+  // original Mid-1 sheet's own values, e.g. 49 raw + 5 bonus -> Total 50,
+  // not 49 — capping before adding Bonus would under-count that student).
+  // Both fields stay directly editable too, for the rare case the total
+  // isn't a plain sum of the parts — touching one of the mark fields again
+  // will recompute and overwrite whatever was typed there.
   const updateMark = (field, value) => setManageForm((f) => {
     const next = { ...f, [field]: value };
     const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
     const round2 = (n) => Math.round(n * 100) / 100;
-    const rawSum = num(next.mcqsMarks) + num(next.q2) + num(next.q3) + num(next.q4);
-    const cappedTotal = round2(Math.min(rawSum, 50));
-    next.total = String(cappedTotal);
-    next.bonusTotal = String(round2(cappedTotal + num(next.bonus)));
+    const sumWithBonus = num(next.mcqsMarks) + num(next.q2) + num(next.q3) + num(next.q4) + num(next.bonus);
+    next.bonusTotal = String(round2(sumWithBonus));
+    next.total = String(round2(Math.min(sumWithBonus, 50)));
     return next;
   });
 
@@ -1575,6 +1579,11 @@ function ExamResultsSection({ flash }) {
             {importResult.duplicateInFile ? `, ${importResult.duplicateInFile} duplicate row${importResult.duplicateInFile === 1 ? '' : 's'} in the file (merged)` : ''}
             {importResult.skipped ? `, ${importResult.skipped} skipped` : ''}.
           </div>
+          {importResult.bonusColumnMissing && (
+            <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--amber)', background: 'rgba(232,160,32,.08)', fontSize: '.74rem', color: 'var(--amber)' }}>
+              ⚠ No "Bonus" column was found in this file — every row's Bonus was just set to blank. If the sheet does have bonus points, rename that column's header to "Bonus" and re-upload (Total and Bonus Total are unaffected either way).
+            </div>
+          )}
           {importResult.skippedRows?.length > 0 && (
             <div style={{ marginTop: '8px', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rose)', background: 'rgba(224,107,107,.08)' }}>
               <div style={{ fontSize: '.74rem', color: 'var(--rose)', fontWeight: 700, marginBottom: '6px' }}>Skipped rows — fix these in the sheet and re-upload:</div>
