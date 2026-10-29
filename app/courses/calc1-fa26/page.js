@@ -53,11 +53,11 @@ const PROBLEM_SET_WEEKS = Array.from({ length: PROBLEM_SET_COUNT }, (_, i) => i 
 const PROBLEM_SETS = Array(PROBLEM_SET_COUNT).fill(null).map((v, i) => {
   if (i === 0) return { href: 'https://drive.google.com/file/d/1E3VlkDSu2A8isMdux8XA5ixZvlR3KRLD/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1hWpGkcPXREaYb5Jxpu19QAyshye9i-v3/view?usp=sharing' };
   if (i === 1) return { href: 'https://drive.google.com/file/d/1qgu2XqNboGUSsrQ6keDTPfhlHNlJIu6q/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1Z0bBDoN3PF5cGTGP5fYilOJsAhrLJpMa/view?usp=sharing' };
-  if (i === 2) return { href: 'https://drive.google.com/file/d/1QrV-U0M0-6sVOPULRXVGPICD1ZVN7CUY/view?usp=sharing', solutionHref: null };
-  if (i === 3) return { href: 'https://drive.google.com/file/d/1HFqmGQfbLQKql7iI-Dob5lK12ETgmU_i/view?usp=sharing', solutionHref: null };
+  if (i === 2) return { href: 'https://drive.google.com/file/d/1QrV-U0M0-6sVOPULRXVGPICD1ZVN7CUY/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1il_dVYCDojD3B-b3AZdhbeumej9R_vEQ/view?usp=sharing' };
+  if (i === 3) return { href: 'https://drive.google.com/file/d/1HFqmGQfbLQKql7iI-Dob5lK12ETgmU_i/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/1nB486TBbVm2GNPT5pir8NMOImzz1s_IN/view?usp=sharing' };
   if (i === 4) return { href: null, solutionHref: null, missed: true };
   if (i === 5) return { href: null, solutionHref: null, missed: true };
-  if (i === 6) return { href: 'https://drive.google.com/file/d/1C0YNv5jaMBqZWH1eHAzbEGCGfRkiYpAX/view?usp=sharing', solutionHref: null };
+  if (i === 6) return { href: 'https://drive.google.com/file/d/1C0YNv5jaMBqZWH1eHAzbEGCGfRkiYpAX/view?usp=sharing', solutionHref: 'https://drive.google.com/file/d/12pw6JM2NO00wxYd-_Cqtj3qPQcxd9R_o/view?usp=sharing' };
   if (i === 7) return { href: 'https://drive.google.com/file/d/1Jp5J3tUviQ_qDso6e2UxKQPXPfb4pCoO/view?usp=sharing', solutionHref: null };
   return { href: null, solutionHref: null };
 });
