@@ -181,6 +181,8 @@ RECITATIONS[5] = { slides: 'https://canva.link/6ydl8jztadynubm', notes: null };
 RECITATIONS[6] = { slides: null, notes: null, slidesMissed: true };
 RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
 RECITATIONS[8] = { slides: 'https://canva.link/qw2w19w6fo2vojz', notes: null };
+RECITATIONS[9] = { slides: null, notes: null, offWeek: true };
+RECITATIONS[10] = { slides: 'https://canva.link/0bjef8835s0i1cl', notes: null };
 
 // Supplementary topic notes that don't belong to any specific week or
 // instructor's column — an extra topic covered outside the normal weekly
@@ -287,6 +289,8 @@ export default function Calc1Fa26() {
         .c26-soon { font-family: var(--fm); font-size: .67rem; color: var(--text3); opacity: .5; }
         .c26-mid-row td { background: linear-gradient(90deg, rgba(232,160,32,.16), rgba(224,107,107,.16));
                           font-family: var(--fh); font-size: .92rem; font-weight: 600; text-align: center; color: var(--text); }
+        .c26-off-row td { background: var(--teal-lt); font-family: var(--fm); font-size: .72rem;
+                           letter-spacing: .04em; text-transform: uppercase; color: var(--teal); text-align: center; }
         .c26-quickfacts { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
         .c26-bar { display: flex; height: 14px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
         @media (max-width: 900px) { .c26-resources-cols { grid-template-columns: minmax(0, 1fr); } }
@@ -480,6 +484,14 @@ export default function Calc1Fa26() {
                   <tbody>
                     {WEEKS.map((w) => {
                       const r = RECITATIONS[w - 1] || {};
+                      if (r.offWeek) {
+                        return (
+                          <tr key={w} className="c26-off-row">
+                            <td style={{ whiteSpace: 'nowrap' }}>Week {w}</td>
+                            <td colSpan={2}>Off Week</td>
+                          </tr>
+                        );
+                      }
                       return (
                         <tr key={w}>
                           <td style={{ whiteSpace: 'nowrap', color: 'var(--text2)' }}>Week {w}</td>
