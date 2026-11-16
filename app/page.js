@@ -89,7 +89,7 @@ export default function Home() {
             <Link href="/education" className="card card-navy" style={{ textDecoration: 'none' }}>
               <div style={{ fontSize: '2rem', marginBottom: '12px' }}>🎓</div>
               <h4>Education</h4>
-              <p style={{ fontSize: '.88rem' }}>Degrees from LUMS, GCU, COMSATS &amp; University of Lille, France.</p>
+              <p style={{ fontSize: '.88rem' }}>Degrees from GCU, COMSATS &amp; University of Lille, France.</p>
             </Link>
             <Link href="/experience/instructor" className="card card-amber" style={{ textDecoration: 'none' }}>
               <div style={{ fontSize: '2rem', marginBottom: '12px' }}>👨‍🏫</div>
