@@ -236,8 +236,8 @@ const EXAMS = [
     spec: 'No notes · No books · No AI',
   },
   {
-    label: 'Final Exam', duration: '3 hours', date: 'TBA', time: null, tentative: false,
-    spec: 'No notes · No books · No AI',
+    label: 'Final Exam', duration: '3 hours', date: 'Dec 22, 2026', time: '11:30 AM – 2:30 PM', tentative: false,
+    spec: 'No notes · No books · No AI', prominent: true,
   },
 ];
 
@@ -368,7 +368,12 @@ export default function Calc1Fa26() {
               {EXAMS.map((e) => (
                 <div key={e.label}>
                   <div style={{ fontFamily: 'var(--fm)', fontSize: '.64rem', color: 'var(--text3)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: '6px' }}>{e.label}</div>
-                  <div style={{ fontSize: '1.02rem', fontWeight: 700, color: 'var(--amber)', lineHeight: 1.3 }}>
+                  <div style={{
+                    fontSize: e.prominent ? '1.1rem' : '.92rem',
+                    fontWeight: e.prominent ? 800 : 600,
+                    color: e.prominent ? 'var(--amber)' : 'var(--text)',
+                    lineHeight: 1.3,
+                  }}>
                     {e.date}{e.time ? ` · ${e.time}` : ''}
                   </div>
                   {e.tentative && <div style={{ fontSize: '.66rem', color: 'var(--text3)', marginTop: '2px' }}>(tentative)</div>}
