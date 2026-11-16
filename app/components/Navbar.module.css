@@ -11,7 +11,7 @@
   top: 3px; left: 0; right: 0;
   z-index: 1000;
   height: var(--nav-h);
-  background: rgba(24, 31, 46, 0.94);
+  background: var(--nav-bg);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border-bottom: 1px solid var(--border);

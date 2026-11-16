@@ -25,12 +25,49 @@
   --shadow-sm: 0 2px 12px rgba(0,0,0,0.25);
   --shadow:    0 8px 32px rgba(0,0,0,0.35);
   --shadow-lg: 0 16px 56px rgba(0,0,0,0.45);
+  --nav-bg:    rgba(24, 31, 46, 0.94);
   --fh: 'Cormorant Garamond', Georgia, serif;
   --fb: 'DM Sans', system-ui, sans-serif;
   --fm: 'DM Mono', monospace;
   --nav-h:  64px;
   --radius: 14px;
   --max-w:  1080px;
+}
+
+/* ── LIGHT MODE ──
+   Opt-in via data-theme="light" on <html> (toggled by Navbar's icon
+   button, persisted to localStorage — see app/layout.js for the
+   pre-paint script that applies it before first render).
+   Only the shared dark-shell pages (ones built on these vars) react;
+   standalone light-themed material (quizzes, printable notes) already
+   hardcodes its own palette and is unaffected either way. */
+:root[data-theme="light"] {
+  --bg:        #f7f4ee;
+  --bg2:       #efe9dc;
+  --bg3:       #e6ddcb;
+  --surface:   #ffffff;
+  --surface2:  #f6f2e9;
+  --navy:      #2a3550;
+  --navy2:     #1c2740;
+  --amber:     #b8790f;
+  --amber-lt:  rgba(184,121,15,0.12);
+  --amber-bd:  #a06a0d;
+  --teal:      #188f79;
+  --teal-lt:   rgba(24,143,121,0.10);
+  --rose:      #c44f4f;
+  --rose-lt:   rgba(196,79,79,0.12);
+  --violet:    #6f52c9;
+  --violet-lt: rgba(111,82,201,0.12);
+  --navy-lt:   rgba(42,53,80,0.08);
+  --text:      #20283a;
+  --text2:     #51607a;
+  --text3:     #828da3;
+  --border:    rgba(20,30,50,0.10);
+  --border2:   rgba(20,30,50,0.18);
+  --shadow-sm: 0 2px 12px rgba(20,30,50,0.08);
+  --shadow:    0 8px 32px rgba(20,30,50,0.10);
+  --shadow-lg: 0 16px 56px rgba(20,30,50,0.14);
+  --nav-bg:    rgba(255, 255, 255, 0.88);
 }
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }

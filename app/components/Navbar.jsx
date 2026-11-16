@@ -27,7 +27,22 @@ export default function Navbar({ activePage = 'home' }) {
   const [menuOpen,  setMenuOpen]  = useState(false);
   const [dropOpen,  setDropOpen]  = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
   const dropRef = useRef(null);
+
+  /* Pick up the theme the pre-paint script in layout.js already applied,
+     so this button's icon matches on first render instead of flashing. */
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing from the pre-paint script's DOM attribute, not React state
+    setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('sk-theme', next); } catch {}
+  }
 
   /* "/" opens search from anywhere, unless already typing in a field */
   useEffect(() => {
@@ -119,6 +134,16 @@ export default function Navbar({ activePage = 'home' }) {
             );
           })}
         </div>
+
+        {/* THEME TOGGLE */}
+        <button
+          className={styles.searchBtn}
+          onClick={toggleTheme}
+          aria-label="Toggle light/dark mode"
+          title="Toggle light/dark mode"
+        >
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
 
         {/* SEARCH */}
         <button
