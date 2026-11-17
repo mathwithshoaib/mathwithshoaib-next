@@ -97,6 +97,7 @@ export async function POST(req) {
     const q2Idx = findCol(headers, ['question 2', 'q2']);
     const q3Idx = findCol(headers, ['question 3', 'q3']);
     const q4Idx = findCol(headers, ['question 4', 'q4']);
+    const q5Idx = findCol(headers, ['question 5', 'q5']);
     const totalIdx = findCol(headers, ['total marks', 'grand total', 'total']);
 
     if ([rollIdx, nameIdx, sectionIdx, venueIdx, totalIdx].some((i) => i === -1)) {
@@ -150,6 +151,7 @@ export async function POST(req) {
         q2: q2Idx !== -1 ? (r[q2Idx] || '').trim() || null : null,
         q3: q3Idx !== -1 ? (r[q3Idx] || '').trim() || null : null,
         q4: q4Idx !== -1 ? (r[q4Idx] || '').trim() || null : null,
+        q5: q5Idx !== -1 ? (r[q5Idx] || '').trim() || null : null,
         bonus: plainBonusIdx !== -1 ? (r[plainBonusIdx] || '').trim() || null : null,
         bonus_total: bonusTotalColIdx !== -1 ? (r[bonusTotalColIdx] || '').trim() || null : null,
         total,
@@ -163,11 +165,11 @@ export async function POST(req) {
 
     const existingRows = await sbSelect(
       'exam_results',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam.trim())}&select=roll_number,student_name,section,venue,mcqs_marks,q2,q3,q4,bonus,bonus_total,total`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(exam.trim())}&select=roll_number,student_name,section,venue,mcqs_marks,q2,q3,q4,q5,bonus,bonus_total,total`
     );
     const existingByRoll = new Map(existingRows.map((r) => [r.roll_number, r]));
 
-    const FIELDS = ['student_name', 'section', 'venue', 'mcqs_marks', 'q2', 'q3', 'q4', 'bonus', 'bonus_total', 'total'];
+    const FIELDS = ['student_name', 'section', 'venue', 'mcqs_marks', 'q2', 'q3', 'q4', 'q5', 'bonus', 'bonus_total', 'total'];
     let added = 0;
     let changed = 0;
     let unchanged = 0;

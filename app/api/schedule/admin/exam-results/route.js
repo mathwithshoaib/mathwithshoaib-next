@@ -17,6 +17,7 @@ import { cookies } from 'next/headers';
 import { readAdminSession } from '../../../../../lib/scheduleAuth';
 import { sbSelect, sbUpsert } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
+import { parseExams } from '../../../../../lib/examResultsAuth';
 
 // Ignores blank/non-numeric values rather than treating them as zero, so a
 // few students with a field left empty don't drag the average down.
@@ -52,10 +53,13 @@ export async function GET() {
 
     let count = 0;
     let stats = null;
-    if (s.exam) {
+    // `exam` may list several released exams ("Midterm I, Midterm II");
+    // count/stats describe the most recent (last) one.
+    const latestExam = parseExams(s.exam).slice(-1)[0];
+    if (latestExam) {
       const rows = await sbSelect(
         'exam_results',
-        `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(s.exam)}&select=mcqs_marks,q2,q3,q4,bonus,bonus_total,total`
+        `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(latestExam)}&select=mcqs_marks,q2,q3,q4,q5,bonus,bonus_total,total`
       );
       count = rows.length;
       stats = {
@@ -64,6 +68,7 @@ export async function GET() {
         q2: numStats(rows.map((r) => r.q2)),
         q3: numStats(rows.map((r) => r.q3)),
         q4: numStats(rows.map((r) => r.q4)),
+        q5: numStats(rows.map((r) => r.q5)),
         bonusTotal: numStats(rows.map((r) => r.bonus_total)),
       };
     }
@@ -72,6 +77,7 @@ export async function GET() {
 
     return Response.json({
       settings: { active: !!s.active, exam: s.exam || '', instructions: s.instructions || '' },
+      latestExam: latestExam || '',
       count,
       searchCount: s.search_count || 0,
       pinsSetCount: pinRows.length,

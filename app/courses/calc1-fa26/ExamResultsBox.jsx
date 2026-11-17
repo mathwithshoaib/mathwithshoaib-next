@@ -148,6 +148,7 @@ export default function ExamResultsBox() {
         .resbox-pin-row .resbox-input { flex: 1; min-width: 140px; letter-spacing: .2em; }
         .resbox-result { margin-top: 4px; padding: 20px 22px; border-radius: 8px; background: rgba(56,201,176,.1); border: 1px solid var(--teal); }
         .resbox-result-name { font-size: 1.1rem; color: var(--text); font-weight: 700; }
+        .resbox-exam-title { font-family: var(--fm); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--teal); font-weight: 700; }
         .resbox-result-sub { font-family: var(--fm); font-size: .8rem; color: var(--text3); margin-top: 2px; }
         .resbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
         .resbox-tile { background: var(--bg); border: 1px solid rgba(56,201,176,.3); border-radius: 8px; padding: 10px 8px; text-align: center; }
@@ -165,7 +166,7 @@ export default function ExamResultsBox() {
       <h4>📊 Check Your Results</h4>
       <p className="resbox-sub">
         {status?.active
-          ? `Enter your LUMS ID to see your marks for ${status.exam}.`
+          ? `Enter your LUMS ID to see your marks for ${(status.exams || [status.exam]).join(' & ')}.`
           : status === null ? 'Loading…' : "Results haven't been released yet."}
       </p>
 
@@ -206,7 +207,7 @@ export default function ExamResultsBox() {
           </div>
 
           <div className="resbox-field">
-            <label className="resbox-label">Set a 6-digit PIN (you'll reuse this for Mid-2 &amp; Final)</label>
+            <label className="resbox-label">Set a 6-digit PIN (you'll reuse this for future exams)</label>
             <div className="resbox-pin-row">
               <input value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="New PIN" className="resbox-input" inputMode="numeric" required />
               <input value={pinConfirm} onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Confirm PIN" className="resbox-input" inputMode="numeric" required />
@@ -240,22 +241,28 @@ export default function ExamResultsBox() {
 
       {stage === 'revealed' && result && (
         <div className="resbox-result">
-          <div className="resbox-result-name">{result.name}</div>
-          <div className="resbox-result-sub">Section {result.section} · {result.venue} · {result.exam}</div>
+          <div className="resbox-result-name">{result.results[0].name}</div>
+          {result.results.map((r, idx) => (
+            <div key={r.exam} className="resbox-exam" style={idx > 0 ? { marginTop: '22px', paddingTop: '18px', borderTop: '1px dashed rgba(56,201,176,.35)' } : { marginTop: '10px' }}>
+              <div className="resbox-exam-title">{r.exam}</div>
+              <div className="resbox-result-sub">Section {r.section} · {r.venue}</div>
 
-          <div className="resbox-grid">
-            <div className="resbox-tile"><div className="resbox-tile-label">MCQs</div><div className="resbox-tile-value">{result.mcqsMarks ?? '—'}</div></div>
-            <div className="resbox-tile"><div className="resbox-tile-label">Q2</div><div className="resbox-tile-value">{result.q2 ?? '—'}</div></div>
-            <div className="resbox-tile"><div className="resbox-tile-label">Q3</div><div className="resbox-tile-value">{result.q3 ?? '—'}</div></div>
-            <div className="resbox-tile"><div className="resbox-tile-label">Q4</div><div className="resbox-tile-value">{result.q4 ?? '—'}</div></div>
-            <div className="resbox-tile"><div className="resbox-tile-label">Bonus</div><div className="resbox-tile-value">{result.bonus ?? '—'}</div></div>
-            <div className="resbox-tile"><div className="resbox-tile-label">Bonus Total</div><div className="resbox-tile-value">{result.bonusTotal ?? '—'}</div></div>
-          </div>
+              <div className="resbox-grid">
+                <div className="resbox-tile"><div className="resbox-tile-label">MCQs</div><div className="resbox-tile-value">{r.mcqsMarks ?? '—'}</div></div>
+                <div className="resbox-tile"><div className="resbox-tile-label">Q2</div><div className="resbox-tile-value">{r.q2 ?? '—'}</div></div>
+                <div className="resbox-tile"><div className="resbox-tile-label">Q3</div><div className="resbox-tile-value">{r.q3 ?? '—'}</div></div>
+                <div className="resbox-tile"><div className="resbox-tile-label">Q4</div><div className="resbox-tile-value">{r.q4 ?? '—'}</div></div>
+                {r.q5 != null && <div className="resbox-tile"><div className="resbox-tile-label">Q5</div><div className="resbox-tile-value">{r.q5}</div></div>}
+                <div className="resbox-tile"><div className="resbox-tile-label">Bonus</div><div className="resbox-tile-value">{r.bonus ?? '—'}</div></div>
+                <div className="resbox-tile"><div className="resbox-tile-label">Bonus Total</div><div className="resbox-tile-value">{r.bonusTotal ?? '—'}</div></div>
+              </div>
 
-          <div className="resbox-total">
-            <div className="resbox-total-label">Total</div>
-            <div className="resbox-total-value">{result.total}</div>
-          </div>
+              <div className="resbox-total">
+                <div className="resbox-total-label">Total</div>
+                <div className="resbox-total-value">{r.total}</div>
+              </div>
+            </div>
+          ))}
 
           {result.instructions && <div className="resbox-instructions">{result.instructions}</div>}
           <button type="button" className="resbox-again" onClick={resetAll}>Check another ID</button>

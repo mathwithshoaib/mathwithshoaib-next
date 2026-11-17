@@ -44,7 +44,7 @@ export async function POST(req) {
   }
 
   try {
-    const { exam, rollNumber, name, section, venue, mcqsMarks, q2, q3, q4, bonus, bonusTotal, total } = await req.json();
+    const { exam, rollNumber, name, section, venue, mcqsMarks, q2, q3, q4, q5, bonus, bonusTotal, total } = await req.json();
     if (!exam?.trim() || !rollNumber?.trim() || !name?.trim() || !section?.trim() || !venue?.trim() || !String(total ?? '').trim()) {
       return Response.json({ error: 'exam, rollNumber, name, section, venue, and total are all required.' }, { status: 400 });
     }
@@ -60,6 +60,7 @@ export async function POST(req) {
       q2: q2 ?? null,
       q3: q3 ?? null,
       q4: q4 ?? null,
+      q5: q5 ?? null,
       bonus: bonus ?? null,
       bonus_total: bonusTotal ?? null,
       total: String(total).trim(),

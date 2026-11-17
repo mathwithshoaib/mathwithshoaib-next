@@ -8,7 +8,7 @@
 import { sbSelect, sbUpdate, sbRpc } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
 import { verifyPasscode } from '../../../../../lib/scheduleAuth';
-import { normalizeId, MAX_PIN_ATTEMPTS, PIN_LOCKOUT_MINUTES } from '../../../../../lib/examResultsAuth';
+import { normalizeId, parseExams, examInFilter, shapeResults, MAX_PIN_ATTEMPTS, PIN_LOCKOUT_MINUTES } from '../../../../../lib/examResultsAuth';
 
 export async function POST(req) {
   try {
@@ -57,28 +57,19 @@ export async function POST(req) {
     sbUpdate('student_pins', `course_code=eq.${COURSE_CODE}&roll_number=eq.${encodeURIComponent(id)}`, { pin_fail_attempts: 0 })
       .catch((err) => console.error('pin_fail_attempts reset error:', err));
 
+    const exams = parseExams(settings.exam);
     const resultRows = await sbSelect(
       'exam_results',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(id)}&select=*`
+      `course_code=eq.${COURSE_CODE}&exam=${encodeURIComponent(examInFilter(exams))}&roll_number=eq.${encodeURIComponent(id)}&select=*`
     );
-    const result = resultRows?.[0];
-    if (!result) {
+    const results = shapeResults(resultRows || [], exams);
+    if (results.length === 0) {
       return Response.json({ ok: false, error: 'No results found for your ID for the current exam.' }, { status: 400 });
     }
 
     return Response.json({
       ok: true,
-      exam: settings.exam,
-      name: result.student_name,
-      section: result.section,
-      venue: result.venue,
-      mcqsMarks: result.mcqs_marks,
-      q2: result.q2,
-      q3: result.q3,
-      q4: result.q4,
-      bonus: result.bonus,
-      bonusTotal: result.bonus_total,
-      total: result.total,
+      results,
       instructions: settings.instructions || '',
     });
   } catch (err) {

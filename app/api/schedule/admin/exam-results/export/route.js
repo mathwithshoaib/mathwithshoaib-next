@@ -37,12 +37,12 @@ export async function GET(req) {
     const pinRows = await sbSelect('student_pins', `course_code=eq.${COURSE_CODE}&select=roll_number,pin_hash`);
     const pinSet = new Set(pinRows.filter((p) => p.pin_hash).map((p) => p.roll_number));
 
-    const header = ['Number', 'Name', 'ID', 'Section', 'Venue', 'MCQs Marks', 'Question 2', 'Question 3', 'Question 4', 'Bonus', 'Bonus Total', 'Total', 'PIN Set'];
+    const header = ['Number', 'Name', 'ID', 'Section', 'Venue', 'MCQs Marks', 'Question 2', 'Question 3', 'Question 4', 'Question 5', 'Bonus', 'Bonus Total', 'Total', 'PIN Set'];
     const lines = [header.map(csvField).join(',')];
     rows.forEach((r, i) => {
       lines.push([
         i + 1, r.student_name, r.roll_number, r.section, r.venue,
-        r.mcqs_marks, r.q2, r.q3, r.q4, r.bonus, r.bonus_total, r.total,
+        r.mcqs_marks, r.q2, r.q3, r.q4, r.q5, r.bonus, r.bonus_total, r.total,
         pinSet.has(r.roll_number) ? 'Yes' : 'No',
       ].map(csvField).join(','));
     });

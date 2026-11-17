@@ -10,7 +10,7 @@
 
 import { sbSelect, sbUpsert, sbRpc } from '../../../../../lib/supabaseAdmin';
 import { COURSE_CODE } from '../../../../../lib/scheduleConfig';
-import { normalizeId, maskName, MAX_VERIFY_ATTEMPTS } from '../../../../../lib/examResultsAuth';
+import { normalizeId, parseExams, examInFilter, pickVerifyRow, maskName, MAX_VERIFY_ATTEMPTS } from '../../../../../lib/examResultsAuth';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -42,11 +42,12 @@ export async function POST(req) {
       console.error('exam-results search count increment failed:', err);
     });
 
+    const exams = parseExams(settings.exam);
     const resultRows = await sbSelect(
       'exam_results',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&roll_number=eq.${encodeURIComponent(id)}&select=student_name,venue`
+      `course_code=eq.${COURSE_CODE}&exam=${encodeURIComponent(examInFilter(exams))}&roll_number=eq.${encodeURIComponent(id)}&select=exam,student_name,venue`
     );
-    const result = resultRows?.[0];
+    const result = pickVerifyRow(resultRows || [], exams);
     if (!result) {
       return Response.json({ found: false, error: "No results found for that ID — double-check it, or contact your TF." });
     }
@@ -70,7 +71,7 @@ export async function POST(req) {
 
     const allVenueRows = await sbSelect(
       'exam_results',
-      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(settings.exam)}&select=venue`
+      `course_code=eq.${COURSE_CODE}&exam=eq.${encodeURIComponent(result.exam)}&select=venue`
     );
     const venues = shuffle([...new Set(allVenueRows.map((r) => r.venue).filter(Boolean))]);
 

@@ -11,7 +11,7 @@ export async function GET() {
     const rows = await sbSelect('exam_results_settings', `course_code=eq.${COURSE_CODE}&select=active,exam,instructions`);
     const s = rows?.[0];
     if (!s || !s.active || !s.exam) return Response.json({ active: false });
-    return Response.json({ active: true, exam: s.exam, instructions: s.instructions || '' });
+    return Response.json({ active: true, exam: s.exam, exams: s.exam.split(',').map((x) => x.trim()).filter(Boolean), instructions: s.instructions || '' });
   } catch (err) {
     console.error('exam-results status error:', err);
     return Response.json({ active: false });

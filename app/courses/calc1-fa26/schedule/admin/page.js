@@ -1096,6 +1096,7 @@ function AnnouncementsSection({ flash }) {
 function ExamSeatingSection({ flash }) {
   const [settings, setSettings] = useState(null); // { active, exam, instructions }
   const [count, setCount] = useState(0);
+  const [latestExam, setLatestExam] = useState('');
   const [searchCount, setSearchCount] = useState(0);
   const [savingSettings, setSavingSettings] = useState(false);
   const [resettingCount, setResettingCount] = useState(false);
@@ -1118,6 +1119,7 @@ function ExamSeatingSection({ flash }) {
       const res = await api('/api/schedule/admin/exam-seating');
       setSettings(res.settings);
       setCount(res.count);
+      setLatestExam(res.latestExam || '');
       setSearchCount(res.searchCount || 0);
       setImportExam((e) => e || res.settings.exam);
       setManageExam((e) => e || res.settings.exam);
@@ -1215,7 +1217,7 @@ function ExamSeatingSection({ flash }) {
       <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '16px' }}>
         Students search their own venue, section &amp; seat by LUMS ID — a "Find Your Seat" link appears in the announcements pop-up (pointing at the Exams page) whenever this is switched on.
         Turn it on shortly before an exam and off again after; change the exam name and import a fresh roster for the next one (old rows for a past exam are left alone, not deleted).
-        {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
+        {latestExam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${latestExam}".`}
       </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
@@ -1232,7 +1234,7 @@ function ExamSeatingSection({ flash }) {
           <input type="checkbox" checked={settings.active} onChange={(e) => setSettings((s) => ({ ...s, active: e.target.checked }))} />
           Search button is live
         </label>
-        <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <Field label="Released exams (comma-separated, shown in this order)"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I, Midterm II" style={{ ...inputStyle, width: '280px' }} /></Field>
         <Field label="Exam date (shown to students)">
           <input value={settings.examDate || ''} onChange={(e) => setSettings((s) => ({ ...s, examDate: e.target.value }))} placeholder="e.g. Sunday, 4 October 2026" style={{ ...inputStyle, width: '220px' }} />
         </Field>
@@ -1333,7 +1335,7 @@ function ExamResultsSection({ flash }) {
   const [manageRow, setManageRow] = useState(undefined); // undefined = not searched; null = not found; object = found
   const [managePin, setManagePin] = useState(null);
   const [newPin, setNewPin] = useState('');
-  const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+  const [manageForm, setManageForm] = useState({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', q5: '', bonus: '', bonusTotal: '', total: '' });
   const [manageBusy, setManageBusy] = useState(false);
 
   // Editing any of MCQs/Q2/Q3/Q4/Bonus re-sums Total and Bonus Total right
@@ -1352,7 +1354,7 @@ function ExamResultsSection({ flash }) {
     const next = { ...f, [field]: value };
     const num = (v) => { const n = parseFloat(v); return Number.isFinite(n) ? n : 0; };
     const round2 = (n) => Math.round(n * 100) / 100;
-    const sumWithBonus = num(next.mcqsMarks) + num(next.q2) + num(next.q3) + num(next.q4) + num(next.bonus);
+    const sumWithBonus = num(next.mcqsMarks) + num(next.q2) + num(next.q3) + num(next.q4) + num(next.q5) + num(next.bonus);
     next.bonusTotal = String(round2(sumWithBonus));
     next.total = String(round2(Math.min(sumWithBonus, 50)));
     return next;
@@ -1366,9 +1368,9 @@ function ExamResultsSection({ flash }) {
       setSearchCount(res.searchCount || 0);
       setPinsSetCount(res.pinsSetCount || 0);
       setStats(res.stats || null);
-      setImportExam((e) => e || res.settings.exam);
-      setManageExam((e) => e || res.settings.exam);
-      setExportExam((e) => e || res.settings.exam);
+      setImportExam((e) => e || res.latestExam || '');
+      setManageExam((e) => e || res.latestExam || '');
+      setExportExam((e) => e || res.latestExam || '');
     } catch (err) { flash(err.message); }
   }, [flash]);
 
@@ -1418,10 +1420,10 @@ function ExamResultsSection({ flash }) {
       setManageForm(res.row
         ? {
           name: res.row.student_name, section: res.row.section, venue: res.row.venue,
-          mcqsMarks: res.row.mcqs_marks || '', q2: res.row.q2 || '', q3: res.row.q3 || '', q4: res.row.q4 || '',
+          mcqsMarks: res.row.mcqs_marks || '', q2: res.row.q2 || '', q3: res.row.q3 || '', q4: res.row.q4 || '', q5: res.row.q5 || '',
           bonus: res.row.bonus || '', bonusTotal: res.row.bonus_total || '', total: res.row.total || '',
         }
-        : { name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+        : { name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', q5: '', bonus: '', bonusTotal: '', total: '' });
     } catch (err) { flash(err.message); }
   };
 
@@ -1446,7 +1448,7 @@ function ExamResultsSection({ flash }) {
       await api(`/api/schedule/admin/exam-results/rows/${manageRow.id}`, { method: 'DELETE' });
       flash('Deleted.', 'ok');
       setManageRow(null);
-      setManageForm({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', bonus: '', bonusTotal: '', total: '' });
+      setManageForm({ name: '', section: '', venue: '', mcqsMarks: '', q2: '', q3: '', q4: '', q5: '', bonus: '', bonusTotal: '', total: '' });
       fetchAll();
     } catch (err) { flash(err.message); } finally { setManageBusy(false); }
   };
@@ -1514,7 +1516,7 @@ function ExamResultsSection({ flash }) {
 
       {stats && stats.total.count > 0 && (
         <div style={{ marginBottom: '16px', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg2)' }}>
-          <h4 style={{ fontSize: '.82rem', marginBottom: '10px' }}>Statistics for "{settings.exam}" ({stats.total.count} grade{stats.total.count === 1 ? '' : 's'})</h4>
+          <h4 style={{ fontSize: '.82rem', marginBottom: '10px' }}>Statistics for "{latestExam}" ({stats.total.count} grade{stats.total.count === 1 ? '' : 's'})</h4>
           <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap', fontSize: '.76rem', color: 'var(--text2)', marginBottom: '12px' }}>
             <span>Mean: <strong style={{ color: 'var(--text)' }}>{stats.total.mean}</strong></span>
             <span>Median: <strong style={{ color: 'var(--text)' }}>{stats.total.median}</strong></span>
@@ -1527,6 +1529,7 @@ function ExamResultsSection({ flash }) {
             {' '}Q2: <strong>{stats.q2.mean ?? '—'}</strong>,
             {' '}Q3: <strong>{stats.q3.mean ?? '—'}</strong>,
             {' '}Q4: <strong>{stats.q4.mean ?? '—'}</strong>,
+            {' '}Q5: <strong>{stats.q5.mean ?? '—'}</strong>,
             {' '}Bonus Total: <strong>{stats.bonusTotal.mean ?? '—'}</strong>
           </div>
         </div>
@@ -1621,7 +1624,7 @@ function ExamResultsSection({ flash }) {
       <p style={{ fontSize: '.72rem', color: 'var(--text3)', marginBottom: '10px' }}>
         Look up a roll number to edit/delete their result, reset their verification attempts/PIN, or set a PIN
         for them directly (PINs are hashed in the database and never shown — this is the only way to see or change one).
-        Editing MCQs/Q2/Q3/Q4/Bonus re-sums Total (capped at 50) and Bonus Total automatically — handy for contestations.
+        Editing MCQs/Q2/Q3/Q4/Q5/Bonus re-sums Total (capped at 50) and Bonus Total automatically — handy for contestations.
       </p>
       <form onSubmit={lookupOne} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
         <Field label="Exam"><input value={manageExam} onChange={(e) => setManageExam(e.target.value)} style={{ ...inputStyle, width: '130px' }} required /></Field>
@@ -1668,6 +1671,7 @@ function ExamResultsSection({ flash }) {
             <Field label="Q2"><input value={manageForm.q2} onChange={(e) => updateMark('q2', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
             <Field label="Q3"><input value={manageForm.q3} onChange={(e) => updateMark('q3', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
             <Field label="Q4"><input value={manageForm.q4} onChange={(e) => updateMark('q4', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
+            <Field label="Q5"><input value={manageForm.q5} onChange={(e) => updateMark('q5', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
             <Field label="Bonus"><input value={manageForm.bonus} onChange={(e) => updateMark('bonus', e.target.value)} style={{ ...inputStyle, width: '60px' }} /></Field>
             <Field label="Bonus Total (auto)"><input value={manageForm.bonusTotal} onChange={(e) => setManageForm((f) => ({ ...f, bonusTotal: e.target.value }))} style={{ ...inputStyle, width: '80px' }} /></Field>
             <Field label="Total (auto, cap 50)"><input value={manageForm.total} onChange={(e) => setManageForm((f) => ({ ...f, total: e.target.value }))} style={{ ...inputStyle, width: '70px' }} required /></Field>
