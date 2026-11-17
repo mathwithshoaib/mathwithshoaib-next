@@ -55,8 +55,12 @@ function saveProfile(p) {
 }
 
 export default function RootRush({ onEvent } = {}) {
-  const [profile, setProfile] = useState(undefined); // undefined = not loaded yet, null = needs onboarding
-  const [screen, setScreen] = useState('home'); // 'name' | 'consent' | 'home' | 'play' | 'summary' | 'leaderboard'
+  // undefined = not loaded from localStorage yet; null = nobody has ever
+  // answered the leaderboard question on this device; an object once they
+  // have (even a "no thanks" answer is a non-null profile with an empty name,
+  // so we stop re-asking after someone declines once).
+  const [profile, setProfile] = useState(undefined);
+  const [screen, setScreen] = useState('home'); // 'settings' | 'home' | 'play' | 'summary' | 'leaderboard'
   const [difficulty, setDifficulty] = useState(null);
   const [levelIdx, setLevelIdx] = useState(0);
   const [attempt, setAttempt] = useState(null);
@@ -69,10 +73,11 @@ export default function RootRush({ onEvent } = {}) {
   const interactedRef = useRef(false);
 
   // ── profile load (client-only, avoids hydration mismatch) ──
+  // No onboarding gate here on purpose: players jump straight to picking a
+  // difficulty. The leaderboard question only comes up the first time
+  // someone actually solves a level (see the solved panel below).
   useEffect(() => {
-    const p = loadProfile();
-    if (p) { setProfile(p); setScreen('home'); }
-    else { setProfile(null); setScreen('name'); }
+    setProfile(loadProfile());
   }, []);
 
   // ── timer tick ──
@@ -102,58 +107,61 @@ export default function RootRush({ onEvent } = {}) {
     onEvent?.('interacted');
   }
 
-  // ── name / consent onboarding ──
-  function NameScreen() {
+  // ── leaderboard name/consent, asked AFTER a solve, never before playing ──
+  // Used two ways: compact + inline inside the solved panel the very first
+  // time someone solves a level (profile still null at that point), or as
+  // a full standalone screen when reached via "Leaderboard settings" any
+  // time after. Either way, answering (yes or no) saves a profile so the
+  // question isn't asked again.
+  function NameConsentForm({ compact, onDone }) {
     const [draft, setDraft] = useState(profile?.name || '');
     const [error, setError] = useState('');
-    function next() {
+    function choose(share) {
       const trimmed = draft.trim();
-      if (!trimmed) { setError('Enter a nickname to continue.'); return; }
-      if (trimmed.length > 20) { setError('Keep it to 20 characters or fewer.'); return; }
-      if (hasBlockedWord(trimmed)) { setError('Please choose a different nickname.'); return; }
-      const deviceId = profile?.deviceId || makeDeviceId();
-      setProfile((prev) => ({ ...(prev || {}), name: trimmed, deviceId, shareOnLeaderboard: prev?.shareOnLeaderboard ?? null }));
-      setScreen('consent');
+      if (share) {
+        if (!trimmed) { setError('Enter a nickname to show on the leaderboard.'); return; }
+        if (trimmed.length > 20) { setError('Keep it to 20 characters or fewer.'); return; }
+        if (hasBlockedWord(trimmed)) { setError('Please choose a different nickname.'); return; }
+      }
+      onDone({ name: trimmed, shareOnLeaderboard: share });
     }
     return (
-      <div className="rr-card rr-onboard">
-        <span className="eyebrow">Root Rush</span>
-        <h3 style={{ marginTop: '6px' }}>What should we call you?</h3>
+      <div className={compact ? 'rr-inline-form' : 'rr-card rr-onboard'}>
+        {!compact && <span className="eyebrow">Root Rush</span>}
+        <h4 style={{ margin: compact ? '0' : '6px 0 0' }}>
+          {compact ? 'Nice! Want this on the leaderboard?' : 'Leaderboard settings'}
+        </h4>
         <input
           className="rr-input"
           value={draft}
           maxLength={20}
           placeholder="Nickname"
           onChange={(e) => { setDraft(e.target.value); setError(''); }}
-          onKeyDown={(e) => { if (e.key === 'Enter') next(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter') choose(true); }}
         />
         <p className="rr-hint-text">Use a nickname, no full names. Max 20 characters.</p>
         {error && <p className="rr-error">{error}</p>}
-        <button type="button" className="btn" onClick={next}>Continue</button>
+        <div className="rr-row">
+          <button type="button" className="btn" onClick={() => choose(true)}>Yes, show my name</button>
+          <button type="button" className="btn btn-outline" onClick={() => choose(false)}>No thanks</button>
+        </div>
       </div>
     );
   }
 
-  function ConsentScreen() {
-    function choose(share) {
-      const next = { ...profile, shareOnLeaderboard: share, seenHard: profile?.seenHard || false };
-      setProfile(next);
-      saveProfile(next);
-      setScreen('home');
+  // Saves the answer and, if they opted in while a level sat already
+  // solved, submits that level's score immediately — the normal
+  // auto-submit effect already ran once before a profile existed, so it
+  // won't fire again on its own for this particular level.
+  function handleLeaderboardChoice({ name, shareOnLeaderboard }) {
+    const deviceId = profile?.deviceId || makeDeviceId();
+    const next = { deviceId, name, shareOnLeaderboard, seenHard: profile?.seenHard || false };
+    setProfile(next);
+    saveProfile(next);
+    if (shareOnLeaderboard && attempt?.phase === 'solved' && difficulty) {
+      submitScore({ difficulty, level: levelIdx + 1, playerName: name, deviceId, steps: attempt.steps, timeMs: elapsedMs });
     }
-    return (
-      <div className="rr-card rr-onboard">
-        <span className="eyebrow">Root Rush</span>
-        <h3 style={{ marginTop: '6px' }}>Show your name on the leaderboard?</h3>
-        <p style={{ color: 'var(--text2)', lineHeight: 1.7 }}>
-          If yes, your best step count for each level is recorded under &ldquo;{profile?.name}&rdquo; on the shared leaderboard. If no, you can still play — nothing is recorded and your name appears nowhere.
-        </p>
-        <div className="rr-row">
-          <button type="button" className="btn" onClick={() => choose(true)}>Yes, show my name</button>
-          <button type="button" className="btn btn-outline" onClick={() => choose(false)}>No, just let me play</button>
-        </div>
-      </div>
-    );
+    if (screen === 'settings') setScreen('home');
   }
 
   // ── start / navigate ──
@@ -206,7 +214,7 @@ export default function RootRush({ onEvent } = {}) {
     if (levelIdx < 2) goLevel(levelIdx + 1);
     else setScreen('summary');
   }
-  function changeName() { setScreen('name'); }
+  function openLeaderboardSettings() { setScreen('settings'); }
   function toHome() { setScreen('home'); setDifficulty(null); setAttempt(null); }
 
   if (profile === undefined) return null; // avoid a flash before localStorage is read
@@ -222,8 +230,7 @@ export default function RootRush({ onEvent } = {}) {
     <div className="rr-root" style={{ '--rr-bg': theme.bg, '--rr-bg2': theme.bg2, '--rr-accent': theme.accent, '--rr-accent-dim': theme.accentDim, '--rr-glow': theme.glow }}>
       <Confetti fire={confettiFire} />
 
-      {screen === 'name' && <NameScreen />}
-      {screen === 'consent' && <ConsentScreen />}
+      {screen === 'settings' && <NameConsentForm onDone={handleLeaderboardChoice} />}
 
       {screen === 'home' && (
         <div className="rr-card">
@@ -232,7 +239,7 @@ export default function RootRush({ onEvent } = {}) {
               <span className="eyebrow">Root Rush</span>
               <h3 style={{ margin: '6px 0 0' }}>{profile?.name ? `Hey, ${profile.name}!` : 'Pick a difficulty'}</h3>
             </div>
-            <button type="button" className="rr-link" onClick={changeName}>Change name</button>
+            <button type="button" className="rr-link" onClick={openLeaderboardSettings}>Leaderboard settings</button>
           </div>
           <p style={{ color: 'var(--text2)' }}>Chase the target number with a handful of buttons — never go over 60.</p>
           <div className="rr-diff-grid">
@@ -320,11 +327,15 @@ export default function RootRush({ onEvent } = {}) {
               {attempt.steps === level.minSteps
                 ? <span className="rr-perfect">Perfect! 🌟</span>
                 : <span className="rr-best">Best possible: {level.minSteps} steps</span>}
+              {profile === null && <NameConsentForm compact onDone={handleLeaderboardChoice} />}
               <button type="button" className="btn" onClick={pressNext}>{levelIdx < 2 ? 'Next level →' : 'See summary →'}</button>
             </div>
           )}
 
-          <button type="button" className="rr-link rr-back" onClick={toHome}>← Choose another difficulty</button>
+          <div className="rr-row" style={{ justifyContent: 'center' }}>
+            <button type="button" className="rr-link" onClick={toHome}>← Choose another difficulty</button>
+            <button type="button" className="rr-link" onClick={openLeaderboardSettings}>Leaderboard settings</button>
+          </div>
         </div>
       )}
 
@@ -452,6 +463,11 @@ const ROOT_RUSH_CSS = `
   padding: 22px 24px; display: flex; flex-direction: column; gap: 14px; transition: background .3s ease;
 }
 .rr-onboard { max-width: 440px; margin: 0 auto; text-align: center; align-items: center; }
+.rr-inline-form {
+  display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center;
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; padding: 14px 16px; width: 100%; max-width: 360px;
+}
+.rr-inline-form .rr-input { max-width: 260px; }
 .rr-input {
   width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border2);
   background: var(--rr-bg2, var(--bg2)); color: var(--text); font-family: var(--fb); font-size: .95rem;
@@ -530,7 +546,6 @@ const ROOT_RUSH_CSS = `
 .rr-best { font-family: var(--fm); font-size: .9rem; color: var(--text2); }
 
 .rr-hint-box { font-size: .82rem; color: var(--text2); background: var(--bg3); border-left: 3px solid var(--rr-accent); border-radius: 0 8px 8px 0; padding: 10px 14px; }
-.rr-back { align-self: center; }
 
 .rr-summary-list { display: flex; flex-direction: column; gap: 8px; }
 .rr-summary-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; font-family: var(--fm); font-size: .85rem; color: var(--text2); background: var(--bg3); border-radius: 8px; padding: 8px 12px; }
