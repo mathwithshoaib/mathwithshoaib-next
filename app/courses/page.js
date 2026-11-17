@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import HeroBackdrop from '../components/HeroBackdrop';
 import CoursesExplorer from './CoursesExplorer';
 
 export const metadata = {
@@ -34,6 +35,7 @@ export default function Courses() {
           overflow: 'hidden',
         }}
       >
+        <HeroBackdrop variant="courses" />
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
           <span className="eyebrow">Teaching Portfolio</span>
           <h1 style={{ fontSize: 'clamp(2.4rem,5vw,4rem)', margin: '0 0 14px' }}>

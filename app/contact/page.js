@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import HeroBackdrop from '../components/HeroBackdrop';
 
 /* ══════════════════════════════════════════════════════
    Contact — carried over from the old Google Sites portfolio
@@ -42,10 +43,12 @@ export default function ContactPage() {
 
       {/* ── HERO ── */}
       <section style={{
+        position: 'relative', overflow: 'hidden',
         paddingTop: 'calc(var(--nav-h) + 3px)',
         background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)',
         borderBottom: '1px solid var(--border)',
       }}>
+        <HeroBackdrop variant="contact" />
         <div className="container" style={{ padding: '64px 32px 56px' }}>
           <span className="eyebrow reveal">Get in Touch</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '680px' }} className="reveal">

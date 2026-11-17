@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import HeroBackdrop from '../components/HeroBackdrop';
 
 /* ══════════════════════════════════════════════════════
    Education data — edit here only to update the page
@@ -115,6 +116,7 @@ export default function Education() {
           background: 'radial-gradient(circle, rgba(232,160,32,.05), transparent 65%)',
           pointerEvents: 'none',
         }} />
+        <HeroBackdrop variant="education" />
         <div className="container" style={{ padding: '64px 32px 56px' }}>
           <span className="eyebrow reveal">Academic Journey</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '600px' }} className="reveal">

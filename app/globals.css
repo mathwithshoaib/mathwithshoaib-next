@@ -375,3 +375,58 @@ h4 { font-family: var(--fh); font-size: 1.15rem; font-weight: 600; margin-bottom
   .explore-grid { grid-template-columns: 1fr; }
   .explore-sort { margin-left: 0; }
 }
+/* ── HERO BACKDROPS (minimal animated page-header art; see components/HeroBackdrop.jsx) ── */
+.hb { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.hb ~ .container { position: relative; z-index: 1; }
+.hb svg {
+  position: absolute; right: 0; top: 0; height: 100%; width: min(72%, 980px);
+  opacity: .55; fill: none; stroke-width: 2; stroke-linecap: round;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%);
+          mask-image: linear-gradient(to right, transparent 0, #000 38%);
+}
+.hb-home svg { width: 100%; -webkit-mask-image: none; mask-image: none; opacity: .4; }
+.hb .sa { stroke: var(--amber); } .hb .st { stroke: var(--teal); }
+.hb .sv { stroke: var(--violet); } .hb .sr { stroke: var(--rose); }
+.hb .fa { fill: var(--amber); stroke: none; } .hb .ft { fill: var(--teal); stroke: none; }
+.hb .fv { fill: var(--violet); stroke: none; } .hb .fr { fill: var(--rose); stroke: none; }
+.hb .ft.hb-twinkle { opacity: .5; }
+.hb svg .hb-grid { stroke: var(--text3); stroke-width: 1; opacity: .25; }
+.hb svg .hb-axis { opacity: .5; }
+
+/* drawing curves: draw → hold → fade, looped */
+.hb-wave, .hb-sir { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hb-draw 11s ease-in-out infinite; }
+.hb-wave-2 { animation-delay: 1.2s; opacity: .7; }
+.hb-sir-2 { animation-delay: .8s; } .hb-sir-3 { animation-delay: 1.6s; }
+@keyframes hb-draw {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  45%, 85% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+/* dashed line with marching dashes */
+.hb-flow { stroke-dasharray: 3 12; animation: hb-march 30s linear infinite; }
+.hb-flow-thin { stroke-width: 1.2; opacity: .6; }
+@keyframes hb-march { to { stroke-dashoffset: -300; } }
+/* pulsing ring (also used for ripples) */
+.hb-pulse, .hb-ripple { transform-box: fill-box; transform-origin: center; animation: hb-ring 4.8s ease-out infinite; opacity: 0; }
+.hb-ripple { animation-duration: 6.4s; }
+@keyframes hb-ring { 0% { transform: scale(.1); opacity: .7; } 100% { transform: scale(1); opacity: 0; } }
+.hb-twinkle { animation: hb-twinkle 4s ease-in-out infinite; }
+@keyframes hb-twinkle { 0%,100% { opacity: .15; } 50% { opacity: .8; } }
+/* explore shapes */
+.hb-drift { animation: hb-drift 14s ease-in-out infinite alternate; }
+@keyframes hb-drift { from { transform: translate(-14px, 10px); } to { transform: translate(14px, -12px); } }
+.hb-spin { transform-box: fill-box; transform-origin: center; animation: hb-rot 30s linear infinite; }
+@keyframes hb-rot { to { transform: rotate(360deg); } }
+/* home: floating maths symbols */
+.hb-sym { position: absolute; font-family: var(--fh); font-style: italic; opacity: .13; animation: hb-float 16s ease-in-out infinite alternate; }
+.hb-sym.fa { color: var(--amber); } .hb-sym.ft { color: var(--teal); }
+.hb-sym.fv { color: var(--violet); } .hb-sym.fr { color: var(--rose); }
+@keyframes hb-float { from { transform: translateY(10px) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
+
+@media (max-width: 700px) { .hb svg { opacity: .35; width: 100%; } .hb-sym { opacity: .09; } }
+@media (prefers-reduced-motion: reduce) {
+  .hb *, .hb svg * { animation: none !important; }
+  .hb animateMotion, .hb circle[r="7"], .hb circle[r="6"].fa { display: none; }
+  .hb-wave, .hb-sir { stroke-dashoffset: 0; }
+  .hb-pulse, .hb-ripple { opacity: .25; transform: none; }
+}

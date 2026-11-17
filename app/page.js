@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import HeroBackdrop from './components/HeroBackdrop';
 
 export default function Home() {
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="hero">
+        <HeroBackdrop variant="home" />
         <div className="container">
           <div className="hero-inner">
 

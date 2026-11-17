@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import HeroBackdrop from '../components/HeroBackdrop';
 
 /* ══════════════════════════════════════════════════════
    Experience — the hub the "Experience" nav label itself links to
@@ -75,10 +76,12 @@ export default function ExperienceHubPage() {
 
       {/* ── HERO ── */}
       <section style={{
+        position: 'relative', overflow: 'hidden',
         paddingTop: 'calc(var(--nav-h) + 3px)',
         background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)',
         borderBottom: '1px solid var(--border)',
       }}>
+        <HeroBackdrop variant="experience" />
         <div className="container" style={{ padding: '64px 32px 56px' }}>
           <span className="eyebrow reveal">Teaching &amp; Mentoring</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '680px' }} className="reveal">

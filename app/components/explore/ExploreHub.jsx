@@ -12,6 +12,7 @@ import { useExploreProgress } from '../../explore/useExploreProgress';
 import ActivityCard from './ActivityCard';
 import ProgressStrip from './ProgressStrip';
 import DailyPuzzleCard from './DailyPuzzleCard';
+import HeroBackdrop from '../HeroBackdrop';
 
 const DIFFICULTY_RANK = { easy: 0, medium: 1, hard: 2 };
 
@@ -56,9 +57,11 @@ export default function ExploreHub() {
       {/* ── HERO ── */}
       <section style={{
         paddingTop: 'calc(var(--nav-h) + 3px)',
+        position: 'relative', overflow: 'hidden',
         background: 'linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%)',
         borderBottom: '1px solid var(--border)',
       }}>
+        <HeroBackdrop variant="explore" />
         <div className="container" style={{ padding: '56px 32px 48px' }}>
           <span className="eyebrow">Play &amp; Wonder</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '680px' }}>Explore</h1>
