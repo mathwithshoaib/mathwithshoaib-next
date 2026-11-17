@@ -1096,7 +1096,6 @@ function AnnouncementsSection({ flash }) {
 function ExamSeatingSection({ flash }) {
   const [settings, setSettings] = useState(null); // { active, exam, instructions }
   const [count, setCount] = useState(0);
-  const [latestExam, setLatestExam] = useState('');
   const [searchCount, setSearchCount] = useState(0);
   const [savingSettings, setSavingSettings] = useState(false);
   const [resettingCount, setResettingCount] = useState(false);
@@ -1119,7 +1118,6 @@ function ExamSeatingSection({ flash }) {
       const res = await api('/api/schedule/admin/exam-seating');
       setSettings(res.settings);
       setCount(res.count);
-      setLatestExam(res.latestExam || '');
       setSearchCount(res.searchCount || 0);
       setImportExam((e) => e || res.settings.exam);
       setManageExam((e) => e || res.settings.exam);
@@ -1217,7 +1215,7 @@ function ExamSeatingSection({ flash }) {
       <p style={{ fontSize: '.76rem', color: 'var(--text3)', marginBottom: '16px' }}>
         Students search their own venue, section &amp; seat by LUMS ID — a "Find Your Seat" link appears in the announcements pop-up (pointing at the Exams page) whenever this is switched on.
         Turn it on shortly before an exam and off again after; change the exam name and import a fresh roster for the next one (old rows for a past exam are left alone, not deleted).
-        {latestExam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${latestExam}".`}
+        {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
       </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
@@ -1234,7 +1232,7 @@ function ExamSeatingSection({ flash }) {
           <input type="checkbox" checked={settings.active} onChange={(e) => setSettings((s) => ({ ...s, active: e.target.checked }))} />
           Search button is live
         </label>
-        <Field label="Released exams (comma-separated, shown in this order)"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I, Midterm II" style={{ ...inputStyle, width: '280px' }} /></Field>
+        <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
         <Field label="Exam date (shown to students)">
           <input value={settings.examDate || ''} onChange={(e) => setSettings((s) => ({ ...s, examDate: e.target.value }))} placeholder="e.g. Sunday, 4 October 2026" style={{ ...inputStyle, width: '220px' }} />
         </Field>
@@ -1314,6 +1312,7 @@ function ExamSeatingSection({ flash }) {
 function ExamResultsSection({ flash }) {
   const [settings, setSettings] = useState(null); // { active, exam, instructions }
   const [count, setCount] = useState(0);
+  const [latestExam, setLatestExam] = useState('');
   const [searchCount, setSearchCount] = useState(0);
   const [pinsSetCount, setPinsSetCount] = useState(0);
   const [stats, setStats] = useState(null);
@@ -1365,6 +1364,7 @@ function ExamResultsSection({ flash }) {
       const res = await api('/api/schedule/admin/exam-results');
       setSettings(res.settings);
       setCount(res.count);
+      setLatestExam(res.latestExam || '');
       setSearchCount(res.searchCount || 0);
       setPinsSetCount(res.pinsSetCount || 0);
       setStats(res.stats || null);
@@ -1498,7 +1498,7 @@ function ExamResultsSection({ flash }) {
         Students check their own marks by LUMS ID — first time, they complete a masked name and pick their venue
         from a dropdown (built automatically from this exam's venues) to prove who they are, then set a 6-digit PIN.
         That same PIN keeps working for Mid-2 and Final, no re-verification needed.
-        {settings.exam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${settings.exam}".`}
+        {latestExam && ` Currently ${count} student${count === 1 ? '' : 's'} loaded for "${latestExam}".`}
       </p>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', flexWrap: 'wrap' }}>
@@ -1540,7 +1540,7 @@ function ExamResultsSection({ flash }) {
           <input type="checkbox" checked={settings.active} onChange={(e) => setSettings((s) => ({ ...s, active: e.target.checked }))} />
           Results are live
         </label>
-        <Field label="Exam"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I" style={{ ...inputStyle, width: '160px' }} /></Field>
+        <Field label="Released exams (comma-separated, shown in this order)"><input value={settings.exam} onChange={(e) => setSettings((s) => ({ ...s, exam: e.target.value }))} placeholder="e.g. Midterm I, Midterm II" style={{ ...inputStyle, width: '280px' }} /></Field>
         <div style={{ width: '100%' }}>
           <Field label="Instructions shown with every result">
             <textarea
