@@ -30,8 +30,9 @@ const INITIATIVES = [
     period: 'November 13, 2026',
     color: 'var(--amber)',
     location: 'LUMS, Lahore',
-    description: `Jaada School System brought its Grade 1–3 students to LUMS, where we ran a Math Circle built around several activities, including the Hidden Dice Sum, the Jumping Julia and the Skyscrapers.`,
+    description: `Jaada School System brought its Grade 1–3 students to LUMS, where Azhar Javed and I were the main instructors of a Math Circle built around several activities, including the Hidden Dice Sum, the Jumping Julia and the Skyscrapers.`,
     highlights: [
+      { icon: '🤝', text: 'Main instructors: Azhar Javed and myself' },
       { icon: '👥', text: '66 students, Grades 1–3 (boys and girls)' },
       { icon: '🎲', text: 'Hidden Dice Sum · Jumping Julia · Skyscrapers' },
     ],
