@@ -63,6 +63,9 @@ const INITIATIVES = [
     color: 'var(--teal)',
     location: 'Syedanwala Higher Secondary School (Girls & Boys), Qasoor',
     description: `Accompanied by Arham Khawaja, I ran a session on tiling: which regular shapes tile the plane, which do not, and why. Through a handful of guided activities the students discovered the general formula themselves.`,
+    stats: [
+      { label: 'Math Circle sessions', value: '2' },
+    ],
     highlights: [
       { icon: '👥', text: '140+ students — 70+ boys and 70+ girls' },
       { icon: '🔷', text: 'Topic: tiling with regular polygons and the general formula behind it' },
@@ -129,6 +132,9 @@ const INITIATIVES = [
     color: 'var(--teal)',
     location: 'Syedanwala Higher Secondary School, District Kasur',
     description: `A one-month summer program at Syedanwala Higher Secondary School, serving students in grades 6–8 with hands-on problem-solving instruction alongside teacher training for the school's own staff.`,
+    stats: [
+      { label: 'Math Circles (every Friday, 4 weeks)', value: '4' },
+    ],
     highlights: [
       { icon: '👥', text: '~250 students trained (roughly equal boys and girls)' },
       { icon: '📍', text: 'Qasoor Campus (2025): a further 130 students, all girls' },
@@ -267,6 +273,18 @@ function HeroArt() {
 
 export default function MathCirclesPage() {
   const [filter, setFilter] = useState('all');
+  const [lightbox, setLightbox] = useState(null); // { images, index, title }
+  useEffect(() => {
+    if (!lightbox) return;
+    const n = lightbox.images.length;
+    const onKey = (e) => {
+      if (e.key === 'Escape') setLightbox(null);
+      else if (e.key === 'ArrowRight') setLightbox((l) => ({ ...l, index: (l.index + 1) % n }));
+      else if (e.key === 'ArrowLeft') setLightbox((l) => ({ ...l, index: (l.index - 1 + n) % n }));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox]);
   const visible = filter === 'all' ? INITIATIVES : INITIATIVES.filter((i) => i.category === filter);
 
   useEffect(() => {
@@ -320,7 +338,7 @@ export default function MathCirclesPage() {
               <div className="mc-stat-label">Students taught directly</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}><CountUp to={16} suffix="+" /></div>
+              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}><CountUp to={22} suffix="+" /></div>
               <div className="mc-stat-label">Math Circle sessions</div>
             </div>
             <div className="mc-stat">
@@ -405,6 +423,18 @@ export default function MathCirclesPage() {
                   </div>
                 )}
 
+                {init.images?.length > 0 && (
+                  <div className="mc-gallery" style={{ marginTop: '20px' }}>
+                    {init.images.map((img, idx) => (
+                      <button key={img.src} className="mc-thumb" aria-label={`Open photo: ${img.alt}`}
+                        onClick={() => setLightbox({ images: init.images, index: idx, title: init.title })}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img.src} alt={img.alt} loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {init.href && (
                   <Link href={init.href} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: '18px', color: init.color, textDecoration: 'none', fontFamily: 'var(--fm)', fontSize: '.8rem', fontWeight: 600 }}>
                     {init.hrefLabel}
@@ -433,6 +463,25 @@ export default function MathCirclesPage() {
         </div>
       </section>
 
+      {lightbox && (
+        <div className="mc-lb" role="dialog" aria-modal="true" aria-label={lightbox.title} onClick={() => setLightbox(null)}>
+          <button className="mc-lb-close" aria-label="Close" onClick={() => setLightbox(null)}>×</button>
+          {lightbox.images.length > 1 && (
+            <button className="mc-lb-nav mc-lb-prev" aria-label="Previous photo"
+              onClick={(e) => { e.stopPropagation(); setLightbox((l) => ({ ...l, index: (l.index - 1 + l.images.length) % l.images.length })); }}>‹</button>
+          )}
+          <figure onClick={(e) => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={lightbox.images[lightbox.index].src} alt={lightbox.images[lightbox.index].alt} />
+            <figcaption>{lightbox.images[lightbox.index].alt} · {lightbox.index + 1}/{lightbox.images.length}</figcaption>
+          </figure>
+          {lightbox.images.length > 1 && (
+            <button className="mc-lb-nav mc-lb-next" aria-label="Next photo"
+              onClick={(e) => { e.stopPropagation(); setLightbox((l) => ({ ...l, index: (l.index + 1) % l.images.length })); }}>›</button>
+          )}
+        </div>
+      )}
+
       <Footer />
 
       <style>{`
@@ -454,6 +503,22 @@ export default function MathCirclesPage() {
         .mc-chip:hover { border-color: var(--amber); color: var(--text); }
         .mc-chip.active { background: var(--amber); border-color: var(--amber); color: #fff; }
         .mc-chip-n { opacity: .65; margin-left: 2px; }
+        .mc-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+        .mc-thumb { padding: 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: zoom-in;
+          background: var(--bg2); aspect-ratio: 4 / 3; transition: transform .2s ease, box-shadow .2s ease; }
+        .mc-thumb:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.15); }
+        .mc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .mc-lb { position: fixed; inset: 0; z-index: 1000; background: rgba(8,10,16,.88); display: flex;
+          align-items: center; justify-content: center; padding: 24px; }
+        .mc-lb figure { margin: 0; max-width: min(92vw, 1100px); text-align: center; }
+        .mc-lb img { max-width: 100%; max-height: 80vh; border-radius: 10px; }
+        .mc-lb figcaption { color: #e8e8ee; font-family: var(--fm); font-size: .78rem; margin-top: 10px; }
+        .mc-lb-close, .mc-lb-nav { position: absolute; background: rgba(255,255,255,.12); color: #fff; border: 0;
+          border-radius: 50%; width: 44px; height: 44px; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+        .mc-lb-close:hover, .mc-lb-nav:hover { background: rgba(255,255,255,.25); }
+        .mc-lb-close { top: 18px; right: 18px; }
+        .mc-lb-nav { top: 50%; margin-top: -22px; }
+        .mc-lb-prev { left: 18px; } .mc-lb-next { right: 18px; }
         .mc-stat { transition: transform .25s ease; }
         .mc-stat:hover { transform: translateY(-4px); }
         .mc-stats { position: relative; overflow: hidden; }
