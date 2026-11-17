@@ -375,58 +375,63 @@ h4 { font-family: var(--fh); font-size: 1.15rem; font-weight: 600; margin-bottom
   .explore-grid { grid-template-columns: 1fr; }
   .explore-sort { margin-left: 0; }
 }
-/* ── HERO BACKDROPS (minimal animated page-header art; see components/HeroBackdrop.jsx) ── */
-.hb { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+/* ── HERO BACKDROPS (layered animated page-header art; see components/HeroBackdrop.jsx) ── */
+.hb { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%); mask-image: linear-gradient(90deg, transparent 0%, #000 45%); }
+.hb-home { -webkit-mask-image: none; mask-image: none; }
 .hb ~ .container { position: relative; z-index: 1; }
-.hb svg {
-  position: absolute; right: 0; top: 0; height: 100%; width: min(72%, 980px);
-  opacity: .55; fill: none; stroke-width: 2; stroke-linecap: round;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 38%);
-          mask-image: linear-gradient(to right, transparent 0, #000 38%);
-}
-.hb-home svg { width: 100%; -webkit-mask-image: none; mask-image: none; opacity: .4; }
+.hb svg { fill: none; stroke-linecap: round; overflow: visible; }
+.hb-slot { position: absolute; top: 50%; transform: translateY(-50%); }
+.hb-abs { position: absolute; }
+.hb-home-band { position: absolute; left: 0; bottom: 0; width: 100%; height: 260px; }
 .hb .sa { stroke: var(--amber); } .hb .st { stroke: var(--teal); }
 .hb .sv { stroke: var(--violet); } .hb .sr { stroke: var(--rose); }
 .hb .fa { fill: var(--amber); stroke: none; } .hb .ft { fill: var(--teal); stroke: none; }
 .hb .fv { fill: var(--violet); stroke: none; } .hb .fr { fill: var(--rose); stroke: none; }
-.hb .ft.hb-twinkle { opacity: .5; }
-.hb svg .hb-grid { stroke: var(--text3); stroke-width: 1; opacity: .25; }
-.hb svg .hb-axis { opacity: .5; }
-
-/* drawing curves: draw → hold → fade, looped */
-.hb-wave, .hb-sir { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hb-draw 11s ease-in-out infinite; }
-.hb-wave-2 { animation-delay: 1.2s; opacity: .7; }
-.hb-sir-2 { animation-delay: .8s; } .hb-sir-3 { animation-delay: 1.6s; }
-@keyframes hb-draw {
-  0% { stroke-dashoffset: 1; opacity: 1; }
-  45%, 85% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
-}
-/* dashed line with marching dashes */
-.hb-flow { stroke-dasharray: 3 12; animation: hb-march 30s linear infinite; }
-.hb-flow-thin { stroke-width: 1.2; opacity: .6; }
-@keyframes hb-march { to { stroke-dashoffset: -300; } }
-/* pulsing ring (also used for ripples) */
-.hb-pulse, .hb-ripple { transform-box: fill-box; transform-origin: center; animation: hb-ring 4.8s ease-out infinite; opacity: 0; }
-.hb-ripple { animation-duration: 6.4s; }
-@keyframes hb-ring { 0% { transform: scale(.1); opacity: .7; } 100% { transform: scale(1); opacity: 0; } }
-.hb-twinkle { animation: hb-twinkle 4s ease-in-out infinite; }
-@keyframes hb-twinkle { 0%,100% { opacity: .15; } 50% { opacity: .8; } }
-/* explore shapes */
-.hb-drift { animation: hb-drift 14s ease-in-out infinite alternate; }
-@keyframes hb-drift { from { transform: translate(-14px, 10px); } to { transform: translate(14px, -12px); } }
-.hb-spin { transform-box: fill-box; transform-origin: center; animation: hb-rot 30s linear infinite; }
-@keyframes hb-rot { to { transform: rotate(360deg); } }
-/* home: floating maths symbols */
-.hb-sym { position: absolute; font-family: var(--fh); font-style: italic; opacity: .13; animation: hb-float 16s ease-in-out infinite alternate; }
+/* tinted fills (keep their stroke class) */
+.hb .ta { fill: var(--amber); fill-opacity: .13; } .hb .tt { fill: var(--teal); fill-opacity: .13; }
+.hb .tv { fill: var(--violet); fill-opacity: .12; } .hb .tr { fill: var(--rose); fill-opacity: .13; }
+.hb .hb-grid { stroke: var(--text3); stroke-width: 1; opacity: .25; }
+.hb-sym { position: absolute; font-family: var(--fh); font-style: italic; opacity: .3; animation: hb-float 6s ease-in-out infinite; }
 .hb-sym.fa { color: var(--amber); } .hb-sym.ft { color: var(--teal); }
 .hb-sym.fv { color: var(--violet); } .hb-sym.fr { color: var(--rose); }
-@keyframes hb-float { from { transform: translateY(10px) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
 
-@media (max-width: 700px) { .hb svg { opacity: .35; width: 100%; } .hb-sym { opacity: .09; } }
+.hb-orbit { transform-origin: 0 0; animation: hb-rot 40s linear infinite; }
+.hb-spin-slow { transform-origin: 0 0; animation: hb-rot 24s linear infinite; }
+.hb-floaty, .hb-floaty-svg { animation: hb-float 7s ease-in-out infinite; }
+.hb-tumble { animation: hb-tumble 14s ease-in-out infinite; }
+.hb-breathe, .hb-pulse { transform-box: fill-box; transform-origin: center; }
+.hb-breathe { animation: hb-breathe 4s ease-in-out infinite; }
+.hb-pulse { animation: hb-ring 4.8s ease-out infinite; opacity: 0; }
+.hb-ripple { transform-box: fill-box; transform-origin: center; animation: hb-ring 6s ease-out infinite; opacity: 0; stroke-width: 1.4; }
+.hb-twinkle { animation: hb-twinkle 4s ease-in-out infinite; }
+.hb-flow { stroke-dasharray: 3 9; animation: hb-march 30s linear infinite; }
+.hb-flow-thin { stroke-width: 1.2; }
+.hb-bar { transform-box: fill-box; transform-origin: bottom; animation: hb-bar 3.6s ease-in-out infinite; }
+.hb-dot { fill: var(--teal); opacity: .55; transform-box: fill-box; transform-origin: center; animation: hb-spread 16s ease-in-out infinite; }
+.hb-sir { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hb-draw 12s ease-in-out infinite; }
+.hb-sir-2 { animation-delay: .8s; } .hb-sir-3 { animation-delay: 1.6s; }
+
+@keyframes hb-rot { to { transform: rotate(360deg); } }
+@keyframes hb-float { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14px) rotate(4deg); } }
+@keyframes hb-tumble { 0%,100% { transform: translateY(0) rotate(-12deg); } 50% { transform: translateY(-22px) rotate(28deg); } }
+@keyframes hb-breathe { 0%,100% { transform: scale(.85); opacity: .5; } 50% { transform: scale(1.2); opacity: 1; } }
+@keyframes hb-ring { 0% { transform: scale(.15); opacity: .8; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes hb-twinkle { 0%,100% { opacity: .2; } 50% { opacity: .85; } }
+@keyframes hb-march { to { stroke-dashoffset: -240; } }
+@keyframes hb-bar { 0%,100% { transform: scaleY(.82); } 50% { transform: scaleY(1); } }
+@keyframes hb-draw { 0% { stroke-dashoffset: 1; opacity: 1; } 45%,85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes hb-spread {
+  0%, 6%   { fill: var(--teal); opacity: .5; transform: scale(1); }
+  14%      { fill: var(--rose); opacity: .95; transform: scale(1.5); }
+  40%      { fill: var(--rose); opacity: .85; transform: scale(1.2); }
+  58%,86%  { fill: var(--violet); opacity: .65; transform: scale(1); }
+  100%     { fill: var(--teal); opacity: .5; transform: scale(1); }
+}
+
+@media (max-width: 640px) { .hb { -webkit-mask-image: none; mask-image: none; opacity: .45; } }
 @media (prefers-reduced-motion: reduce) {
-  .hb *, .hb svg * { animation: none !important; }
-  .hb animateMotion, .hb circle[r="7"], .hb circle[r="6"].fa { display: none; }
-  .hb-wave, .hb-sir { stroke-dashoffset: 0; }
-  .hb-pulse, .hb-ripple { opacity: .25; transform: none; }
+  .hb *, .hb-sym { animation: none !important; }
+  .hb-mv { display: none; }
+  .hb-sir { stroke-dashoffset: 0; } .hb-pulse, .hb-ripple { opacity: .25; transform: none; }
 }
