@@ -11,9 +11,16 @@ import Footer from '../../components/Footer';
    math-circles) and its four linked sub-pages. Add a new entry
    here whenever another Math Circle initiative happens.
    ══════════════════════════════════════════════════════ */
+const CATEGORIES = [
+  { key: 'circle', label: 'Math Circles', icon: '⭕' },
+  { key: 'teacher', label: 'Teacher Training', icon: '👩‍🏫' },
+  { key: 'summer', label: 'Summer Programs', icon: '☀️' },
+  { key: 'event', label: 'Events & Volunteering', icon: '🎪' },
+];
+
 const INITIATIVES = [
   {
-    id: 'learning-alliance-2026',
+    id: 'learning-alliance-2026', category: 'teacher',
     title: 'Teacher Training — Learning Alliance International School',
     period: 'November 14, 2026',
     color: 'var(--violet)',
@@ -25,7 +32,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'jaada-2026',
+    id: 'jaada-2026', category: 'circle',
     title: 'Math Circle at LUMS — Jaada School System',
     period: 'November 13, 2026',
     color: 'var(--amber)',
@@ -38,7 +45,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'roshni-2026',
+    id: 'roshni-2026', category: 'circle',
     title: 'Math Circle — Roshni Public Foundation School',
     period: 'October 26, 2026',
     color: 'var(--rose)',
@@ -50,7 +57,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'syedanwala-tiling-2026',
+    id: 'syedanwala-tiling-2026', category: 'circle',
     title: 'Math Circle — Tiling at Syedanwala',
     period: 'October 16, 2026',
     color: 'var(--teal)',
@@ -63,7 +70,34 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'gb-fellows-2024',
+    id: 'math-quest-epsilon-2025',
+    category: 'circle',
+    title: 'MATH QUEST — A Circle of Fun',
+    period: 'January 31, 2025',
+    color: 'var(--violet)',
+    location: 'LUMS, Lahore',
+    description: `The first LUMS Math Circle for LMC-Epsilon, the LUMS Math Circles program for students of grades 4 to 8. Javaid Qayyoom and I introduced the students to permutations and possibilities through hands-on activities.`,
+    highlights: [
+      { icon: '🪑', text: 'Permutations with chairs: students arranged themselves in different ways and counted every possible seating arrangement' },
+      { icon: '🥤', text: '"Crack the Code": four attempts to line up three coloured cups with a hidden sequence, building logical thinking and problem solving' },
+      { icon: '🤝', text: 'Instructors: Javaid Qayyoom and myself' },
+    ],
+  },
+  {
+    id: 'gojra-girls',
+    category: 'circle',
+    title: 'Math Circle — Govt. Millat Girls High School',
+    period: 'December 6, 2024',
+    color: 'var(--teal)',
+    location: 'Govt. Millat Girls High School, Gojra, District Toba Tek Singh',
+    description: `A Math Circle session for the students of Govt. Millat Girls High School, Gojra, conducted by Muhammad Shoaib Khan, Ammara and Soniya.`,
+    highlights: [
+      { icon: '👥', text: '120+ students trained (all girls)' },
+      { icon: '🤝', text: 'Instructors: Muhammad Shoaib Khan, Ammara and Soniya' },
+    ],
+  },
+  {
+    id: 'gb-fellows-2024', category: 'teacher',
     title: 'Education Fellows Training — Gilgit-Baltistan',
     period: 'Oct 15 – Nov 12, 2024',
     color: 'var(--amber)',
@@ -73,6 +107,7 @@ const INITIATIVES = [
       { label: 'Teachers trained (personally)', value: '200+' },
       { label: 'Districts (GB-wide)', value: '10' },
       { label: 'Districts visited personally', value: '4' },
+      { label: 'Training sessions (1 week per district)', value: '16' },
     ],
     highlights: [
       { icon: '🎲', text: 'Gamified exercises — turning math problems into participatory games' },
@@ -88,7 +123,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'syedanwala-2024-25',
+    id: 'syedanwala-2024-25', category: 'summer',
     title: 'Syedanwala Summer School',
     period: '2024 & 2025',
     color: 'var(--teal)',
@@ -100,12 +135,15 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'gb-bootcamp-2023',
+    id: 'gb-bootcamp-2023', category: 'summer',
     title: 'GB Summer Fiesta BootCamp',
     period: '2023 · 2 weeks',
     color: 'var(--violet)',
     location: 'Khaplu, Ghanche District, Gilgit-Baltistan',
     description: `The Gilgit-Baltistan government's "Summer Fiesta" — a ten-day camp redefining schools as centers of learning and enjoyment over the summer, combining creative learning, extracurriculars, health awareness, field trips, sports, entrepreneurship training, IT bootcamps, and robotics. It brought together the private sector, NGOs, banks, IT institutions, LUMS, NUST, philanthropists, and civil society. LUMS deployed 45 people in 9 teams of 5 — one team per district — each team pairing a leader with four instructors across math circles, machine learning, design thinking, renewable energy, and computer learning.`,
+    stats: [
+      { label: 'Math Circles (Mon–Fri, 2 weeks)', value: '10' },
+    ],
     highlights: [
       { icon: '📍', text: 'Assigned to Khaplu, Ghanche district as Math Circle instructor, two weeks' },
       { icon: '👥', text: '150+ female students trained' },
@@ -114,7 +152,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'home-village-2022',
+    id: 'home-village-2022', category: 'circle',
     title: 'Math Circle in My Home Village',
     period: 'November 7, 2022',
     color: 'var(--rose)',
@@ -125,18 +163,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'gojra-girls',
-    title: 'Math Circle — Gojra Girls High School',
-    period: '',
-    color: 'var(--teal)',
-    location: 'Gojra, District Toba Tek Singh',
-    description: `A Math Circle session for students at Gojra Girls High School.`,
-    highlights: [
-      { icon: '👥', text: '120+ students trained (all girls)' },
-    ],
-  },
-  {
-    id: 'lahore-science-mela',
+    id: 'lahore-science-mela', category: 'event',
     title: 'Lahore Science Mela',
     period: '2023 & 2025',
     color: 'var(--amber)',
@@ -147,7 +174,7 @@ const INITIATIVES = [
     ],
   },
   {
-    id: 'lums-volunteer',
+    id: 'lums-volunteer', category: 'event',
     title: 'Volunteer, LUMS Math Circles',
     period: 'Ongoing · Bi-weekly',
     color: 'var(--rose)',
@@ -239,6 +266,9 @@ function HeroArt() {
 }
 
 export default function MathCirclesPage() {
+  const [filter, setFilter] = useState('all');
+  const visible = filter === 'all' ? INITIATIVES : INITIATIVES.filter((i) => i.category === filter);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible'); }),
@@ -282,16 +312,20 @@ export default function MathCirclesPage() {
               <div className="mc-stat-label">Teachers trained directly</div>
             </div>
             <div className="mc-stat">
+              <div className="mc-stat-value" style={{ color: 'var(--violet)' }}><CountUp to={17} /></div>
+              <div className="mc-stat-label">Teacher training sessions</div>
+            </div>
+            <div className="mc-stat">
               <div className="mc-stat-value" style={{ color: 'var(--teal)' }}><CountUp to={1500} suffix="+" comma /></div>
               <div className="mc-stat-label">Students taught directly</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--violet)' }}><CountUp to={7} /></div>
-              <div className="mc-stat-label">Districts reached</div>
+              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}><CountUp to={16} suffix="+" /></div>
+              <div className="mc-stat-label">Math Circle sessions</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}><CountUp to={2} /></div>
-              <div className="mc-stat-label">Provinces — Punjab &amp; GB</div>
+              <div className="mc-stat-value" style={{ color: 'var(--amber)' }}><CountUp to={7} /></div>
+              <div className="mc-stat-label">Districts reached</div>
             </div>
           </div>
         </div>
@@ -301,11 +335,30 @@ export default function MathCirclesPage() {
       <section className="sk-section sk-section-alt">
         <div className="container">
           <span className="eyebrow reveal">The Work</span>
-          <h2 className="reveal" style={{ marginBottom: '40px' }}>Initiatives</h2>
+          <h2 className="reveal" style={{ marginBottom: '24px' }}>Initiatives</h2>
+
+          <div className="mc-filters reveal" role="tablist" aria-label="Filter by category">
+            {[{ key: 'all', label: 'All', icon: '✨' }, ...CATEGORIES].map((c) => {
+              const count = c.key === 'all' ? INITIATIVES.length : INITIATIVES.filter((i) => i.category === c.key).length;
+              return (
+                <button key={c.key} role="tab" aria-selected={filter === c.key}
+                  className={`mc-chip${filter === c.key ? ' active' : ''}`} onClick={() => setFilter(c.key)}>
+                  <span>{c.icon}</span> {c.label} <span className="mc-chip-n">{count}</span>
+                </button>
+              );
+            })}
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-            {INITIATIVES.map((init) => (
-              <div key={init.id} className="reveal card" style={{ padding: '28px 30px', borderTop: `3px solid ${init.color}` }}>
+            {visible.map((init) => {
+              const cat = CATEGORIES.find((c) => c.key === init.category);
+              return (
+              <div key={init.id} className="reveal visible card" style={{ padding: '28px 30px', borderTop: `3px solid ${init.color}` }}>
+                {cat && (
+                  <span className="tag" style={{ borderColor: `${init.color}50`, color: init.color, fontSize: '.66rem', marginBottom: '10px', display: 'inline-block' }}>
+                    {cat.icon} {cat.label}
+                  </span>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '6px' }}>
                   <h3 style={{ fontSize: '1.25rem', margin: 0, color: 'var(--text)' }}>{init.title}</h3>
                   <span style={{ fontFamily: 'var(--fm)', fontSize: '.72rem', color: init.color, whiteSpace: 'nowrap' }}>{init.period}</span>
@@ -358,7 +411,8 @@ export default function MathCirclesPage() {
                   </Link>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -383,7 +437,7 @@ export default function MathCirclesPage() {
 
       <style>{`
         .mc-stats {
-          display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+          display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;
           padding: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
         }
         .mc-stat { text-align: center; }
@@ -394,6 +448,12 @@ export default function MathCirclesPage() {
         .mc-mini-stat-value { font-family: var(--fm); font-size: 1.3rem; font-weight: 700; }
         .mc-mini-stat-label { font-family: var(--fm); font-size: .68rem; color: var(--text3); margin-top: 2px; }
 
+        .mc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+        .mc-chip { font-family: var(--fm); font-size: .76rem; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+          background: var(--surface); color: var(--text2); border: 1px solid var(--border); transition: all .2s ease; }
+        .mc-chip:hover { border-color: var(--amber); color: var(--text); }
+        .mc-chip.active { background: var(--amber); border-color: var(--amber); color: #fff; }
+        .mc-chip-n { opacity: .65; margin-left: 2px; }
         .mc-stat { transition: transform .25s ease; }
         .mc-stat:hover { transform: translateY(-4px); }
         .mc-stats { position: relative; overflow: hidden; }
@@ -417,6 +477,7 @@ export default function MathCirclesPage() {
 
         @media (max-width: 640px) {
           .mc-stats { grid-template-columns: repeat(2, 1fr); }
+          .mc-stat:last-child { grid-column: 1 / -1; }
           .mc-art { -webkit-mask-image: none; mask-image: none; opacity: .5; }
         }
       `}</style>
