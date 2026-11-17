@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
@@ -12,6 +12,55 @@ import Footer from '../../components/Footer';
    here whenever another Math Circle initiative happens.
    ══════════════════════════════════════════════════════ */
 const INITIATIVES = [
+  {
+    id: 'learning-alliance-2026',
+    title: 'Teacher Training — Learning Alliance International School',
+    period: 'November 14, 2026',
+    color: 'var(--violet)',
+    location: 'Learning Alliance International School, DHA, Lahore',
+    description: `I joined Dr. Waqas Ali Azhar and Dr. Imran Anwar as an assistant for a teacher-training session. We ran a series of hands-on activities so teachers could take them back and run them in their own classrooms, building more interest in mathematics among their students.`,
+    highlights: [
+      { icon: '👩‍🏫', text: 'Around 70 female instructors from the junior sections trained' },
+      { icon: '🎒', text: 'Activities designed to be reused directly in the classroom' },
+    ],
+  },
+  {
+    id: 'jaada-2026',
+    title: 'Math Circle at LUMS — Jaada School System',
+    period: 'November 13, 2026',
+    color: 'var(--amber)',
+    location: 'LUMS, Lahore',
+    description: `Jaada School System brought its Grade 1–3 students to LUMS, where we ran a Math Circle built around several activities, including the Hidden Dice Sum, the Jumping Julia and the Skyscrapers.`,
+    highlights: [
+      { icon: '👥', text: '66 students, Grades 1–3 (boys and girls)' },
+      { icon: '🎲', text: 'Hidden Dice Sum · Jumping Julia · Skyscrapers' },
+    ],
+  },
+  {
+    id: 'roshni-2026',
+    title: 'Math Circle — Roshni Public Foundation School',
+    period: 'October 26, 2026',
+    color: 'var(--rose)',
+    location: 'Roshni Public Foundation School, Chak 678 GB Khair Shah',
+    description: `A return to my home village, this time at Roshni Public Foundation School, with a set of short activities including Magic Sum, Knotting the Rope and teamwork exercises.`,
+    highlights: [
+      { icon: '👥', text: '30 students — 15 boys and 15 girls' },
+      { icon: '🪢', text: 'Magic Sum · Knotting the Rope · teamwork lessons' },
+    ],
+  },
+  {
+    id: 'syedanwala-tiling-2026',
+    title: 'Math Circle — Tiling at Syedanwala',
+    period: 'October 16, 2026',
+    color: 'var(--teal)',
+    location: 'Syedanwala Higher Secondary School (Girls & Boys), Qasoor',
+    description: `Accompanied by Arham Khawaja, I ran a session on tiling: which regular shapes tile the plane, which do not, and why. Through a handful of guided activities the students discovered the general formula themselves.`,
+    highlights: [
+      { icon: '👥', text: '140+ students — 70+ boys and 70+ girls' },
+      { icon: '🔷', text: 'Topic: tiling with regular polygons and the general formula behind it' },
+      { icon: '🤝', text: 'With Arham Khawaja' },
+    ],
+  },
   {
     id: 'gb-fellows-2024',
     title: 'Education Fellows Training — Gilgit-Baltistan',
@@ -112,6 +161,82 @@ const INITIATIVES = [
   },
 ];
 
+/* Count-up number that animates once when scrolled into view */
+function CountUp({ to, suffix = '', comma = false }) {
+  const ref = useRef(null);
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { setN(to); return; }
+    let raf;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const t0 = performance.now(), dur = 1400;
+      const tick = (t) => {
+        const p = Math.min(1, (t - t0) / dur);
+        setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.3 });
+    io.observe(el);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [to]);
+  return <span ref={ref}>{comma ? n.toLocaleString('en-US') : n}{suffix}</span>;
+}
+
+/* Decorative hero background: hexagonal tiling, concentric circles,
+   floating math symbols and a dotted orbit. Pure SVG + CSS. */
+function HeroArt() {
+  const hexes = [];
+  const R = 34, w = Math.sqrt(3) * R;
+  for (let row = 0; row < 7; row++) {
+    for (let col = 0; col < 9; col++) {
+      const cx = col * w + (row % 2 ? w / 2 : 0);
+      const cy = row * R * 1.5;
+      const pts = Array.from({ length: 6 }, (_, i) => {
+        const a = Math.PI / 180 * (60 * i - 30);
+        return `${(cx + R * Math.cos(a)).toFixed(1)},${(cy + R * Math.sin(a)).toFixed(1)}`;
+      }).join(' ');
+      const fill = (row * 3 + col) % 5 === 0 ? 'var(--amber)' : (row + col * 2) % 7 === 0 ? 'var(--teal)' : 'none';
+      hexes.push(<polygon key={`${row}-${col}`} points={pts} fill={fill} fillOpacity={fill === 'none' ? 0 : 0.14} stroke="var(--amber)" strokeOpacity="0.22" strokeWidth="1" />);
+    }
+  }
+  const symbols = [
+    { s: 'π', x: '58%', y: '14%', c: 'var(--amber)', d: 0, size: 54 },
+    { s: '∞', x: '82%', y: '58%', c: 'var(--teal)', d: 1.2, size: 64 },
+    { s: 'Σ', x: '68%', y: '72%', c: 'var(--violet)', d: 2.4, size: 44 },
+    { s: '√', x: '90%', y: '16%', c: 'var(--rose)', d: 3.1, size: 48 },
+    { s: 'φ', x: '47%', y: '66%', c: 'var(--amber)', d: 0.6, size: 38 },
+    { s: '∆', x: '76%', y: '34%', c: 'var(--teal)', d: 1.9, size: 40 },
+  ];
+  return (
+    <div aria-hidden="true" className="mc-art">
+      <svg className="mc-hex" width="340" height="300" viewBox="0 0 330 310">{hexes}</svg>
+      <svg className="mc-rings" viewBox="-200 -200 400 400" width="460" height="460">
+        {[40, 80, 120, 160, 190].map((r, i) => (
+          <circle key={r} r={r} fill="none" stroke={i % 2 ? 'var(--teal)' : 'var(--amber)'} strokeOpacity="0.22" strokeWidth="1.2" strokeDasharray={i % 2 ? '3 7' : undefined} />
+        ))}
+        <g className="mc-orbit">
+          <circle cx="120" cy="0" r="6" fill="var(--amber)" fillOpacity=".7" />
+          <circle cx="-160" cy="0" r="5" fill="var(--teal)" fillOpacity=".7" />
+          <circle cx="0" cy="190" r="4" fill="var(--rose)" fillOpacity=".7" />
+        </g>
+      </svg>
+      <svg className="mc-tri" viewBox="0 0 120 104" width="120" height="104">
+        <polygon points="60,4 116,100 4,100" fill="var(--violet)" fillOpacity=".1" stroke="var(--violet)" strokeOpacity=".35" strokeWidth="1.5" />
+        <polygon points="60,36 88,84 32,84" fill="none" stroke="var(--violet)" strokeOpacity=".3" strokeWidth="1.2" />
+      </svg>
+      {symbols.map((m) => (
+        <span key={m.s} className="mc-sym" style={{ left: m.x, top: m.y, color: m.c, fontSize: m.size, animationDelay: `${m.d}s` }}>{m.s}</span>
+      ))}
+    </div>
+  );
+}
+
 export default function MathCirclesPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -133,13 +258,8 @@ export default function MathCirclesPage() {
         borderBottom: '1px solid var(--border)',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', right: '-100px', top: '-80px',
-          width: '500px', height: '500px',
-          background: 'radial-gradient(circle, rgba(232,160,32,.05), transparent 65%)',
-          pointerEvents: 'none',
-        }} />
-        <div className="container" style={{ padding: '64px 32px 56px' }}>
+        <HeroArt />
+        <div className="container" style={{ padding: '64px 32px 56px', position: 'relative', zIndex: 1 }}>
           <span className="eyebrow reveal">Experience · Outreach</span>
           <h1 style={{ marginBottom: '16px', maxWidth: '680px' }} className="reveal">
             Math <em style={{ color: 'var(--amber)', fontStyle: 'italic' }}>Circles</em>
@@ -157,19 +277,19 @@ export default function MathCirclesPage() {
         <div className="container">
           <div className="mc-stats reveal">
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--amber)' }}>200+</div>
+              <div className="mc-stat-value" style={{ color: 'var(--amber)' }}><CountUp to={270} suffix="+" /></div>
               <div className="mc-stat-label">Teachers trained directly</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--teal)' }}>1,300+</div>
+              <div className="mc-stat-value" style={{ color: 'var(--teal)' }}><CountUp to={1500} suffix="+" comma /></div>
               <div className="mc-stat-label">Students taught directly</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--violet)' }}>5</div>
-              <div className="mc-stat-label">Districts &amp; villages reached</div>
+              <div className="mc-stat-value" style={{ color: 'var(--violet)' }}><CountUp to={7} /></div>
+              <div className="mc-stat-label">Districts reached</div>
             </div>
             <div className="mc-stat">
-              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}>2</div>
+              <div className="mc-stat-value" style={{ color: 'var(--rose)' }}><CountUp to={2} /></div>
               <div className="mc-stat-label">Provinces — Punjab &amp; GB</div>
             </div>
           </div>
@@ -273,8 +393,30 @@ export default function MathCirclesPage() {
         .mc-mini-stat-value { font-family: var(--fm); font-size: 1.3rem; font-weight: 700; }
         .mc-mini-stat-label { font-family: var(--fm); font-size: .68rem; color: var(--text3); margin-top: 2px; }
 
+        .mc-stat { transition: transform .25s ease; }
+        .mc-stat:hover { transform: translateY(-4px); }
+        .mc-stats { position: relative; overflow: hidden; }
+        .mc-stats::before {
+          content: ''; position: absolute; inset: 0 0 auto 0; height: 3px;
+          background: linear-gradient(90deg, var(--amber), var(--teal), var(--violet), var(--rose));
+        }
+
+        .mc-art { position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
+          mask-image: linear-gradient(90deg, transparent 0%, #000 45%); }
+        .mc-hex { position: absolute; right: 0; top: 0; opacity: .9; }
+        .mc-rings { position: absolute; right: 6%; top: 50%; margin-top: -230px; }
+        .mc-orbit { transform-origin: 0 0; animation: mc-spin 40s linear infinite; }
+        .mc-tri { position: absolute; right: 30%; bottom: 18px; animation: mc-float 7s ease-in-out infinite; }
+        .mc-sym { position: absolute; font-family: var(--fh); font-style: italic; opacity: .3;
+          animation: mc-float 6s ease-in-out infinite; }
+        @keyframes mc-spin { to { transform: rotate(360deg); } }
+        @keyframes mc-float { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-14px) rotate(4deg); } }
+        @media (prefers-reduced-motion: reduce) { .mc-orbit, .mc-tri, .mc-sym { animation: none; } }
+
         @media (max-width: 640px) {
           .mc-stats { grid-template-columns: repeat(2, 1fr); }
+          .mc-art { -webkit-mask-image: none; mask-image: none; opacity: .5; }
         }
       `}</style>
     </>
