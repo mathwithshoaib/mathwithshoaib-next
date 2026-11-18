@@ -1416,7 +1416,7 @@ function ExamResultsSection({ flash }) {
     try {
       const res = await api(`/api/schedule/admin/exam-results/rows?exam=${encodeURIComponent(manageExam)}&roll=${encodeURIComponent(manageRoll)}`);
       setManageRow(res.row || null);
-      setManagePin(res.pin || null);
+      setManagePin(res.pin || {}); // {} = no PIN record yet (student never tried) — controls must still show
       setManageForm(res.row
         ? {
           name: res.row.student_name, section: res.row.section, venue: res.row.venue,
