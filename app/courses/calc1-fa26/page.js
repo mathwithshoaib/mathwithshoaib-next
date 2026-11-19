@@ -183,6 +183,7 @@ RECITATIONS[7] = { slides: 'https://canva.link/mrumyrcyp7fh5u2', notes: null };
 RECITATIONS[8] = { slides: 'https://canva.link/qw2w19w6fo2vojz', notes: null };
 RECITATIONS[9] = { slides: null, notes: null, offWeek: true };
 RECITATIONS[10] = { slides: 'https://canva.link/0bjef8835s0i1cl', notes: null };
+RECITATIONS[11] = { slides: '/recitations/calc1-fa26-week12.html', notes: null };
 
 // Supplementary topic notes that don't belong to any specific week or
 // instructor's column — an extra topic covered outside the normal weekly
